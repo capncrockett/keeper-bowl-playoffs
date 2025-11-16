@@ -3,10 +3,6 @@ import type { Team } from '../models/fantasy';
 import type { BracketSlot } from './types';
 import { BRACKET_TEMPLATE } from './template';
 
-/**
- * Given seeded teams, return a new array of BracketSlot where any position
- * with a `seed` also has a `teamId` wired up to that Team's sleeperRosterId.
- */
 export function assignSeedsToBracketSlots(
   teams: Team[],
   template: BracketSlot[] = BRACKET_TEMPLATE,

@@ -8,12 +8,14 @@ import type { BracketSlot } from '../bracket/types';
 import { BRACKET_TEMPLATE } from '../bracket/template';
 import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 
+// import { ROUTING_RULES } from '../bracket/routingRules';
+// console.table(ROUTING_RULES);
+
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
 
 function PlayoffsIfTodayPage() {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [slots, setSlots] = useState<BracketSlot[]>(BRACKET_TEMPLATE);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,9 +34,7 @@ function PlayoffsIfTodayPage() {
         const withSeeds = computeSeeds(merged);
 
         setTeams(withSeeds);
-        setSlots(assignSeedsToBracketSlots(withSeeds));
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -45,10 +45,15 @@ function PlayoffsIfTodayPage() {
     void load();
   }, []);
 
+  const slots: BracketSlot[] = useMemo(
+    () => (teams.length > 0 ? assignSeedsToBracketSlots(teams) : BRACKET_TEMPLATE),
+    [teams],
+  );
+
   const teamById = useMemo(() => {
-    const map = new Map<string, Team>();
+    const map = new Map<number, Team>();
     teams.forEach((team) => {
-      map.set(team.sleeperRosterId.toString(), team);
+      map.set(team.sleeperRosterId, team);
     });
     return map;
   }, [teams]);

@@ -41,7 +41,7 @@ export interface BracketTeamRef {
   /** Final seed number 1–12 (from computeSeeds). */
   seed?: number;
   /** Canonical ID for the team – we’ll use Team.sleeperRosterId. */
-  teamId?: string;
+  teamId?: number;
   /** Marks a bye position where no team actually plays. */
   isBye?: boolean;
 }
@@ -59,4 +59,16 @@ export interface BracketSlot {
   /** Reward metadata for Reward Mode. */
   rewardTitle?: string;
   rewardText?: string;
+}
+
+export interface BracketRoutingRule {
+  fromSlotId: BracketSlotId;
+  winnerGoesTo?: {
+    slotId: BracketSlotId;
+    positionIndex: 0 | 1; // 0 = top/left, 1 = bottom/right
+  };
+  loserGoesTo?: {
+    slotId: BracketSlotId;
+    positionIndex: 0 | 1;
+  };
 }
