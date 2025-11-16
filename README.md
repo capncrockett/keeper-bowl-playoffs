@@ -1,6 +1,6 @@
 # Keeper Bowl Playoffs
 
-Playoff visualization and bracket UI for a Sleeper dynasty league.
+Playoff visualization and bracket UI for a Sleeper keeper league.
 
 ## Tech Stack
 
