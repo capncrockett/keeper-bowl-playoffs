@@ -1,8 +1,158 @@
-export default function MatchupsPage() {
+// src/pages/MatchupsPage.tsx
+
+import { useEffect, useMemo, useState } from 'react';
+import {
+  getLeagueUsers,
+  getLeagueRosters,
+  getLeagueMatchupsForWeek,
+  getNFLState,
+} from '../api/sleeper';
+import {
+  mergeRostersAndUsersToTeams,
+  pairMatchups,
+  buildLiveMatchData,
+  mapNFLStateToSeasonState,
+} from '../utils/sleeperTransforms';
+import type { Team, LiveMatchData } from '../models/fantasy';
+import { MatchupCard } from '../components/matchups/matchupCard';
+
+// 🔑 replace with your real Sleeper league id
+const LEAGUE_ID = '1251950356187840512';
+
+export function MatchupsPage() {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [liveMatchups, setLiveMatchups] = useState<LiveMatchData[]>([]);
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
+  const [seasonLabel, setSeasonLabel] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 1) Load NFL state once to know current week
+  useEffect(() => {
+    async function loadSeasonState() {
+      try {
+        const nflState = await getNFLState();
+        const seasonState = mapNFLStateToSeasonState(nflState);
+
+        setSelectedWeek(seasonState.displayWeek);
+        setSeasonLabel(`${seasonState.season} • Week ${seasonState.displayWeek}`);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        setError(err instanceof Error ? err.message : 'Failed to load NFL state');
+      }
+    }
+
+    void loadSeasonState();
+  }, []);
+
+  // 2) Whenever selectedWeek changes, fetch league data for that week
+  useEffect(() => {
+    if (selectedWeek == null) return;
+
+    async function loadWeekData(week: number) {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const [users, rosters, matchups] = await Promise.all([
+          getLeagueUsers(LEAGUE_ID),
+          getLeagueRosters(LEAGUE_ID),
+          getLeagueMatchupsForWeek(LEAGUE_ID, week),
+        ]);
+
+        const mergedTeams = mergeRostersAndUsersToTeams(rosters, users);
+        setTeams(mergedTeams);
+
+        const paired = pairMatchups(week, matchups);
+        const live = paired.map((p) => buildLiveMatchData(p));
+        setLiveMatchups(live);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        setError(err instanceof Error ? err.message : 'Failed to load matchups');
+        setLiveMatchups([]);
+        setTeams([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void loadWeekData(selectedWeek);
+  }, [selectedWeek]);
+
+  const teamsByRosterId = useMemo(
+    () => new Map<number, Team>(teams.map((t) => [t.sleeperRosterId, t])),
+    [teams],
+  );
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Regular Season Matchups</h1>
-      <p>Coming soon: Sleeper-style matchup cards.</p>
+    <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="flex items-center justify-between mb-4 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Matchups</h1>
+          <p className="text-sm text-base-content/60">
+            {seasonLabel || 'Loading current Sleeper week...'}
+          </p>
+        </div>
+
+        {/* Week selector */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text text-xs">Week</span>
+          </label>
+          <select
+            className="select select-bordered select-sm"
+            value={selectedWeek ?? ''}
+            onChange={(e) => setSelectedWeek(Number(e.target.value))}
+            disabled={selectedWeek == null}
+          >
+            <option disabled value="">
+              Select week
+            </option>
+            {Array.from({ length: 18 }).map((_, idx) => {
+              const w = idx + 1;
+              return (
+                <option key={w} value={w}>
+                  Week {w}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="flex justify-center py-10">
+          <span className="loading loading-spinner loading-lg" />
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <div className="alert alert-error mb-4">
+          <span>{error}</span>
+        </div>
+      )}
+
+      {!isLoading && !error && liveMatchups.length === 0 && (
+        <p className="text-sm text-base-content/60">No matchups found for this week.</p>
+      )}
+
+      <div>
+        {liveMatchups.map((live) => {
+          const teamA = teamsByRosterId.get(live.teamIdA);
+          const teamB = live.teamIdB !== null ? teamsByRosterId.get(live.teamIdB) : undefined;
+
+          return (
+            <MatchupCard
+              key={`${live.week}-${live.teamIdA}-${live.teamIdB ?? 'bye'}`}
+              live={live}
+              teamA={teamA}
+              teamB={teamB}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

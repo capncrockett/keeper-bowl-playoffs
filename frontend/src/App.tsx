@@ -1,8 +1,8 @@
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import MatchupsPage from './pages/MatchupsPage';
+import { MatchupsPage } from './pages/MatchupsPage';
 import PlayoffsIfTodayPage from './pages/PlayoffsIfTodayPage';
 import PlayoffsLivePage from './pages/PlayoffsLivePage';
-import StandingsPage from './pages/StandingsPage';
+import { StandingsPage } from './pages/StandingsPage';
 
 type NavLinkProps = {
   to: string;
