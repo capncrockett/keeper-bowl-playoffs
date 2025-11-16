@@ -1,8 +1,8 @@
-import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import MatchupsPage from "./pages/MatchupsPage";
-import PlayoffsIfTodayPage from "./pages/PlayoffsIfTodayPage";
-import PlayoffsLivePage from "./pages/PlayoffsLivePage";
-import StandingsPage from "./pages/StandingsPage";
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import MatchupsPage from './pages/MatchupsPage';
+import PlayoffsIfTodayPage from './pages/PlayoffsIfTodayPage';
+import PlayoffsLivePage from './pages/PlayoffsLivePage';
+import StandingsPage from './pages/StandingsPage';
 
 type NavLinkProps = {
   to: string;
@@ -16,9 +16,7 @@ function NavLink({ to, label }: NavLinkProps) {
   return (
     <Link
       to={to}
-      className={`btn btn-ghost btn-sm ${
-        isActive ? "btn-active font-semibold" : "opacity-80"
-      }`}
+      className={`btn btn-ghost btn-sm ${isActive ? 'btn-active font-semibold' : 'opacity-80'}`}
     >
       {label}
     </Link>
@@ -30,9 +28,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-base-200 text-base-content">
       <header className="navbar bg-base-100 shadow-md">
         <div className="navbar-start">
-          <span className="btn btn-ghost normal-case text-xl font-bold">
-            Keeper Bowl Playoffs
-          </span>
+          <span className="btn btn-ghost normal-case text-xl font-bold">Keeper Bowl Playoffs</span>
         </div>
         <div className="navbar-center">
           <nav className="flex gap-2">
