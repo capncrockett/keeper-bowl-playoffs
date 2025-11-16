@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: "dark";
+}
+
+/* Basic global styles */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+}
