@@ -14,7 +14,7 @@ import {
   mapNFLStateToSeasonState,
 } from '../utils/sleeperTransforms';
 import type { Team, LiveMatchData } from '../models/fantasy';
-import { MatchupCard } from '../components/matchups/matchupCard';
+import { MatchupCard } from '../components/matchups/MatchupCard';
 
 // 🔑 replace with your real Sleeper league id
 const LEAGUE_ID = '1251950356187840512';
