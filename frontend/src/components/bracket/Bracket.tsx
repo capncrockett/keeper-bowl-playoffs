@@ -9,12 +9,12 @@ import { ChampBracket } from './ChampBracket';
 const PLACEMENT_COLUMNS = [
   {
     id: 'stage_keeper_toilet_r2',
-    title: 'Round 2 – Keeper & Toilet',
+    title: 'Round 2 - Keeper & Toilet',
     slotIds: ['keeper_floater1', 'keeper_floater2', 'toilet_r2_g1', 'toilet_r2_g2'],
   },
   {
     id: 'stage_keeper_toilet_finals',
-    title: 'Finals – Keeper & Toilet',
+    title: 'Finals - Keeper & Toilet',
     slotIds: [
       'keeper_splashback1',
       'keeper_splashback2',

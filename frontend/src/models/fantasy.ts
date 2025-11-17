@@ -20,7 +20,7 @@ export interface Team {
   pointsFor: number;
   pointsAgainst: number;
   rank: number; // 1-based rank in standings
-  seed?: number; // 1–12, computed for playoffs
+  seed?: number; // 1-12, computed for playoffs
 }
 
 export interface PairedMatchup {
@@ -39,8 +39,8 @@ export interface LiveMatchData {
   pointsB: number;
   projectedA: number;
   projectedB: number;
-  winProbA: number; // 0–1
-  winProbB: number; // 0–1
+  winProbA: number; // 0-1
+  winProbB: number; // 0-1
   week: number;
 }
 

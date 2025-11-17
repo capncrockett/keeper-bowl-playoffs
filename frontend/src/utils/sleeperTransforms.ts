@@ -77,7 +77,7 @@ export function pairMatchups(week: number, matchups: SleeperMatchup[]): PairedMa
     const [a, b] = entries;
 
     if (!b) {
-      // bye / incomplete data – treat second side as null
+      // bye / incomplete data - treat second side as null
       paired.push({
         matchupId,
         week,

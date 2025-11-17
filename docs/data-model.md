@@ -47,7 +47,7 @@ Fields:
 - `pointsFor: number`
 - `pointsAgainst: number`
 - `rank: number` (1-based, derived from standings)
-- `seed?: number` (1–12, used for playoffs)
+- `seed?: number` (1-12, used for playoffs)
 
 Source: `Team` in `src/models/fantasy.ts`.
 
@@ -78,8 +78,8 @@ Fields:
 - `pointsB: number`
 - `projectedA: number`
 - `projectedB: number`
-- `winProbA: number` (0–1, simple projection-based estimate)
-- `winProbB: number` (0–1)
+- `winProbA: number` (0-1, simple projection-based estimate)
+- `winProbB: number` (0-1)
 - `week: number`
 
 Built from `PairedMatchup` via `buildLiveMatchData` in `src/utils/sleeperTransforms.ts`.
