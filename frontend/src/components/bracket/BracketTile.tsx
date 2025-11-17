@@ -7,11 +7,21 @@ import type { Team } from '../../models/fantasy';
 interface BracketTileProps {
   slot: BracketSlot;
   teamsById: Map<number, Team>;
+  highlightTeamId?: number | null;
+  mode: 'score' | 'reward';
 }
 
-export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById }) => {
+export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTeamId, mode }) => {
+  const involvesHighlight =
+    highlightTeamId != null && slot.positions.some((pos) => pos?.teamId === highlightTeamId);
+
+  const cardClassName = [
+    'card bg-base-200',
+    involvesHighlight ? 'border-2 border-primary shadow-lg' : 'shadow-sm',
+  ].join(' ');
+
   return (
-    <div className="card bg-base-200 shadow-sm">
+    <div className={cardClassName}>
       <div className="card-body p-4 gap-2">
         <div>
           <h2 className="card-title text-sm">{slot.label}</h2>
@@ -46,10 +56,12 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById }) => {
                     <span className="font-semibold">
                       {team.seed}. {team.teamName}
                     </span>
-                    <span className="text-base-content/60">
-                      ({team.record.wins}-{team.record.losses}
-                      {team.record.ties ? `-${team.record.ties}` : ''})
-                    </span>
+                    {mode === 'score' && (
+                      <span className="text-base-content/60">
+                        ({team.record.wins}-{team.record.losses}
+                        {team.record.ties ? `-${team.record.ties}` : ''})
+                      </span>
+                    )}
                   </div>
                 </li>
               );
@@ -75,12 +87,12 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById }) => {
           })}
         </ul>
 
-        {slot.rewardTitle ? (
+        {slot.rewardTitle && mode === 'reward' && (
           <div className="mt-1 text-[0.7rem]">
             <div className="font-semibold">{slot.rewardTitle}</div>
             <div className="text-base-content/70">{slot.rewardText}</div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

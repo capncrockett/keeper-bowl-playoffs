@@ -1,22 +1,12 @@
 // src/components/bracket/Bracket.tsx
 
 import type { FC } from 'react';
-import type { BracketSlot, BracketSlotId } from '../../bracket/types';
+import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
 import { BracketColumn } from './BracketColumn';
 import { ChampBracket } from './ChampBracket';
 
-interface BracketProps {
-  slots: BracketSlot[];
-  teams: Team[];
-}
-
-// non-Champ placement by stage (stacked)
-const PLACEMENT_COLUMNS: {
-  id: string;
-  title: string;
-  slotIds: BracketSlotId[];
-}[] = [
+const PLACEMENT_COLUMNS = [
   {
     id: 'stage_keeper_toilet_r2',
     title: 'Round 2 – Keeper & Toilet',
@@ -36,7 +26,14 @@ const PLACEMENT_COLUMNS: {
   },
 ];
 
-export const Bracket: FC<BracketProps> = ({ slots, teams }) => {
+interface BracketProps {
+  slots: BracketSlot[];
+  teams: Team[];
+  highlightTeamId?: number | null;
+  mode: 'score' | 'reward';
+}
+
+export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode }) => {
   const teamsById = new Map<number, Team>();
   teams.forEach((t) => teamsById.set(t.sleeperRosterId, t));
 
@@ -45,10 +42,15 @@ export const Bracket: FC<BracketProps> = ({ slots, teams }) => {
 
   return (
     <div className="space-y-8">
-      {/* Main Champ bracket (with connectors) */}
-      <ChampBracket slots={champSlots} teamsById={teamsById} />
+      {/* Main Champ bracket */}
+      <ChampBracket
+        slots={champSlots}
+        teamsById={teamsById}
+        highlightTeamId={highlightTeamId}
+        mode={mode}
+      />
 
-      {/* Keeper + Toilet stacked underneath, grouped by stage */}
+      {/* Keeper + Toilet underneath */}
       <div className="grid gap-6 md:grid-cols-2">
         {PLACEMENT_COLUMNS.map((col) => (
           <BracketColumn
@@ -56,6 +58,8 @@ export const Bracket: FC<BracketProps> = ({ slots, teams }) => {
             title={col.title}
             slots={placementSlots.filter((slot) => col.slotIds.includes(slot.id))}
             teamsById={teamsById}
+            highlightTeamId={highlightTeamId}
+            mode={mode}
           />
         ))}
       </div>
