@@ -76,6 +76,25 @@ export interface SleeperNFLState {
   display_week: number;
 }
 
+export interface SleeperPlayoffMatchup {
+  /** Unique identifier for this playoff matchup */
+  r: number; // round
+  m: number; // matchup number within round
+  /** Team 1 roster ID */
+  t1?: number;
+  /** Team 2 roster ID */
+  t2?: number;
+  /** From matchup (route for advancement) */
+  t1_from?: { w?: number; l?: number } | null;
+  t2_from?: { w?: number; l?: number } | null;
+  /** Winner roster ID (null if not yet played) */
+  w?: number | null;
+  /** Loser roster ID (null if not yet played) */
+  l?: number | null;
+  /** Points scored by team 1 */
+  p?: number | null;
+}
+
 async function sleeperFetch<T>(path: string): Promise<T> {
   const url = `${SLEEPER_BASE_URL}${path}`;
 
@@ -112,6 +131,14 @@ export async function getLeagueMatchupsForWeek(
 
 export async function getNFLState(): Promise<SleeperNFLState> {
   return sleeperFetch<SleeperNFLState>('/state/nfl');
+}
+
+export async function getWinnersBracket(leagueId: string): Promise<SleeperPlayoffMatchup[]> {
+  return sleeperFetch<SleeperPlayoffMatchup[]>(`/league/${leagueId}/winners_bracket`);
+}
+
+export async function getLosersBracket(leagueId: string): Promise<SleeperPlayoffMatchup[]> {
+  return sleeperFetch<SleeperPlayoffMatchup[]>(`/league/${leagueId}/losers_bracket`);
 }
 
 // Helpers for avatar URLs (full + thumb) as per docs
