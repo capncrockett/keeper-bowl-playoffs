@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getLeagueRosters, getLeagueUsers } from '../api/sleeper';
+import {
+  getLeagueRosters,
+  getLeagueUsers,
+  getLeagueMatchupsForWeek,
+} from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
+import { applyMatchupScoresToBracket } from '../utils/applyMatchupScores';
 import type { Team } from '../models/fantasy';
 import type { BracketSlot } from '../bracket/types';
 import { BRACKET_TEMPLATE } from '../bracket/template';
@@ -14,6 +19,7 @@ type BracketMode = 'score' | 'reward';
 
 function PlayoffsIfTodayPage() {
   const [teams, setTeams] = useState<Team[]>([]);
+  const [slots, setSlots] = useState<BracketSlot[]>(BRACKET_TEMPLATE);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
@@ -25,15 +31,21 @@ function PlayoffsIfTodayPage() {
         setIsLoading(true);
         setError(null);
 
-        const [users, rosters] = await Promise.all([
+        const [users, rosters, week15Matchups] = await Promise.all([
           getLeagueUsers(LEAGUE_ID),
           getLeagueRosters(LEAGUE_ID),
+          getLeagueMatchupsForWeek(LEAGUE_ID, 15), // Week 15 is first week of playoffs
         ]);
 
         const merged = mergeRostersAndUsersToTeams(rosters, users);
         const withSeeds = computeSeeds(merged);
 
         setTeams(withSeeds);
+
+        // Apply Week 15 matchup scores to the bracket
+        const seededSlots = assignSeedsToBracketSlots(withSeeds);
+        const slotsWithScores = applyMatchupScoresToBracket(seededSlots, week15Matchups);
+        setSlots(slotsWithScores);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -46,10 +58,7 @@ function PlayoffsIfTodayPage() {
     void load();
   }, []);
 
-  const slots: BracketSlot[] = useMemo(
-    () => (teams.length > 0 ? assignSeedsToBracketSlots(teams) : BRACKET_TEMPLATE),
-    [teams],
-  );
+  // Slots are now managed by state and set in the useEffect
 
   const teamsById = useMemo(() => {
     const map = new Map<number, Team>();

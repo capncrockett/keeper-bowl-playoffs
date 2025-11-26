@@ -4,9 +4,11 @@ import {
   getLeagueUsers,
   getWinnersBracket,
   getLosersBracket,
+  getLeagueMatchupsForWeek,
 } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
 import { toBracketGameOutcomes } from '../utils/sleeperPlayoffTransforms';
+import { applyMatchupScoresToBracket } from '../utils/applyMatchupScores';
 import type { Team } from '../models/fantasy';
 import type { BracketSlot } from '../bracket/types';
 import { BRACKET_TEMPLATE } from '../bracket/template';
@@ -34,12 +36,15 @@ export default function PlayoffsLivePage() {
         setError(null);
 
         // Fetch all required data in parallel
-        const [users, rosters, winnersBracket, losersBracket] = await Promise.all([
-          getLeagueUsers(LEAGUE_ID),
-          getLeagueRosters(LEAGUE_ID),
-          getWinnersBracket(LEAGUE_ID),
-          getLosersBracket(LEAGUE_ID),
-        ]);
+        const [users, rosters, winnersBracket, losersBracket, week15Matchups] = await Promise.all(
+          [
+            getLeagueUsers(LEAGUE_ID),
+            getLeagueRosters(LEAGUE_ID),
+            getWinnersBracket(LEAGUE_ID),
+            getLosersBracket(LEAGUE_ID),
+            getLeagueMatchupsForWeek(LEAGUE_ID, 15), // Week 15 is first week of playoffs
+          ],
+        );
 
         // Build team data with seeds
         const merged = mergeRostersAndUsersToTeams(rosters, users);
@@ -56,6 +61,9 @@ export default function PlayoffsLivePage() {
         if (outcomes.length > 0) {
           bracketSlots = applyGameOutcomesToBracket(bracketSlots, outcomes);
         }
+
+        // Apply Week 15 matchup scores
+        bracketSlots = applyMatchupScoresToBracket(bracketSlots, week15Matchups);
 
         setSlots(bracketSlots);
       } catch (err) {

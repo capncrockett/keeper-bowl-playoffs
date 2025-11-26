@@ -40,10 +40,14 @@ export type BracketRound =
 export interface BracketTeamRef {
   /** Final seed number 1-12 (from computeSeeds). */
   seed?: number;
-  /** Canonical ID for the team - we’ll use Team.sleeperRosterId. */
+  /** Canonical ID for the team - we'll use Team.sleeperRosterId. */
   teamId?: number;
   /** Marks a bye position where no team actually plays. */
   isBye?: boolean;
+  /** Current points scored in the playoff matchup (Week 15+). */
+  currentPoints?: number;
+  /** Projected points for the playoff matchup. */
+  projectedPoints?: number;
 }
 
 export interface BracketSlot {
