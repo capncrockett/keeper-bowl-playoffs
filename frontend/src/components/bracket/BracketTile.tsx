@@ -34,22 +34,22 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 py-2">
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+    <div className="flex items-center justify-between gap-1 py-1.5 md:py-2">
+      <div className="flex items-center gap-1 md:gap-2 min-w-0 flex-1">
         {team.avatarUrl && (
           <div className="avatar flex-shrink-0">
-            <div className="w-8 md:w-10 rounded-full">
+            <div className="w-6 md:w-10 rounded-full">
               <img src={team.avatarUrl} alt={team.teamName} />
             </div>
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-xs md:text-sm truncate">
+          <div className="font-semibold text-[0.65rem] md:text-sm truncate">
             <span className="hidden md:inline">{team.seed}. </span>
             {team.teamName}
           </div>
           {mode === 'score' && (
-            <div className="text-[0.7rem] text-base-content/60 hidden md:block">
+            <div className="text-[0.6rem] text-base-content/60 hidden md:block">
               {team.record.wins}-{team.record.losses}
               {team.record.ties ? `-${team.record.ties}` : ''}
             </div>
@@ -57,7 +57,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
         </div>
       </div>
       {mode === 'score' && (
-        <div className="text-sm md:text-base font-semibold text-base-content/80 flex-shrink-0">
+        <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80 flex-shrink-0">
           {team.pointsFor.toFixed(2)}
         </div>
       )}
@@ -76,7 +76,7 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
 
   return (
     <div className={cardClassName}>
-      <div className="card-body p-2 md:p-4 gap-1 md:gap-2">
+      <div className="card-body p-1.5 md:p-4 gap-0.5 md:gap-2">
         {/* Title - hidden on mobile */}
         <div className="hidden md:block">
           <h2 className="text-sm font-semibold text-base-content/90">{slot.label}</h2>
