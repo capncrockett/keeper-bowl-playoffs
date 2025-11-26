@@ -21,11 +21,11 @@ export const BracketColumn: FC<BracketColumnProps> = ({
   if (slots.length === 0) return null;
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-sm font-semibold tracking-wide uppercase text-base-content/70">
+    <div className="space-y-2 md:space-y-3">
+      <h2 className="text-xs md:text-sm font-semibold tracking-wide uppercase text-base-content/70">
         {title}
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-2 md:space-y-3">
         {slots.map((slot) => (
           <BracketTile
             key={slot.id}

@@ -135,13 +135,13 @@ export const ChampBracket: FC<ChampBracketProps> = ({
 
   return (
     <div className="w-full overflow-x-auto">
-      <div ref={containerRef} className="relative grid gap-8 md:grid-cols-3 min-w-[720px]">
+      <div ref={containerRef} className="relative grid gap-4 md:gap-8 md:grid-cols-3 min-w-[720px]">
         {/* Round 1 */}
         <div className="flex flex-col justify-between gap-8">
           <h2 className="text-sm font-semibold tracking-wide uppercase text-base-content/70">
             Round 1
           </h2>
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4 md:gap-6">
             {/* 1 Seed Bye */}
             {champBye1 && champBye1.positions[0]?.teamId != null && (
               <div className="card bg-base-200 shadow-sm border border-base-300">
@@ -185,16 +185,12 @@ export const ChampBracket: FC<ChampBracketProps> = ({
             {/* Main Champ R1 match */}
             {r1.map((slot) => (
               <BracketMatchShell key={slot.id} slotId={slot.id}>
-                <div className="card bg-base-200 shadow-sm border border-base-300">
-                  <div className="card-body p-4 gap-2">
-                    <BracketTile
-                      slot={slot}
-                      teamsById={teamsById}
-                      highlightTeamId={highlightTeamId}
-                      mode={mode}
-                    />
-                  </div>
-                </div>
+                <BracketTile
+                  slot={slot}
+                  teamsById={teamsById}
+                  highlightTeamId={highlightTeamId}
+                  mode={mode}
+                />
               </BracketMatchShell>
             ))}
             {/* 2 Seed Bye */}
@@ -245,19 +241,15 @@ export const ChampBracket: FC<ChampBracketProps> = ({
           <h2 className="text-sm font-semibold tracking-wide uppercase text-base-content/70">
             Round 2
           </h2>
-          <div className="relative flex flex-col gap-16 pt-6 pb-6">
+          <div className="relative flex flex-col gap-12 md:gap-16 pt-6 pb-6">
             {r2.map((slot) => (
               <BracketMatchShell key={slot.id} slotId={slot.id}>
-                <div className="card bg-base-200 shadow-sm border border-base-300">
-                  <div className="card-body p-4 gap-2">
-                    <BracketTile
-                      slot={slot}
-                      teamsById={teamsById}
-                      highlightTeamId={highlightTeamId}
-                      mode={mode}
-                    />
-                  </div>
-                </div>
+                <BracketTile
+                  slot={slot}
+                  teamsById={teamsById}
+                  highlightTeamId={highlightTeamId}
+                  mode={mode}
+                />
               </BracketMatchShell>
             ))}
             {/* connector lines unchanged */}
@@ -269,19 +261,15 @@ export const ChampBracket: FC<ChampBracketProps> = ({
           <h2 className="text-sm font-semibold tracking-wide uppercase text-base-content/70">
             Finals
           </h2>
-          <div className="relative flex flex-col gap-8 pt-10 pb-10">
+          <div className="relative flex flex-col gap-6 md:gap-8 pt-10 pb-10">
             {finals.map((slot) => (
               <BracketMatchShell key={slot.id} slotId={slot.id}>
-                <div className="card bg-base-200 shadow-sm border border-base-300">
-                  <div className="card-body p-4 gap-2">
-                    <BracketTile
-                      slot={slot}
-                      teamsById={teamsById}
-                      highlightTeamId={highlightTeamId}
-                      mode={mode}
-                    />
-                  </div>
-                </div>
+                <BracketTile
+                  slot={slot}
+                  teamsById={teamsById}
+                  highlightTeamId={highlightTeamId}
+                  mode={mode}
+                />
               </BracketMatchShell>
             ))}
             {/* connector lines unchanged */}

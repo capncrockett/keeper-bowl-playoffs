@@ -41,7 +41,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
   const placementSlots = slots.filter((s) => s.bracketId !== 'champ');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Main Champ bracket */}
       <ChampBracket
         slots={champSlots}
@@ -51,7 +51,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
       />
 
       {/* Keeper + Toilet underneath */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         {PLACEMENT_COLUMNS.map((col) => (
           <BracketColumn
             key={col.id}
