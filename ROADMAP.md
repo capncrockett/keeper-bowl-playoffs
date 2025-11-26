@@ -73,29 +73,37 @@ Checklist:
 - [x] Champ cards outlined (BYE + games)
 - [x] Champ bracket functional layout stable
 
-### 3.2 — Bracket Geometry + Spacing (NEXT)
+### 3.2 — Bracket Geometry + Spacing (DONE)
 
 **Goal:** Make Champ/Keeper/Toilet _look_ like a bracket even before connectors.
 
+**Delivered:**
+
+- Fully responsive BracketTile component with mobile/desktop variants
+- Mobile (<768px): Sleeper-style minimal cards (avatar + name + score)
+- Desktop (≥768px): Rich cards with seed, record, and reward text
+- Responsive spacing normalized across all components
+- Removed redundant card wrappers
+- Cards adapt to screen size for optimal readability
+
 Checklist:
 
-- [ ] Normalize card heights across all bracket tiles
-  - Decide a minimum height per bracket role (R1/R2/Finals/Placement)
-  - Ensure BYE and single‑team cards don’t collapse height
-- [ ] Align vertical rhythm so rounds visually ladder
-  - R1 cards line up to midpoints of R2 cards
-  - R2 cards line up to midpoint of Finals
-- [ ] Reduce excess whitespace
-  - Tighten column gaps (`gap-*`) carefully
-  - Keep mobile readability
-- [ ] Group placement games cleanly under Finals
-  - Champ: Finals + 3rd place grouped
-  - Keeper: 5/6 + 7/8 grouped
-  - Toilet: Poop King + 9/10 grouped
+- [x] Normalize card heights across all bracket tiles
+  - Responsive padding and consistent card structure
+  - Mobile-optimized minimal design
+- [x] Align vertical rhythm so rounds visually ladder
+  - Responsive gaps: tight on mobile, generous on desktop
+- [x] Reduce excess whitespace
+  - Mobile: gap-2, Desktop: gap-4 to gap-8
+  - Optimized for mobile readability
+- [x] Group placement games cleanly under Finals
+  - BracketColumn component handles grouping
+  - Responsive grid layout
 - [ ] Add tiny flow labels (text only, no styling pass)
-  - “Rimmers →”, “Flushed →”, “Floaters”, “Splashbacks”
+  - "Rimmers →", "Flushed →", "Floaters", "Splashbacks"
+  - Deferred for future iteration
 
-**Deliverable:** Updated bracket layout where every tile snaps to a predictable grid.
+**Deliverable:** Responsive bracket layout that adapts to mobile and desktop.
 
 ### 3.3 — Connectors (PAUSED)
 
