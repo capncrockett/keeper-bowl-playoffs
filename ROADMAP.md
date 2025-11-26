@@ -112,40 +112,49 @@ Checklist:
 
 ---
 
-## Phase 4 — Live Playoffs Mode (MAJOR NEXT FEATURE)
+## Phase 4 — Live Playoffs Mode (DONE)
 
 **Goal:** `/playoffs/live` shows the _real_ in‑progress playoff bracket from Sleeper.
 
-### 4.1 — Data Fetch + Normalization
+**Delivered:**
+
+- Sleeper playoff bracket API integration (winners_bracket/losers_bracket endpoints)
+- `SleeperPlayoffMatchup` type and client functions
+- `toBracketGameOutcomes()` transform utility
+- Full PlayoffsLivePage implementation with live data fetching
+- Game outcomes applied through routing engine
+- UI reuses patterns from If-Today page (mode toggle, team selector, PvP header)
+
+### 4.1 — Data Fetch + Normalization (DONE)
 
 Checklist:
 
-- [ ] Add Sleeper calls:
+- [x] Add Sleeper calls:
   - `/league/{leagueId}/winners_bracket`
   - `/league/{leagueId}/losers_bracket`
-- [ ] Define TS types for Sleeper bracket payloads
-- [ ] Write `toBracketGameOutcomes()`:
-  - Map each Sleeper game to `{ slotId, winnerTeamId }`
+- [x] Define TS types for Sleeper bracket payloads
+- [x] Write `toBracketGameOutcomes()`:
+  - Map each Sleeper game to `{ slotId, winnerIndex }`
   - Handle unplayed games (`winner = null`)
   - Confirm Sleeper IDs map to your `teamId`/`rosterId` scheme
 
-### 4.2 — Apply Outcomes to Template
+### 4.2 — Apply Outcomes to Template (DONE)
 
 Checklist:
 
-- [ ] Start from `BRACKET_TEMPLATE`
-- [ ] Apply `assignSeedsToBracketSlots()` for baseline population (if Sleeper doesn’t provide teamIds everywhere)
-- [ ] Feed outcomes into `applyGameOutcomesToBracket()`
-- [ ] Verify downstream placement matches routing rules
+- [x] Start from `BRACKET_TEMPLATE`
+- [x] Apply `assignSeedsToBracketSlots()` for baseline population
+- [x] Feed outcomes into `applyGameOutcomesToBracket()`
+- [x] Verify downstream placement matches routing rules
 
-### 4.3 — Live Page + UI
+### 4.3 — Live Page + UI (DONE)
 
 Checklist:
 
-- [ ] Create `/playoffs/live` page
-- [ ] Reuse `<Bracket />` component
-- [ ] Add page header, controls identical to If‑Today
-- [ ] Show winners/losers status in cards (text only at first)
+- [x] Create `/playoffs/live` page
+- [x] Reuse `<Bracket />` component
+- [x] Add page header, controls identical to If‑Today
+- [x] Show winners/losers status in cards (handled by bracket routing)
 
 **Deliverable:** Live bracket page displays correct real bracket state.
 
