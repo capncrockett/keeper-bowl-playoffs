@@ -127,7 +127,7 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
     highlightTeamId != null && slot.positions.some((pos) => pos?.teamId === highlightTeamId);
 
   const cardClassName = [
-    'card card-compact bg-base-200 w-full max-w-full overflow-hidden border border-base-300',
+    'card card-compact bg-base-100 w-full max-w-full overflow-hidden border border-base-300',
     involvesHighlight ? 'ring-2 ring-primary shadow-lg' : 'shadow-sm',
   ].join(' ');
 

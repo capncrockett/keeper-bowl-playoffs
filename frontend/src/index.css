@@ -1,7 +1,4 @@
 @import 'tailwindcss';
-@plugin "daisyui" {
-  themes: 'dark';
-}
 
 /* Basic global styles */
 :root {
@@ -11,3 +8,5 @@
 body {
   min-height: 100vh;
 }
+
+@plugin "daisyui";

@@ -1,4 +1,4 @@
-// src/components/bracket/ChampBracket.tsx
+// src/components/bracket/KeeperBracket.tsx
 
 import type { FC, ReactNode } from 'react';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -33,14 +33,14 @@ interface ConnectorLine {
   y2: number;
 }
 
-interface ChampBracketProps {
+interface KeeperBracketProps {
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
 }
 
-export const ChampBracket: FC<ChampBracketProps> = ({
+export const KeeperBracket: FC<KeeperBracketProps> = ({
   slots,
   teamsById,
   highlightTeamId,
@@ -49,21 +49,21 @@ export const ChampBracket: FC<ChampBracketProps> = ({
   const [connectorLines, setConnectorLines] = useState<ConnectorLine[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const r1 = useMemo(
-    () => slots.filter((s) => s.id === 'champ_r1_g1' || s.id === 'champ_r1_g2'),
+  // Column 1: Floaters and Splashbacks
+  const floaters = useMemo(
+    () => slots.filter((s) => s.id === 'keeper_floater1' || s.id === 'keeper_floater2'),
     [slots],
   );
-  const r2 = useMemo(
-    () => slots.filter((s) => s.id === 'champ_r2_g1' || s.id === 'champ_r2_g2'),
-    [slots],
-  );
-  const finals = useMemo(
-    () => slots.filter((s) => s.id === 'champ_finals' || s.id === 'champ_3rd'),
+  const splashbacks = useMemo(
+    () => slots.filter((s) => s.id === 'keeper_splashback1' || s.id === 'keeper_splashback2'),
     [slots],
   );
 
-  const champBye1 = useMemo(() => slots.find((s) => s.id === 'champ_r2_g1'), [slots]);
-  const champBye2 = useMemo(() => slots.find((s) => s.id === 'champ_r2_g2'), [slots]);
+  // Column 2: Placement games
+  const placements = useMemo(
+    () => slots.filter((s) => s.id === 'keeper_5th_6th' || s.id === 'keeper_7th_8th'),
+    [slots],
+  );
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -104,26 +104,13 @@ export const ChampBracket: FC<ChampBracketProps> = ({
         });
       };
 
-      // Safely connect based on the actual slots rendered in each column
-      const r1Slots = r1;
-      const r2Slots = r2;
-      const finalSlots = finals;
-
-      // Round 1 winners feed into Round 2 games
-      if (r1Slots.length > 0 && r2Slots.length > 0) {
-        connect(r1Slots[0].id, 'bottom', r2Slots[0].id, 'top');
+      // Floaters feed into Splashbacks (already done implicitly by positioning)
+      // Splashbacks feed into placement games
+      if (splashbacks.length > 0 && placements.length > 0) {
+        connect(splashbacks[0].id, 'bottom', placements[0].id, 'top'); // Splashback1 → 5th/6th
       }
-      if (r1Slots.length > 1 && r2Slots.length > 1) {
-        connect(r1Slots[1].id, 'bottom', r2Slots[1].id, 'top');
-      }
-
-      // Round 2 winners feed into the Championship game
-      const champGame = finalSlots[0];
-      if (champGame && r2Slots.length > 0) {
-        connect(r2Slots[0].id, 'bottom', champGame.id, 'top');
-      }
-      if (champGame && r2Slots.length > 1) {
-        connect(r2Slots[1].id, 'bottom', champGame.id, 'top');
+      if (splashbacks.length > 1 && placements.length > 1) {
+        connect(splashbacks[1].id, 'bottom', placements[0].id, 'top'); // Splashback2 → 5th/6th
       }
 
       return lines;
@@ -140,30 +127,19 @@ export const ChampBracket: FC<ChampBracketProps> = ({
     return () => {
       window.removeEventListener('resize', updateLines);
     };
-  }, [slots]);
+  }, [slots, splashbacks, placements]);
 
   return (
     <div className="w-full">
-      <div ref={containerRef} className="relative grid grid-cols-3 gap-1 md:gap-8">
-        {/* Round 1 */}
-        <div className="flex flex-col justify-between">
+      <div ref={containerRef} className="relative grid grid-cols-2 gap-1 md:gap-8">
+        {/* Column 1: Floaters vs Splashbacks */}
+        <div className="flex flex-col justify-start">
           <h2 className="text-[0.6rem] md:text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-1 md:mb-3">
-            Round 1
+            Keeper Bowl
           </h2>
-          <div className="flex flex-col gap-2 md:gap-6">
-            {/* 1 Seed Bye */}
-            {champBye1 && champBye1.positions[0]?.teamId != null && (
-              <BracketMatchShell slotId={'champ_bye1' as BracketSlot['id']}>
-                <BracketTile
-                  slot={champBye1}
-                  teamsById={teamsById}
-                  highlightTeamId={highlightTeamId}
-                  mode={mode}
-                />
-              </BracketMatchShell>
-            )}
-            {/* Main Champ R1 match */}
-            {r1.map((slot) => (
+          <div className="flex flex-col gap-2 md:gap-4">
+            {/* Floaters */}
+            {floaters.map((slot) => (
               <BracketMatchShell key={slot.id} slotId={slot.id}>
                 <BracketTile
                   slot={slot}
@@ -173,27 +149,32 @@ export const ChampBracket: FC<ChampBracketProps> = ({
                 />
               </BracketMatchShell>
             ))}
-            {/* 2 Seed Bye */}
-            {champBye2 && champBye2.positions[0]?.teamId != null && (
-              <BracketMatchShell slotId={'champ_bye2' as BracketSlot['id']}>
-                <BracketTile
-                  slot={champBye2}
-                  teamsById={teamsById}
-                  highlightTeamId={highlightTeamId}
-                  mode={mode}
-                />
-              </BracketMatchShell>
-            )}
+            {/* Splashbacks */}
+            <div className="mt-2 md:mt-4">
+              <h3 className="text-[0.55rem] md:text-xs font-semibold tracking-wide uppercase text-base-content/60 mb-1 md:mb-2">
+                Splashback
+              </h3>
+              {splashbacks.map((slot) => (
+                <BracketMatchShell key={slot.id} slotId={slot.id}>
+                  <BracketTile
+                    slot={slot}
+                    teamsById={teamsById}
+                    highlightTeamId={highlightTeamId}
+                    mode={mode}
+                  />
+                </BracketMatchShell>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Round 2 */}
-        <div className="flex flex-col justify-between">
+        {/* Column 2: Placement Finals */}
+        <div className="flex flex-col justify-start">
           <h2 className="text-[0.6rem] md:text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-1 md:mb-3">
-            Round 2
+            Placement
           </h2>
-          <div className="relative flex flex-col gap-4 md:gap-16 pt-2 md:pt-6 pb-2 md:pb-6">
-            {r2.map((slot) => (
+          <div className="relative flex flex-col gap-3 md:gap-6 pt-2 md:pt-4">
+            {placements.map((slot) => (
               <BracketMatchShell key={slot.id} slotId={slot.id}>
                 <BracketTile
                   slot={slot}
@@ -203,29 +184,9 @@ export const ChampBracket: FC<ChampBracketProps> = ({
                 />
               </BracketMatchShell>
             ))}
-            {/* connector lines unchanged */}
           </div>
         </div>
 
-        {/* Finals */}
-        <div className="flex flex-col justify-between">
-          <h2 className="text-[0.6rem] md:text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-1 md:mb-3">
-            Finals
-          </h2>
-          <div className="relative flex flex-col gap-3 md:gap-8 pt-3 md:pt-10 pb-3 md:pb-10">
-            {finals.map((slot) => (
-              <BracketMatchShell key={slot.id} slotId={slot.id}>
-                <BracketTile
-                  slot={slot}
-                  teamsById={teamsById}
-                  highlightTeamId={highlightTeamId}
-                  mode={mode}
-                />
-              </BracketMatchShell>
-            ))}
-            {/* connector lines unchanged */}
-          </div>
-        </div>
         {connectorLines.length > 0 && (
           <svg className="pointer-events-none absolute inset-0 text-base-content/30">
             {connectorLines.map((line, index) => (

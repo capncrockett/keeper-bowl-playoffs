@@ -3,28 +3,9 @@
 import type { FC } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
-import { BracketColumn } from './BracketColumn';
 import { ChampBracket } from './ChampBracket';
-
-const PLACEMENT_COLUMNS = [
-  {
-    id: 'stage_keeper_toilet_r2',
-    title: 'Round 2 - Keeper & Toilet',
-    slotIds: ['keeper_floater1', 'keeper_floater2', 'toilet_r2_g1', 'toilet_r2_g2'],
-  },
-  {
-    id: 'stage_keeper_toilet_finals',
-    title: 'Finals - Keeper & Toilet',
-    slotIds: [
-      'keeper_splashback1',
-      'keeper_splashback2',
-      'keeper_5th_6th',
-      'keeper_7th_8th',
-      'toilet_finals',
-      'toilet_9th_10th',
-    ],
-  },
-];
+import { KeeperBracket } from './KeeperBracket';
+import { ToiletBracket } from './ToiletBracket';
 
 interface BracketProps {
   slots: BracketSlot[];
@@ -38,30 +19,42 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
   teams.forEach((t) => teamsById.set(t.sleeperRosterId, t));
 
   const champSlots = slots.filter((s) => s.bracketId === 'champ');
-  const placementSlots = slots.filter((s) => s.bracketId !== 'champ');
+  const keeperSlots = slots.filter((s) => s.bracketId === 'keeper');
+  const toiletSlots = slots.filter((s) => s.bracketId === 'toilet');
 
   return (
-    <div className="space-y-4 md:space-y-8">
-      {/* Main Champ bracket */}
-      <ChampBracket
-        slots={champSlots}
-        teamsById={teamsById}
-        highlightTeamId={highlightTeamId}
-        mode={mode}
-      />
+    <div className="space-y-6 md:space-y-12">
+      {/* Champ Bowl bracket */}
+      <div>
+        <h2 className="text-sm md:text-lg font-bold mb-3 md:mb-4 text-base-content">Champ Bowl</h2>
+        <ChampBracket
+          slots={champSlots}
+          teamsById={teamsById}
+          highlightTeamId={highlightTeamId}
+          mode={mode}
+        />
+      </div>
 
-      {/* Keeper + Toilet underneath */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-        {PLACEMENT_COLUMNS.map((col) => (
-          <BracketColumn
-            key={col.id}
-            title={col.title}
-            slots={placementSlots.filter((slot) => col.slotIds.includes(slot.id))}
-            teamsById={teamsById}
-            highlightTeamId={highlightTeamId}
-            mode={mode}
-          />
-        ))}
+      {/* Keeper Bowl bracket */}
+      <div>
+        <h2 className="text-sm md:text-lg font-bold mb-3 md:mb-4 text-base-content">Keeper Bowl</h2>
+        <KeeperBracket
+          slots={keeperSlots}
+          teamsById={teamsById}
+          highlightTeamId={highlightTeamId}
+          mode={mode}
+        />
+      </div>
+
+      {/* Toilet Bowl bracket */}
+      <div>
+        <h2 className="text-sm md:text-lg font-bold mb-3 md:mb-4 text-base-content">Toilet Bowl</h2>
+        <ToiletBracket
+          slots={toiletSlots}
+          teamsById={teamsById}
+          highlightTeamId={highlightTeamId}
+          mode={mode}
+        />
       </div>
     </div>
   );

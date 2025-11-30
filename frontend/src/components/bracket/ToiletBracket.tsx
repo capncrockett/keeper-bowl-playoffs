@@ -1,4 +1,4 @@
-// src/components/bracket/ChampBracket.tsx
+// src/components/bracket/ToiletBracket.tsx
 
 import type { FC, ReactNode } from 'react';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -33,14 +33,14 @@ interface ConnectorLine {
   y2: number;
 }
 
-interface ChampBracketProps {
+interface ToiletBracketProps {
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
 }
 
-export const ChampBracket: FC<ChampBracketProps> = ({
+export const ToiletBracket: FC<ToiletBracketProps> = ({
   slots,
   teamsById,
   highlightTeamId,
@@ -50,20 +50,20 @@ export const ChampBracket: FC<ChampBracketProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const r1 = useMemo(
-    () => slots.filter((s) => s.id === 'champ_r1_g1' || s.id === 'champ_r1_g2'),
+    () => slots.filter((s) => s.id === 'toilet_r1_g1' || s.id === 'toilet_r1_g2'),
     [slots],
   );
   const r2 = useMemo(
-    () => slots.filter((s) => s.id === 'champ_r2_g1' || s.id === 'champ_r2_g2'),
+    () => slots.filter((s) => s.id === 'toilet_r2_g1' || s.id === 'toilet_r2_g2'),
     [slots],
   );
   const finals = useMemo(
-    () => slots.filter((s) => s.id === 'champ_finals' || s.id === 'champ_3rd'),
+    () => slots.filter((s) => s.id === 'toilet_finals' || s.id === 'toilet_9th_10th'),
     [slots],
   );
 
-  const champBye1 = useMemo(() => slots.find((s) => s.id === 'champ_r2_g1'), [slots]);
-  const champBye2 = useMemo(() => slots.find((s) => s.id === 'champ_r2_g2'), [slots]);
+  const toiletBye1 = useMemo(() => slots.find((s) => s.id === 'toilet_r2_g1'), [slots]);
+  const toiletBye2 = useMemo(() => slots.find((s) => s.id === 'toilet_r2_g2'), [slots]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -104,7 +104,6 @@ export const ChampBracket: FC<ChampBracketProps> = ({
         });
       };
 
-      // Safely connect based on the actual slots rendered in each column
       const r1Slots = r1;
       const r2Slots = r2;
       const finalSlots = finals;
@@ -117,13 +116,13 @@ export const ChampBracket: FC<ChampBracketProps> = ({
         connect(r1Slots[1].id, 'bottom', r2Slots[1].id, 'top');
       }
 
-      // Round 2 winners feed into the Championship game
-      const champGame = finalSlots[0];
-      if (champGame && r2Slots.length > 0) {
-        connect(r2Slots[0].id, 'bottom', champGame.id, 'top');
+      // Round 2 winners feed into the Poop King final
+      const poopKingGame = finalSlots[0];
+      if (poopKingGame && r2Slots.length > 0) {
+        connect(r2Slots[0].id, 'bottom', poopKingGame.id, 'top');
       }
-      if (champGame && r2Slots.length > 1) {
-        connect(r2Slots[1].id, 'bottom', champGame.id, 'top');
+      if (poopKingGame && r2Slots.length > 1) {
+        connect(r2Slots[1].id, 'bottom', poopKingGame.id, 'top');
       }
 
       return lines;
@@ -140,7 +139,7 @@ export const ChampBracket: FC<ChampBracketProps> = ({
     return () => {
       window.removeEventListener('resize', updateLines);
     };
-  }, [slots]);
+  }, [slots, r1, r2, finals]);
 
   return (
     <div className="w-full">
@@ -151,18 +150,18 @@ export const ChampBracket: FC<ChampBracketProps> = ({
             Round 1
           </h2>
           <div className="flex flex-col gap-2 md:gap-6">
-            {/* 1 Seed Bye */}
-            {champBye1 && champBye1.positions[0]?.teamId != null && (
-              <BracketMatchShell slotId={'champ_bye1' as BracketSlot['id']}>
+            {/* 12 Seed Bye */}
+            {toiletBye1 && toiletBye1.positions[0]?.teamId != null && (
+              <BracketMatchShell slotId={'toilet_bye1' as BracketSlot['id']}>
                 <BracketTile
-                  slot={champBye1}
+                  slot={toiletBye1}
                   teamsById={teamsById}
                   highlightTeamId={highlightTeamId}
                   mode={mode}
                 />
               </BracketMatchShell>
             )}
-            {/* Main Champ R1 match */}
+            {/* Main Toilet R1 matches */}
             {r1.map((slot) => (
               <BracketMatchShell key={slot.id} slotId={slot.id}>
                 <BracketTile
@@ -173,11 +172,11 @@ export const ChampBracket: FC<ChampBracketProps> = ({
                 />
               </BracketMatchShell>
             ))}
-            {/* 2 Seed Bye */}
-            {champBye2 && champBye2.positions[0]?.teamId != null && (
-              <BracketMatchShell slotId={'champ_bye2' as BracketSlot['id']}>
+            {/* 11 Seed Bye */}
+            {toiletBye2 && toiletBye2.positions[0]?.teamId != null && (
+              <BracketMatchShell slotId={'toilet_bye2' as BracketSlot['id']}>
                 <BracketTile
-                  slot={champBye2}
+                  slot={toiletBye2}
                   teamsById={teamsById}
                   highlightTeamId={highlightTeamId}
                   mode={mode}
@@ -203,7 +202,6 @@ export const ChampBracket: FC<ChampBracketProps> = ({
                 />
               </BracketMatchShell>
             ))}
-            {/* connector lines unchanged */}
           </div>
         </div>
 
@@ -223,7 +221,6 @@ export const ChampBracket: FC<ChampBracketProps> = ({
                 />
               </BracketMatchShell>
             ))}
-            {/* connector lines unchanged */}
           </div>
         </div>
         {connectorLines.length > 0 && (
