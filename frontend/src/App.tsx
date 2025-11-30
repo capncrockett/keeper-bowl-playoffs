@@ -1,4 +1,5 @@
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { ThemeSelector } from './components/ThemeSelector';
 import { MatchupsPage } from './pages/MatchupsPage';
 import PlayoffsIfTodayPage from './pages/PlayoffsIfTodayPage';
 import PlayoffsLivePage from './pages/PlayoffsLivePage';
@@ -37,6 +38,9 @@ export default function App() {
             <NavLink to="/playoffs/live" label="Playoffs" />
             <NavLink to="/standings" label="Standings" />
           </nav>
+        </div>
+        <div className="navbar-end">
+          <ThemeSelector />
         </div>
       </header>
 

@@ -2,11 +2,14 @@
 
 /* Basic global styles */
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 body {
   min-height: 100vh;
 }
 
-@plugin "daisyui";
+/* DaisyUI theme configuration for Tailwind 4 */
+@plugin "daisyui" {
+  themes: light, cupcake, synthwave, dark --prefersdark;
+}
