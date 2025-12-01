@@ -7,6 +7,7 @@ import {
   type SleeperMatchup,
   type SleeperNFLState,
   type SleeperPlayer,
+  type SleeperLeague,
 } from '../api/sleeper';
 import type { Team, PairedMatchup, LiveMatchData, SeasonState } from '../models/fantasy';
 import { countFinishedPlayers } from './playerGameStatus';
@@ -16,11 +17,50 @@ import { countFinishedPlayers } from './playerGameStatus';
 export function mergeRostersAndUsersToTeams(
   rosters: SleeperRoster[],
   users: SleeperUser[],
+  league?: SleeperLeague,
 ): Team[] {
   const usersById = new Map<string, SleeperUser>(users.map((u) => [u.user_id, u]));
+  const divisionNameById = new Map<number, string>();
+  const divisionAvatarById = new Map<number, string | null>();
+
+  if (league?.metadata) {
+    for (const [key, value] of Object.entries(league.metadata)) {
+      if (typeof value !== 'string') continue;
+      const nameMatch = key.match(/^division_(\d+)$/);
+      const avatarMatch = key.match(/^division_(\d+)_avatar$/) ?? key.match(/^division_avatar_(\d+)$/);
+
+      if (nameMatch) {
+        const id = Number(nameMatch[1]);
+        if (!Number.isNaN(id)) {
+          divisionNameById.set(id, value);
+        }
+        continue;
+      }
+
+      if (avatarMatch) {
+        const id = Number(avatarMatch[1]);
+        if (!Number.isNaN(id)) {
+          const url = value.startsWith('http') ? value : buildSleeperAvatarUrl(value);
+          divisionAvatarById.set(id, url);
+        }
+      }
+    }
+  }
 
   const teams: Team[] = rosters.map((roster) => {
     const user = usersById.get(roster.owner_id);
+    const divisionIdRaw =
+      roster.division_id ??
+      roster.division ??
+      (roster.settings as { division_id?: number; division?: number }).division_id ??
+      (roster.settings as { division?: number }).division ??
+      null;
+    const divisionId =
+      divisionIdRaw === null || divisionIdRaw === undefined
+        ? null
+        : Number.isNaN(Number(divisionIdRaw))
+          ? null
+          : Number(divisionIdRaw);
 
     const wins = roster.settings.wins ?? 0;
     const losses = roster.settings.losses ?? 0;
@@ -45,6 +85,9 @@ export function mergeRostersAndUsersToTeams(
       avatarUrl,
       sleeperRosterId: roster.roster_id,
       sleeperUserId: roster.owner_id,
+      divisionId,
+      divisionName: divisionId ? divisionNameById.get(divisionId) ?? `Division ${divisionId}` : null,
+      divisionAvatarUrl: divisionId ? divisionAvatarById.get(divisionId) ?? null : null,
       record: { wins, losses, ties },
       pointsFor,
       pointsAgainst,

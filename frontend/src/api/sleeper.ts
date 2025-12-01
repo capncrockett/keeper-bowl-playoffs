@@ -10,6 +10,7 @@ export interface SleeperLeague {
   status: 'pre_draft' | 'drafting' | 'in_season' | 'complete';
   sport: 'nfl' | string;
   settings: Record<string, unknown>;
+  metadata?: Record<string, string | undefined>;
   season_type: 'pre' | 'regular' | 'post' | string;
   season: string;
   scoring_settings: Record<string, number>;
@@ -40,6 +41,8 @@ export interface SleeperRoster {
   players: string[];
   owner_id: string;
   league_id: string;
+  division_id?: number | null;
+  division?: number | null;
 }
 
 export interface SleeperUserMetadata {

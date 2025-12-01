@@ -16,6 +16,9 @@ export interface Team {
   avatarUrl: string | null;
   sleeperRosterId: number;
   sleeperUserId: string;
+  divisionId: number | null;
+  divisionName?: string | null;
+  divisionAvatarUrl?: string | null;
   record: TeamRecord;
   pointsFor: number;
   pointsAgainst: number;
