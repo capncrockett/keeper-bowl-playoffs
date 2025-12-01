@@ -18,10 +18,10 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
     title: 'Round 1',
     subtitle: 'Week 15',
     items: [
-      { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 1 },
+      { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 1, maskOppIndex: 1 },
       { id: 'champ_r1_g1', slotId: 'champ_r1_g1', topPct: 25 },
       { id: 'champ_r1_g2', slotId: 'champ_r1_g2', topPct: 50 },
-      { id: 'champ_bye2', slotId: 'champ_r2_g2', topPct: 75 },
+      { id: 'champ_bye2', slotId: 'champ_r2_g2', topPct: 75, maskOppIndex: 1 },
     ],
   },
   {

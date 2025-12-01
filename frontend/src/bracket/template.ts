@@ -62,7 +62,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     bracketId: 'keeper',
     round: 'keeper_main',
     label: 'Floater 1 (Champ loser top)',
-    positions: [null, null], // loser champ_r2_g1 + Toilet winner top
+    positions: [null, null], // Champ Round 1 loser drops here (routed into Splashback 1)
   },
   {
     id: 'keeper_splashback1',
@@ -79,7 +79,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     bracketId: 'keeper',
     round: 'keeper_main',
     label: 'Floater 2 (Champ loser bottom)',
-    positions: [null, null],
+    positions: [null, null], // Champ Round 1 loser drops here (routed into Splashback 2)
   },
   {
     id: 'keeper_splashback2',

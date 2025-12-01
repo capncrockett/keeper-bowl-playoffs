@@ -18,15 +18,15 @@ export const ROUTING_RULES: BracketRoutingRule[] = [
     fromSlotId: 'champ_r1_g1',
     // Winner plays in Champ R2 G1 (vs seed 1) as the bottom slot
     winnerGoesTo: { slotId: 'champ_r2_g1', positionIndex: 1 },
-    // Loser drops to Keeper Floater 1
-    loserGoesTo: { slotId: 'keeper_floater1', positionIndex: 0 },
+    // Loser drops into Keeper Splashback 1 (as the Floater side)
+    loserGoesTo: { slotId: 'keeper_splashback1', positionIndex: 0 },
   },
   {
     fromSlotId: 'champ_r1_g2',
     // Winner plays in Champ R2 G2 (vs seed 2) as the bottom slot
     winnerGoesTo: { slotId: 'champ_r2_g2', positionIndex: 1 },
-    // Loser drops to Keeper Floater 2
-    loserGoesTo: { slotId: 'keeper_floater2', positionIndex: 0 },
+    // Loser drops into Keeper Splashback 2 (as the Floater side)
+    loserGoesTo: { slotId: 'keeper_splashback2', positionIndex: 0 },
   },
 
   // Round 2 -> Finals + 3rd place
@@ -49,18 +49,18 @@ export const ROUTING_RULES: BracketRoutingRule[] = [
   // TOILET BOWL
   //
 
-  // Round 1 -> Round 2
-  // R1 G1 winner faces seed 12
+  // Round 1 -> Round 2 + Keeper
+  // Winners jump up into Keeper Splashback; losers slide to face the bye seeds
   {
     fromSlotId: 'toilet_r1_g1',
-    winnerGoesTo: { slotId: 'toilet_r2_g1', positionIndex: 1 },
-    // R1 losers effectively fall toward 11th/12th via reward logic;
-    // they don't play another explicit game.
+    winnerGoesTo: { slotId: 'keeper_splashback1', positionIndex: 1 },
+    loserGoesTo: { slotId: 'toilet_r2_g1', positionIndex: 1 },
   },
-  // R1 G2 winner faces seed 11
+  // R1 G2 mirrors top side
   {
     fromSlotId: 'toilet_r1_g2',
-    winnerGoesTo: { slotId: 'toilet_r2_g2', positionIndex: 1 },
+    winnerGoesTo: { slotId: 'keeper_splashback2', positionIndex: 1 },
+    loserGoesTo: { slotId: 'toilet_r2_g2', positionIndex: 1 },
   },
 
   // Round 2 -> Poop King final + 9th/10th game
@@ -80,24 +80,6 @@ export const ROUTING_RULES: BracketRoutingRule[] = [
   //
   // KEEPER BOWL
   //
-  // Keeper flow depends a bit on how we finalize the Excel logic,
-  // but structurally we know:
-  // - Losers of Champ R1 land in keeper_floater1/2 (see rules above)
-  // - Winners from those Keeper games end up in 5th/6th,
-  //   and the others in 7th/8th.
-  //
-  // Floater -> Splashback
-  {
-    fromSlotId: 'keeper_floater1',
-    winnerGoesTo: { slotId: 'keeper_splashback1', positionIndex: 0 },
-    loserGoesTo: { slotId: 'keeper_7th_8th', positionIndex: 0 },
-  },
-  {
-    fromSlotId: 'keeper_floater2',
-    winnerGoesTo: { slotId: 'keeper_splashback2', positionIndex: 0 },
-    loserGoesTo: { slotId: 'keeper_7th_8th', positionIndex: 1 },
-  },
-
   // Splashback -> 5th/6th
   {
     fromSlotId: 'keeper_splashback1',

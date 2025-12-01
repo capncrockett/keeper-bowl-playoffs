@@ -13,6 +13,8 @@ interface LayoutItem {
   topPct: number;
   /** Center the card on the percent marker (translateY(-50%)). Defaults to false. */
   centerOnPct?: boolean;
+  /** Optional: mask one position to show a BYE/TBD without altering the real slot data. */
+  maskOppIndex?: 0 | 1;
 }
 
 export interface BracketLayoutColumn {
@@ -109,6 +111,17 @@ export const BracketGrid: FC<BracketGridProps> = ({
               const center = item.centerOnPct === true;
               const scale = col.heightScale ?? defaultHeightScale;
               const top = item.topPct * scale;
+              const displaySlot =
+                item.maskOppIndex == null
+                  ? slot
+                  : {
+                      ...slot,
+                      positions: slot.positions.map((pos, idx) =>
+                        idx === item.maskOppIndex
+                          ? { ...(pos ?? {}), teamId: undefined, isBye: true }
+                          : pos,
+                      ) as typeof slot.positions,
+                    };
 
               return (
                 <div
@@ -121,7 +134,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
                 >
                   <BracketMatchShell itemId={item.id}>
                     <BracketTile
-                      slot={slot}
+                      slot={displaySlot}
                       teamsById={teamsById}
                       highlightTeamId={highlightTeamId}
                       mode={mode}

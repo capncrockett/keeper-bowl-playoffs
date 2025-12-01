@@ -46,6 +46,8 @@ export interface BracketTeamRef {
   isBye?: boolean;
   /** Current points scored in the playoff matchup (Week 15+). */
   currentPoints?: number;
+  /** Season-average projection used when simulating brackets. */
+  projectedPoints?: number;
 }
 
 export interface BracketSlot {
