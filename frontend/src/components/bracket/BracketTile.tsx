@@ -2,7 +2,10 @@
 
 import type { FC } from 'react';
 import type { BracketSlot } from '../../bracket/types';
+import type { BracketRoutingRule } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
+import { BRACKET_TEMPLATE } from '../../bracket/template';
+import { ROUTING_RULES } from '../../bracket/routingRules';
 import { TeamAvatars } from '../common/TeamAvatars';
 
 interface BracketTileProps {
@@ -24,12 +27,57 @@ interface TeamRowProps {
 }
 
 const FLIPPABLE_ROUNDS = new Set<BracketSlot['round']>([
+  'champ_round_1',
+  'champ_round_2',
   'champ_finals',
   'champ_misc',
+  'keeper_main',
   'keeper_misc',
+  'toilet_round_1',
+  'toilet_round_2',
   'toilet_finals',
   'toilet_misc',
 ]);
+
+const SLOT_LABEL_BY_ID = BRACKET_TEMPLATE.reduce(
+  (acc, slot) => acc.set(slot.id, slot.label),
+  new Map<BracketSlot['id'], string>(),
+);
+
+const SLOT_BY_ID = BRACKET_TEMPLATE.reduce(
+  (acc, slot) => acc.set(slot.id, slot),
+  new Map<BracketSlot['id'], BracketSlot>(),
+);
+
+const ROUTE_BY_FROM_ID = ROUTING_RULES.reduce(
+  (acc, rule) => acc.set(rule.fromSlotId, rule),
+  new Map<BracketSlot['id'], BracketRoutingRule>(),
+);
+
+const cleanLabel = (label: string): string => label.replace(/\s*\(.*?\)\s*$/, '');
+
+const ROUND_TITLES: Record<BracketSlot['round'], string> = {
+  champ_round_1: 'Champ Round 1',
+  champ_round_2: 'Champ Semis',
+  champ_finals: 'Championship',
+  champ_misc: 'Champ Placement',
+  keeper_main: 'Keeper Bowl',
+  keeper_misc: 'Keeper Placement',
+  toilet_round_1: 'Toilet Round 1',
+  toilet_round_2: 'Toilet Semis',
+  toilet_finals: 'Toilet Final',
+  toilet_misc: 'Toilet Placement',
+};
+
+function describeDestination(dest: BracketRoutingRule['winnerGoesTo'] | BracketRoutingRule['loserGoesTo']) {
+  if (!dest) return null;
+  const targetSlot = SLOT_BY_ID.get(dest.slotId);
+  const label =
+    (targetSlot ? ROUND_TITLES[targetSlot.round] ?? cleanLabel(targetSlot.label) : null) ??
+    cleanLabel(SLOT_LABEL_BY_ID.get(dest.slotId) ?? dest.slotId);
+  const lane = dest.positionIndex === 0 ? 'top slot' : 'bottom slot';
+  return `${label} (${lane})`;
+}
 
 const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   const renderPlaceholderRow = (label: string) => (
@@ -143,6 +191,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
 export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTeamId, mode }) => {
   const involvesHighlight =
     highlightTeamId != null && slot.positions.some((pos) => pos?.teamId === highlightTeamId);
+  const hasBye = slot.positions.some((pos) => pos?.isBye);
 
   const cardClassName = [
     'card card-compact bg-base-100 w-full max-w-full overflow-hidden border border-base-300',
@@ -169,19 +218,48 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
     </div>
   );
 
+  const route = ROUTE_BY_FROM_ID.get(slot.id);
+  const winnerDest = describeDestination(route?.winnerGoesTo);
+  const loserDest = describeDestination(route?.loserGoesTo);
+  const roundLabel = ROUND_TITLES[slot.round] ?? cleanLabel(slot.label);
+
   const renderBack = () => (
     <div className={cardClassName}>
       <div className="card-body gap-2 p-2 md:p-3">
         <div className="text-[0.65rem] font-semibold uppercase text-base-content/60">Reward</div>
-        <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? slot.label}</div>
-        {slot.rewardText && (
-          <div className="text-[0.7rem] text-base-content/70 leading-snug">{slot.rewardText}</div>
+        <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? roundLabel}</div>
+        {hasBye ? (
+          <div className="text-[0.7rem] text-base-content/70 leading-snug">
+            You lucky dog—BYE week. Advance to {winnerDest ?? 'the next round'} without lifting a
+            finger.
+          </div>
+        ) : (
+          <>
+            {slot.rewardText && (
+              <div className="text-[0.7rem] text-base-content/70 leading-snug">
+                {slot.rewardText}
+              </div>
+            )}
+            <div className="mt-1 space-y-1 text-[0.7rem] text-base-content/70">
+              {winnerDest && (
+                <div>
+                  <span className="font-semibold text-base-content">Winner</span> → {winnerDest}
+                </div>
+              )}
+              {loserDest && (
+                <div>
+                  <span className="font-semibold text-base-content">Loser</span> → {loserDest}
+                </div>
+              )}
+              {!winnerDest && !loserDest && <div>Season ends here.</div>}
+            </div>
+          </>
         )}
       </div>
     </div>
   );
 
-  const isFlippable = slot.rewardTitle && FLIPPABLE_ROUNDS.has(slot.round);
+  const isFlippable = FLIPPABLE_ROUNDS.has(slot.round);
   const showBack = isFlippable && mode === 'reward';
 
   if (!isFlippable) {
