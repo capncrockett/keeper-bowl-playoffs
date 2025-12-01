@@ -24,8 +24,27 @@ interface TeamRowProps {
 }
 
 const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
+  const renderPlaceholderRow = (label: string) => (
+    <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
+      <div className="flex justify-between items-start gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
+          <div className="w-6 md:w-10 rounded-full bg-base-300/60" />
+        </div>
+        {mode === 'score' && (
+          <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
+            <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80">-</div>
+            <div className="text-[0.6rem] md:text-xs text-base-content/60"></div>
+          </div>
+        )}
+      </div>
+      <div className="mt-1 min-w-0">
+        <div className="font-semibold text-[0.65rem] md:text-sm truncate">{label}</div>
+      </div>
+    </div>
+  );
+
   if (!pos) {
-    return <div className="text-xs italic text-base-content/60">TBD</div>;
+    return renderPlaceholderRow('TBD');
   }
 
   if (!team) {
@@ -68,9 +87,9 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
 
     // For non-BYE unknown teams, just show seed or TBD
     if (pos.seed != null) {
-      return <div className="text-xs text-base-content/70">Seed {pos.seed}</div>;
+      return renderPlaceholderRow(`Seed ${pos.seed}`);
     }
-    return <div className="text-xs italic text-base-content/60">TBD</div>;
+    return renderPlaceholderRow('TBD');
   }
 
   const isBye = !!pos.isBye;
