@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
-import type { BracketConnector, BracketLayoutColumn } from './BracketGrid';
+import type { BracketLayoutColumn } from './BracketGrid';
 import { BracketGrid } from './BracketGrid';
 
 interface ChampBracketProps {
@@ -17,36 +17,29 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 1',
     subtitle: 'Week 15',
-    cells: [
-      { id: 'champ_bye1', slotId: 'champ_r2_g1' },
-      { id: 'champ_r1_g1', slotId: 'champ_r1_g1' },
-      { id: 'champ_r1_g2', slotId: 'champ_r1_g2' },
-      { id: 'champ_bye2', slotId: 'champ_r2_g2' },
+    items: [
+      { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 0 },
+      { id: 'champ_r1_g1', slotId: 'champ_r1_g1', topPct: 25 },
+      { id: 'champ_r1_g2', slotId: 'champ_r1_g2', topPct: 50 },
+      { id: 'champ_bye2', slotId: 'champ_r2_g2', topPct: 75 },
     ],
   },
   {
     title: 'Round 2',
     subtitle: 'Week 16',
-    cells: [
-      { id: 'champ_r2_g1', slotId: 'champ_r2_g1', row: 2 },
-      { id: 'champ_r2_g2', slotId: 'champ_r2_g2', row: 3 },
+    items: [
+      { id: 'champ_r2_g1', slotId: 'champ_r2_g1', topPct: 12.5 },
+      { id: 'champ_r2_g2', slotId: 'champ_r2_g2', topPct: 62.5 },
     ],
   },
   {
     title: 'Finals',
     subtitle: 'Week 17',
-    cells: [
-      { id: 'champ_finals', slotId: 'champ_finals', row: 3 },
-      { id: 'champ_3rd', slotId: 'champ_3rd', row: 4 },
+    items: [
+      { id: 'champ_finals', slotId: 'champ_finals', topPct: 37.5 },
+      { id: 'champ_3rd', slotId: 'champ_3rd', topPct: 87.5 },
     ],
   },
-];
-
-const CHAMP_CONNECTORS: BracketConnector[] = [
-  { fromId: 'champ_r1_g1', toId: 'champ_r2_g1' },
-  { fromId: 'champ_r1_g2', toId: 'champ_r2_g2' },
-  { fromId: 'champ_r2_g1', toId: 'champ_finals' },
-  { fromId: 'champ_r2_g2', toId: 'champ_finals' },
 ];
 
 export const ChampBracket: FC<ChampBracketProps> = ({
@@ -58,7 +51,6 @@ export const ChampBracket: FC<ChampBracketProps> = ({
   return (
     <BracketGrid
       columns={CHAMP_COLUMNS}
-      connectors={CHAMP_CONNECTORS}
       slots={slots}
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
