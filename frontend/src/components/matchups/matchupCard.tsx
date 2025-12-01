@@ -9,10 +9,6 @@ interface MatchupCardProps {
 }
 
 export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
-  const totalWinProb = live.winProbA + live.winProbB || 1;
-
-  const winPctA = Math.round((live.winProbA / totalWinProb) * 100);
-  const winPctB = Math.round((live.winProbB / totalWinProb) * 100);
 
   return (
     <div className="card bg-base-200 shadow-md mb-4">
@@ -51,10 +47,10 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
 
             <div className="mt-1">
               <div className="text-2xl font-bold">
-                {live.pointsA ? live.pointsA.toFixed(1) : '-'}
+                {live.pointsA ? live.pointsA.toFixed(2) : '-'}
               </div>
               <div className="text-xs text-base-content/60">
-                Proj: {live.projectedA.toFixed(1)} • Win: {winPctA}%
+                {live.playersFinishedA}/{live.startersA} finished
               </div>
             </div>
           </div>
@@ -82,25 +78,16 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
             </div>
 
             <div className="mt-1">
-              <div className="text-2xl font-bold">{teamB ? live.pointsB.toFixed(1) : '-'}</div>
-              <div className="text-xs text-base-content/60">
-                Proj: {live.projectedB.toFixed(1)} • Win: {winPctB}%
-              </div>
+              <div className="text-2xl font-bold">{teamB ? live.pointsB.toFixed(2) : '-'}</div>
+              {teamB && (
+                <div className="text-xs text-base-content/60">
+                  {live.playersFinishedB}/{live.startersB} finished
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Win % bar */}
-        <div className="mt-2">
-          <div className="flex justify-between text-xs mb-1 text-base-content/60">
-            <span>{teamA?.teamName ?? 'Team A'}</span>
-            <span>{teamB?.teamName ?? 'Team B'}</span>
-          </div>
-          <div className="flex w-full h-2 overflow-hidden rounded-full bg-base-300">
-            <div className="bg-primary" style={{ width: `${winPctA}%` }} />
-            <div className="bg-secondary" style={{ width: `${winPctB}%` }} />
-          </div>
-        </div>
       </div>
     </div>
   );

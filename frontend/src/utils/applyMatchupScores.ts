@@ -4,10 +4,10 @@ import type { SleeperMatchup } from '../api/sleeper';
 import type { BracketSlot } from '../bracket/types';
 
 /**
- * Applies matchup scores (current points and projected points) to bracket slots.
+ * Applies matchup scores (current points) to bracket slots.
  * 
  * For each bracket slot, finds the corresponding matchup data and updates
- * the positions with currentPoints and projectedPoints.
+ * the positions with currentPoints.
  *
  * @param slots - Array of bracket slots
  * @param matchups - Array of Sleeper matchup data for the week
@@ -30,17 +30,10 @@ export function applyMatchupScoresToBracket(
 
       const matchup = matchupByRosterId.get(pos.teamId);
       if (!matchup) return pos;
-
-      // For projections, we could calculate average or use starter projections
-      // Sleeper doesn't provide projections directly in matchups endpoint
-      // For now, we'll just use current points
-      // TODO: Add player projections if needed
       
       return {
         ...pos,
         currentPoints: matchup.points ?? 0,
-        // projectedPoints would need to come from player projections API
-        // For now, leaving it undefined
       };
     }) as typeof slot.positions;
 

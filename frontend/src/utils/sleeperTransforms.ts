@@ -6,8 +6,10 @@ import {
   type SleeperUser,
   type SleeperMatchup,
   type SleeperNFLState,
+  type SleeperPlayer,
 } from '../api/sleeper';
 import type { Team, PairedMatchup, LiveMatchData, SeasonState } from '../models/fantasy';
+import { countFinishedPlayers } from './playerGameStatus';
 
 // --- Merge rosters + users → Team[] ---
 
@@ -57,7 +59,12 @@ export function mergeRostersAndUsersToTeams(
 
 // --- Pair matchups by matchup_id ---
 
-export function pairMatchups(week: number, matchups: SleeperMatchup[]): PairedMatchup[] {
+export function pairMatchups(
+  week: number,
+  matchups: SleeperMatchup[],
+  playersById?: Record<string, SleeperPlayer>,
+  teamGameStatus?: Map<string, boolean>,
+): PairedMatchup[] {
   const map = new Map<number, SleeperMatchup[]>();
 
   for (const m of matchups) {
@@ -76,6 +83,12 @@ export function pairMatchups(week: number, matchups: SleeperMatchup[]): PairedMa
 
     const [a, b] = entries;
 
+    // Count finished players if data is available
+    const canCountFinished = playersById && teamGameStatus;
+    const finishedA = canCountFinished
+      ? countFinishedPlayers(a.starters, playersById, teamGameStatus)
+      : { total: a.starters?.length ?? 0, finished: a.starters?.length ?? 0 };
+
     if (!b) {
       // bye / incomplete data - treat second side as null
       paired.push({
@@ -85,9 +98,17 @@ export function pairMatchups(week: number, matchups: SleeperMatchup[]): PairedMa
         rosterIdB: null,
         pointsA: a.points ?? 0,
         pointsB: 0,
+        startersA: finishedA.total,
+        startersB: 0,
+        playersFinishedA: finishedA.finished,
+        playersFinishedB: 0,
       });
       continue;
     }
+
+    const finishedB = canCountFinished
+      ? countFinishedPlayers(b.starters, playersById, teamGameStatus)
+      : { total: b.starters?.length ?? 0, finished: b.starters?.length ?? 0 };
 
     paired.push({
       matchupId,
@@ -96,6 +117,10 @@ export function pairMatchups(week: number, matchups: SleeperMatchup[]): PairedMa
       rosterIdB: b.roster_id,
       pointsA: a.points ?? 0,
       pointsB: b.points ?? 0,
+      startersA: finishedA.total,
+      startersB: finishedB.total,
+      playersFinishedA: finishedA.finished,
+      playersFinishedB: finishedB.finished,
     });
   }
 
@@ -103,31 +128,17 @@ export function pairMatchups(week: number, matchups: SleeperMatchup[]): PairedMa
 }
 
 // --- Build LiveMatchData from a paired matchup ---
-// NOTE: Sleeper /matchups doesn’t include projections, so we use
-// current points as a naive “projection” for now.
 
 export function buildLiveMatchData(paired: PairedMatchup): LiveMatchData {
-  const projectedA = paired.pointsA;
-  const projectedB = paired.pointsB;
-
-  const totalProjected = projectedA + projectedB;
-  let winProbA = 0.5;
-  let winProbB = 0.5;
-
-  if (totalProjected > 0) {
-    winProbA = projectedA / totalProjected;
-    winProbB = projectedB / totalProjected;
-  }
-
   return {
     teamIdA: paired.rosterIdA,
     teamIdB: paired.rosterIdB,
     pointsA: paired.pointsA,
     pointsB: paired.pointsB,
-    projectedA,
-    projectedB,
-    winProbA,
-    winProbB,
+    startersA: paired.startersA,
+    startersB: paired.startersB,
+    playersFinishedA: paired.playersFinishedA,
+    playersFinishedB: paired.playersFinishedB,
     week: paired.week,
   };
 }

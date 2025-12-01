@@ -6,14 +6,14 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 Playoff bracket visualization UI for a Sleeper fantasy football keeper league. The app visualizes three interrelated brackets (Champ Bowl, Keeper Bowl, Toilet Bowl) with custom routing rules where losers from Champ Bowl flow into Keeper Bowl, and winners from Toilet Bowl feed into Keeper Bowl.
 
-**Current State:** Frontend-only React SPA. Direct calls to Sleeper public APIs. Backend proxy planned for later (caching/rate-limiting).
+**Current State:** Fully functional React SPA with both "If Today" preview mode and Live playoffs mode. Features responsive design with mobile-optimized layouts. Direct calls to Sleeper public APIs. Backend proxy may be added later (caching/rate-limiting).
 
 ## Tech Stack
 
-- React 19 + Vite + TypeScript
-- Tailwind CSS 4 + DaisyUI
-- react-router-dom for routing
-- ESLint + Prettier
+- React 19.2 + Vite 7 + TypeScript 5.9
+- Tailwind CSS 4.1 + DaisyUI 5.5
+- react-router-dom 7.9 for routing
+- ESLint 9 + Prettier 3.6
 
 ## Development Commands
 
@@ -46,12 +46,40 @@ npm run format:write
 
 ```
 src/
-├── api/          # Sleeper API client (typed fetch wrappers)
-├── bracket/      # Core bracket engine (template, routing, transforms)
-├── components/   # React components (bracket rendering, matchup cards)
-├── models/       # Domain types (Team, PairedMatchup, etc.)
-├── pages/        # Route pages (PlayoffsIfTodayPage, PlayoffsLivePage, etc.)
-└── utils/        # Transform utilities (Sleeper data → Teams, seeds, standings)
+├── api/
+│   └── sleeper.ts                    # Sleeper API client (typed fetch wrappers + playoff bracket endpoints)
+├── bracket/
+│   ├── types.ts                      # BracketSlot, BracketSlotId, Position types
+│   ├── template.ts                   # BRACKET_TEMPLATE (immutable structure)
+│   ├── routingRules.ts               # ROUTING_RULES (winner/loser flows)
+│   ├── seedAssignment.ts             # assignSeedsToBracketSlots()
+│   └── state.ts                      # applyGameOutcomesToBracket() routing engine
+├── components/
+│   ├── bracket/
+│   │   ├── Bracket.tsx               # Main container (3 sub-brackets)
+│   │   ├── BracketGrid.tsx           # Shared grid layout with absolute positioning
+│   │   ├── BracketTile.tsx           # Responsive matchup card (mobile minimal/desktop rich)
+│   │   ├── ChampBracket.tsx          # Champ Bowl layout definition
+│   │   ├── KeeperBracket.tsx         # Keeper Bowl layout definition
+│   │   ├── ToiletBracket.tsx         # Toilet Bowl layout definition
+│   │   ├── BracketMatchShell.tsx     # Wrapper with anchors for connectors
+│   │   ├── BracketColumn.tsx         # Legacy column component
+│   │   ├── BracketRoundColumn.tsx    # Legacy round component
+│   │   └── layoutReference/          # Visual layout planning documents
+│   ├── matchups/
+│   │   └── MatchupCard.tsx           # Weekly matchup results card
+│   └── ThemeSelector.tsx             # DaisyUI theme switcher (light/dark/cupcake/synthwave)
+├── models/
+│   └── fantasy.ts                    # Team, PairedMatchup domain types
+├── pages/
+│   ├── PlayoffsIfTodayPage.tsx       # Preview bracket (seeded from current standings)
+│   ├── PlayoffsLivePage.tsx          # Live playoff bracket (real game outcomes)
+│   ├── MatchupsPage.tsx              # Weekly matchup results
+│   └── StandingsPage.tsx             # Season standings table
+└── utils/
+    ├── sleeperTransforms.ts          # Sleeper data → Teams, seeds, standings
+    ├── sleeperPlayoffTransforms.ts   # Sleeper playoff matchups → BracketGameOutcomes
+    └── applyMatchupScores.ts         # Apply current/projected points to bracket slots
 ```
 
 ### Bracket Engine (Most Critical System)
@@ -94,29 +122,51 @@ Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.
 
 ### Components
 
-- `<Bracket />` - Main container that organizes 3 sub-brackets
-- `<ChampBracket />`, `<KeeperBracket />`, `<ToiletBracket />` - Bracket-specific layouts
-- `<BracketMatchShell />` - Individual game card with team display, scores, and reward text
+#### Bracket Components
+- `<Bracket />` - Main container that organizes 3 sub-brackets with mode toggle (score/reward)
+- `<BracketGrid />` - Shared layout engine using absolute positioning with `topPct` values and height scaling
+  - Handles responsive column heights, gaps, and spacing
+  - Maps layout definitions to rendered `<BracketTile />` components
+- `<BracketTile />` - Fully responsive matchup card with two modes:
+  - **Mobile (<768px)**: Minimal Sleeper-style design (avatar + name + score only)
+  - **Desktop (≥768px)**: Rich cards with seed, record, reward text, and detailed layout
+- `<ChampBracket />`, `<KeeperBracket />`, `<ToiletBracket />` - Define layout structures (columns, items, topPct positioning)
+- `<BracketMatchShell />` - Wrapper with top/bottom anchors for future connector lines
 - `<MatchupCard />` - Used in matchups page for weekly results
+- `<ThemeSelector />` - DaisyUI theme picker with localStorage persistence
 
 ### Pages
 
-- `/playoffs/if-today` - Preview bracket seeded from current standings
-- `/playoffs/live` - Real playoff bracket (Phase 4, not yet implemented)
+- `/playoffs/if-today` - Preview bracket seeded from current standings (fully functional)
+- `/playoffs/live` - Real playoff bracket with live game outcomes from Sleeper (fully functional)
 - `/matchups` - Weekly matchup results
 - `/standings` - Season standings table
 
+**Both playoff pages share:**
+- Mode toggle: Score view (shows current/projected points) vs Reward view (shows prize text)
+- Team selector: Highlight a specific team across the bracket
+- Responsive layout: Mobile-first design with desktop enhancements
+
 ## Current Development Phase
 
-**Phase 3.2:** Bracket Geometry + Spacing (per ROADMAP.md)
-- Normalizing card heights across bracket tiles
-- Aligning vertical rhythm so rounds visually ladder
-- Grouping placement games under finals
+**Phase 4 (COMPLETE):** Live Playoffs Mode
+- ✅ Sleeper winners_bracket/losers_bracket endpoints integrated
+- ✅ `toBracketGameOutcomes()` transform implemented
+- ✅ Live bracket page with real game outcomes
+- ✅ Full responsive design (mobile + desktop)
 
-**Next Major Feature:** Phase 4 - Live Playoffs Mode
-- Fetch Sleeper winners_bracket/losers_bracket endpoints
-- Map Sleeper game results to `BracketGameOutcome[]`
-- Apply outcomes via routing engine
+**Phase 3.2 (COMPLETE):** Bracket Geometry + Spacing
+- ✅ Fully responsive BracketTile component
+- ✅ Mobile-optimized minimal cards (<768px)
+- ✅ Desktop rich cards (≥768px) with seed, record, reward text
+- ✅ Responsive spacing normalized across all components
+- ⏸️ Connectors paused (Phase 3.3)
+
+**Current Status:** App is feature-complete with both preview and live bracket modes. Next work would be:
+- Phase 5: Keeper + Toilet visual refinements
+- Phase 3.3: Resume connector lines (currently paused)
+- Phase 6: Optional visual style pass (user-owned)
+- Phase 7: Release/hosting/QA
 
 ## Testing & Quality
 
@@ -129,10 +179,12 @@ npm run lint
 
 ## Important Notes
 
-- **League ID:** Currently appears to be hardcoded in pages. Look for `LEAGUE_ID` constants or environment variables when making changes.
+- **League ID:** Hardcoded in pages (look for `LEAGUE_ID` constants). Consider moving to environment variables for multi-league support.
 - **Sleeper API Rate Limits:** No caching currently implemented. Be mindful when fetching during development.
 - **Routing Rules:** Changes to playoff bracket flow require updating `ROUTING_RULES` in `bracket/routingRules.ts`. These rules are separate from the template structure.
 - **BYE Handling:** Some slots have `isBye: true` in positions. UI components handle BYE display differently than normal matchups.
+- **Responsive Design:** The app uses Tailwind breakpoint `md:` (768px) to switch between mobile and desktop layouts. All spacing, text sizes, and card layouts adapt at this breakpoint.
+- **Theme System:** Uses DaisyUI themes with localStorage persistence. Current themes: light, cupcake, synthwave, dark.
 
 ## Common Patterns
 
@@ -140,14 +192,21 @@ npm run lint
 1. Add new `BracketSlotId` to `bracket/types.ts`
 2. Add slot definition to `BRACKET_TEMPLATE` in `bracket/template.ts`
 3. Add routing rules to `ROUTING_RULES` in `bracket/routingRules.ts`
-4. Update relevant bracket component layout (ChampBracket/KeeperBracket/ToiletBracket)
+4. Update relevant bracket layout definition in `ChampBracket.tsx`/`KeeperBracket.tsx`/`ToiletBracket.tsx`
+   - Add item to appropriate column with `slotId` and `topPct` positioning
+   - Optionally set `centerOnPct: true` for vertical centering
 
 ### Fetching Sleeper Data
 ```typescript
-import { getLeagueUsers, getLeagueRosters } from '@/api/sleeper';
+import { getLeagueUsers, getLeagueRosters, getWinnersBracket, getLosersBracket } from '@/api/sleeper';
 
+// For If-Today mode (standings-based)
 const users = await getLeagueUsers(leagueId);
 const rosters = await getLeagueRosters(leagueId);
+
+// For Live mode (actual playoff results)
+const winnersBracket = await getWinnersBracket(leagueId);
+const losersBracket = await getLosersBracket(leagueId);
 ```
 
 ### Building Teams from Sleeper Data
@@ -156,6 +215,47 @@ import { mergeRostersAndUsersToTeams, computeSeeds } from '@/utils/sleeperTransf
 
 const teams = mergeRostersAndUsersToTeams(rosters, users);
 const teamsWithSeeds = computeSeeds(teams);
+```
+
+### Applying Live Playoff Outcomes
+```typescript
+import { assignSeedsToBracketSlots } from '@/bracket/seedAssignment';
+import { applyGameOutcomesToBracket } from '@/bracket/state';
+import { BRACKET_TEMPLATE } from '@/bracket/template';
+import { ROUTING_RULES } from '@/bracket/routingRules';
+import { toBracketGameOutcomes } from '@/utils/sleeperPlayoffTransforms';
+
+// Start with template + seed assignment
+const initialSlots = assignSeedsToBracketSlots([...BRACKET_TEMPLATE], teams);
+
+// Convert Sleeper playoff data to outcomes
+const outcomes = toBracketGameOutcomes(winnersBracket, losersBracket);
+
+// Apply routing
+const liveSlots = applyGameOutcomesToBracket(initialSlots, outcomes, ROUTING_RULES);
+```
+
+### Working with BracketGrid Layouts
+```typescript
+import type { BracketLayoutColumn } from '@/components/bracket/BracketGrid';
+
+// Define column structure
+const columns: BracketLayoutColumn[] = [
+  {
+    title: 'Round 1',
+    items: [
+      { id: 'r1-g1', slotId: 'champ_r1_g1', topPct: 20 },
+      { id: 'r1-g2', slotId: 'champ_r1_g2', topPct: 60 },
+    ],
+  },
+  {
+    title: 'Round 2',
+    items: [
+      { id: 'r2-g1', slotId: 'champ_r2_g1', topPct: 40, centerOnPct: true },
+    ],
+    heightScale: 1.2, // Stretch vertical spacing
+  },
+];
 ```
 
 ## Roadmap Context

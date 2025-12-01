@@ -18,7 +18,6 @@ interface TeamRowProps {
     teamId?: number;
     isBye?: boolean;
     currentPoints?: number;
-    projectedPoints?: number;
   } | null;
   mode: 'score' | 'reward';
 }
@@ -51,7 +50,6 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
     // BYE without a concrete team should still use the same visual layout
     if (pos.isBye) {
       const currentPoints = mode === 'score' ? pos.currentPoints : undefined;
-      const projectedPoints = mode === 'score' ? pos.projectedPoints : undefined;
 
       return (
         <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
@@ -65,13 +63,9 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
             {/* Scores on the right */}
             {mode === 'score' && (
               <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
-                {/* Current week score (top-right) */}
+                {/* Current week score */}
                 <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80">
                   {currentPoints != null && currentPoints !== 0 ? currentPoints.toFixed(2) : '-'}
-                </div>
-                {/* Projected score (second row, right-aligned) */}
-                <div className="text-[0.6rem] md:text-xs text-base-content/60">
-                  {projectedPoints != null ? projectedPoints.toFixed(2) : ''}
                 </div>
               </div>
             )}
@@ -93,9 +87,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   }
 
   const isBye = !!pos.isBye;
-
   const currentPoints = mode === 'score' ? (pos.currentPoints ?? team.pointsFor) : undefined;
-  const projectedPoints = mode === 'score' ? pos.projectedPoints : undefined;
 
   return (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
@@ -115,17 +107,13 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
         {/* Scores on the right */}
         {mode === 'score' && (
           <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
-            {/* Current week score (top-right) */}
+            {/* Current week score */}
             <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80">
               {isBye
                 ? '-'
                 : currentPoints != null && currentPoints !== 0
                   ? currentPoints.toFixed(2)
                   : '-'}
-            </div>
-            {/* Projected score (second row, right-aligned) */}
-            <div className="text-[0.6rem] md:text-xs text-base-content/60">
-              {!isBye && projectedPoints != null ? projectedPoints.toFixed(2) : ''}
             </div>
           </div>
         )}

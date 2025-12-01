@@ -1,6 +1,7 @@
 // frontend/src/api/sleeper.ts
 
 const SLEEPER_BASE_URL = 'https://api.sleeper.app/v1';
+const SLEEPER_PROJECTIONS_BASE = 'https://api.sleeper.com/projections/nfl';
 
 // --- Raw Sleeper API types (mirror docs) ---
 
@@ -95,10 +96,34 @@ export interface SleeperPlayoffMatchup {
   p?: number | null;
 }
 
-async function sleeperFetch<T>(path: string): Promise<T> {
-  const url = `${SLEEPER_BASE_URL}${path}`;
+export interface SleeperPlayerProjection {
+  player_id: string;
+  stats: {
+    pts_half_ppr?: number;
+    pts_ppr?: number;
+    pts_std?: number;
+    [key: string]: number | undefined;
+  };
+  player?: {
+    position?: string;
+    team?: string;
+    [key: string]: unknown;
+  };
+}
 
-  const response = await fetch(url);
+async function sleeperFetch<T>(path: string, bustCache = false): Promise<T> {
+  let url = `${SLEEPER_BASE_URL}${path}`;
+
+  // Add cache-busting query param instead of headers to avoid CORS issues
+  if (bustCache) {
+    const separator = path.includes('?') ? '&' : '?';
+    url += `${separator}_t=${Date.now()}`;
+  }
+
+  const response = await fetch(url, {
+    // Use no-store cache mode to prevent browser caching
+    cache: bustCache ? 'no-store' : 'default',
+  });
 
   if (!response.ok) {
     // You can add more robust logging / error boundaries later
@@ -119,26 +144,59 @@ export async function getLeagueUsers(leagueId: string): Promise<SleeperUser[]> {
 }
 
 export async function getLeagueRosters(leagueId: string): Promise<SleeperRoster[]> {
-  return sleeperFetch<SleeperRoster[]>(`/league/${leagueId}/rosters`);
+  return sleeperFetch<SleeperRoster[]>(`/league/${leagueId}/rosters`, true);
 }
 
 export async function getLeagueMatchupsForWeek(
   leagueId: string,
   week: number,
 ): Promise<SleeperMatchup[]> {
-  return sleeperFetch<SleeperMatchup[]>(`/league/${leagueId}/matchups/${week}`);
+  return sleeperFetch<SleeperMatchup[]>(`/league/${leagueId}/matchups/${week}`, true);
 }
 
 export async function getNFLState(): Promise<SleeperNFLState> {
-  return sleeperFetch<SleeperNFLState>('/state/nfl');
+  return sleeperFetch<SleeperNFLState>('/state/nfl', true);
 }
 
 export async function getWinnersBracket(leagueId: string): Promise<SleeperPlayoffMatchup[]> {
-  return sleeperFetch<SleeperPlayoffMatchup[]>(`/league/${leagueId}/winners_bracket`);
+  return sleeperFetch<SleeperPlayoffMatchup[]>(`/league/${leagueId}/winners_bracket`, true);
 }
 
 export async function getLosersBracket(leagueId: string): Promise<SleeperPlayoffMatchup[]> {
-  return sleeperFetch<SleeperPlayoffMatchup[]>(`/league/${leagueId}/losers_bracket`);
+  return sleeperFetch<SleeperPlayoffMatchup[]>(`/league/${leagueId}/losers_bracket`, true);
+}
+
+export async function getPlayerProjections(
+  season: number,
+  week: number,
+): Promise<SleeperPlayerProjection[]> {
+  const url = `${SLEEPER_PROJECTIONS_BASE}/${season}/${week}?season_type=regular`;
+  const response = await fetch(url, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`Projections API error (${response.status}): ${response.statusText}`);
+  }
+  return (await response.json()) as SleeperPlayerProjection[];
+}
+
+export interface SleeperPlayer {
+  player_id: string;
+  team: string | null;
+  position: string;
+  first_name: string;
+  last_name: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+export async function getAllPlayers(): Promise<Record<string, SleeperPlayer>> {
+  // Cache players data in memory for the session (it's a large payload)
+  const response = await fetch('https://api.sleeper.app/v1/players/nfl', {
+    cache: 'force-cache', // Cache aggressively since player data changes rarely
+  });
+  if (!response.ok) {
+    throw new Error(`Players API error (${response.status}): ${response.statusText}`);
+  }
+  return (await response.json()) as Record<string, SleeperPlayer>;
 }
 
 // Helpers for avatar URLs (full + thumb) as per docs

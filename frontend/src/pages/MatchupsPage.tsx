@@ -6,7 +6,10 @@ import {
   getLeagueRosters,
   getLeagueMatchupsForWeek,
   getNFLState,
+  getAllPlayers,
+  type SleeperPlayer,
 } from '../api/sleeper';
+import { getESPNScoreboard, buildTeamGameStatusMap } from '../api/espn';
 import {
   mergeRostersAndUsersToTeams,
   pairMatchups,
@@ -26,14 +29,19 @@ export function MatchupsPage() {
   const [seasonLabel, setSeasonLabel] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [playersById, setPlayersById] = useState<Record<string, SleeperPlayer> | null>(null);
 
-  // 1) Load NFL state once to know current week
+  // 1) Load NFL state and player data once
   useEffect(() => {
     async function loadSeasonState() {
       try {
-        const nflState = await getNFLState();
+        const [nflState, players] = await Promise.all([
+          getNFLState(),
+          getAllPlayers(),
+        ]);
+        
         const seasonState = mapNFLStateToSeasonState(nflState);
-
+        setPlayersById(players);
         setSelectedWeek(seasonState.displayWeek);
         setSeasonLabel(`${seasonState.season} • Week ${seasonState.displayWeek}`);
       } catch (err) {
@@ -48,23 +56,28 @@ export function MatchupsPage() {
 
   // 2) Whenever selectedWeek changes, fetch league data for that week
   useEffect(() => {
-    if (selectedWeek == null) return;
+    if (selectedWeek == null || !playersById) return;
 
     async function loadWeekData(week: number) {
       try {
         setIsLoading(true);
         setError(null);
 
-        const [users, rosters, matchups] = await Promise.all([
+        const [users, rosters, matchups, espnScoreboard] = await Promise.all([
           getLeagueUsers(LEAGUE_ID),
           getLeagueRosters(LEAGUE_ID),
           getLeagueMatchupsForWeek(LEAGUE_ID, week),
+          getESPNScoreboard(week),
         ]);
 
         const mergedTeams = mergeRostersAndUsersToTeams(rosters, users);
         setTeams(mergedTeams);
 
-        const paired = pairMatchups(week, matchups);
+        // Build team game status map from ESPN data
+        const teamGameStatus = buildTeamGameStatusMap(espnScoreboard);
+
+        // Pass player and game status data to pairMatchups
+        const paired = pairMatchups(week, matchups, playersById, teamGameStatus);
         const live = paired.map((p) => buildLiveMatchData(p));
         setLiveMatchups(live);
       } catch (err) {
@@ -79,7 +92,7 @@ export function MatchupsPage() {
     }
 
     void loadWeekData(selectedWeek);
-  }, [selectedWeek]);
+  }, [selectedWeek, playersById]);
 
   const teamsByRosterId = useMemo(
     () => new Map<number, Team>(teams.map((t) => [t.sleeperRosterId, t])),

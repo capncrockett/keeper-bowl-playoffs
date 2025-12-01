@@ -30,6 +30,10 @@ export interface PairedMatchup {
   rosterIdB: number | null; // handle odd cases / byes
   pointsA: number;
   pointsB: number;
+  startersA: number; // count of starters for team A
+  startersB: number; // count of starters for team B
+  playersFinishedA: number; // count of players who have finished their games
+  playersFinishedB: number;
 }
 
 export interface LiveMatchData {
@@ -37,10 +41,10 @@ export interface LiveMatchData {
   teamIdB: number | null;
   pointsA: number;
   pointsB: number;
-  projectedA: number;
-  projectedB: number;
-  winProbA: number; // 0-1
-  winProbB: number; // 0-1
+  startersA: number; // count of starters for team A
+  startersB: number; // count of starters for team B
+  playersFinishedA: number; // count of players who have finished their games
+  playersFinishedB: number;
   week: number;
 }
 
