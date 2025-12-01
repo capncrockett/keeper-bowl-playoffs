@@ -55,7 +55,7 @@ export const ToiletBracket: FC<ToiletBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
-      columnHeightClass="min-h-[540px] md:min-h-[760px]"
+      columnHeightClass="min-h-[600px] md:min-h-[760px]"
     />
   );
 };
