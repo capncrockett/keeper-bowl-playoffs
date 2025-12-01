@@ -24,16 +24,16 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
     title: 'Round 2',
     subtitle: 'Keeper Bowl',
     items: [
-      { id: 'keeper_splashback1', slotId: 'keeper_splashback1', topPct: 10, centerOnPct: false },
-      { id: 'keeper_splashback2', slotId: 'keeper_splashback2', topPct: 50, centerOnPct: true },
+      { id: 'keeper_splashback1', slotId: 'keeper_splashback1', topPct: 0, centerOnPct: false },
+      { id: 'keeper_splashback2', slotId: 'keeper_splashback2', topPct: 35, centerOnPct: true },
     ],
   },
   {
     title: 'Finals',
     subtitle: 'Placement',
     items: [
-      { id: 'keeper_5th_6th', slotId: 'keeper_5th_6th', topPct: 35, centerOnPct: true },
-      { id: 'keeper_7th_8th', slotId: 'keeper_7th_8th', topPct: 65, centerOnPct: true },
+      { id: 'keeper_5th_6th', slotId: 'keeper_5th_6th', topPct: 22.5, centerOnPct: true },
+      { id: 'keeper_7th_8th', slotId: 'keeper_7th_8th', topPct: 55, centerOnPct: true },
     ],
   },
 ];
