@@ -11,12 +11,16 @@ interface LayoutItem {
   slotId: BracketSlot['id'] | null;
   /** Percent from top of the column container (0-100). */
   topPct: number;
+  /** Center the card on the percent marker (translateY(-50%)). Defaults to false. */
+  centerOnPct?: boolean;
 }
 
 export interface BracketLayoutColumn {
   title?: string;
   subtitle?: string;
   items: LayoutItem[];
+  /** Optional height override per column. */
+  columnHeightClass?: string;
 }
 
 interface BracketGridProps {
@@ -25,8 +29,10 @@ interface BracketGridProps {
   teamsById: Map<number, Team>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
-  /** Tailwind-friendly height for the column containers. */
-  columnHeightClass?: string;
+  /** Base column height if none is provided per column. */
+  defaultColumnHeightClass?: string;
+  /** Horizontal gap between columns. */
+  colGapClass?: string;
 }
 
 interface BracketMatchShellProps {
@@ -50,7 +56,8 @@ export const BracketGrid: FC<BracketGridProps> = ({
   teamsById,
   highlightTeamId,
   mode,
-  columnHeightClass = 'min-h-[720px] md:min-h-[880px]',
+  defaultColumnHeightClass = 'min-h-[600px] md:min-h-[720px]',
+  colGapClass = 'gap-3 md:gap-10',
 }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
 
@@ -60,7 +67,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
     <div className="w-full">
       {/* Column headers */}
       <div
-        className="grid gap-1 md:gap-3 mb-2 md:mb-4"
+        className={`grid ${colGapClass} mb-2 md:mb-4`}
         style={{ gridTemplateColumns: gridTemplateColumns }}
       >
         {columns.map((col, idx) => (
@@ -80,16 +87,18 @@ export const BracketGrid: FC<BracketGridProps> = ({
       </div>
 
       {/* Columns with absolute-positioned matchups */}
-      <div className="grid gap-3 md:gap-8" style={{ gridTemplateColumns: gridTemplateColumns }}>
+      <div className={`grid ${colGapClass}`} style={{ gridTemplateColumns: gridTemplateColumns }}>
         {columns.map((col, colIdx) => (
           <div
             key={colIdx}
-            className={`relative ${columnHeightClass}`}
+            className={`relative ${col.columnHeightClass ?? defaultColumnHeightClass}`}
           >
             {col.items.map((item) => {
               if (!item.slotId) return null;
               const slot = slotById.get(item.slotId);
               if (!slot) return null;
+
+              const center = item.centerOnPct === true;
 
               return (
                 <div
@@ -97,7 +106,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
                   className="absolute left-0 right-0"
                   style={{
                     top: `${item.topPct}%`,
-                    transform: item.topPct === 0 ? undefined : 'translateY(-50%)',
+                    transform: center ? 'translateY(-50%)' : undefined,
                   }}
                 >
                   <BracketMatchShell itemId={item.id}>
