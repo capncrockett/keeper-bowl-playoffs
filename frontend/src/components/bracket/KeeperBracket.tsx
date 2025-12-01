@@ -23,17 +23,19 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 2',
     subtitle: 'Keeper Bowl',
+    heightScale: 1.15,
     items: [
       { id: 'keeper_splashback1', slotId: 'keeper_splashback1', topPct: 0, centerOnPct: false },
-      { id: 'keeper_splashback2', slotId: 'keeper_splashback2', topPct: 55, centerOnPct: true },
+      { id: 'keeper_splashback2', slotId: 'keeper_splashback2', topPct: 65, centerOnPct: true },
     ],
   },
   {
     title: 'Finals',
     subtitle: 'Placement',
+    heightScale: 1.15,
     items: [
       { id: 'keeper_5th_6th', slotId: 'keeper_5th_6th', topPct: 37, centerOnPct: true },
-      { id: 'keeper_7th_8th', slotId: 'keeper_7th_8th', topPct: 80, centerOnPct: true },
+      { id: 'keeper_7th_8th', slotId: 'keeper_7th_8th', topPct: 85, centerOnPct: true },
     ],
   },
 ];
@@ -51,7 +53,8 @@ export const KeeperBracket: FC<KeeperBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
-      columnHeightClass="h-[360px] md:h-[360px]"
+      columnHeightClass="min-h-[300px] md:min-h-[360px]"
+      defaultHeightScale={1.15}
     />
   );
 };

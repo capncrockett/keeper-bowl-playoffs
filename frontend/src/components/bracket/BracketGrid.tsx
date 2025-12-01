@@ -21,6 +21,8 @@ export interface BracketLayoutColumn {
   items: LayoutItem[];
   /** Optional height override per column. */
   columnHeightClass?: string;
+  /** Optional scale factor to stretch topPct spacing (e.g., 1.2 makes 50% behave like 60%). */
+  heightScale?: number;
 }
 
 interface BracketGridProps {
@@ -33,6 +35,8 @@ interface BracketGridProps {
   defaultColumnHeightClass?: string;
   /** Optional override to apply the same height class to all columns (e.g., Keeper uses a shorter stack). */
   columnHeightClass?: string;
+  /** Default height scale applied when a column doesn't provide one. */
+  defaultHeightScale?: number;
   /** Horizontal gap between columns. */
   colGapClass?: string;
 }
@@ -60,6 +64,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
   mode,
   defaultColumnHeightClass = 'min-h-[600px] md:min-h-[720px]',
   columnHeightClass,
+  defaultHeightScale = 1,
   colGapClass = 'gap-3 md:gap-10',
 }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
@@ -102,13 +107,15 @@ export const BracketGrid: FC<BracketGridProps> = ({
               if (!slot) return null;
 
               const center = item.centerOnPct === true;
+              const scale = col.heightScale ?? defaultHeightScale;
+              const top = item.topPct * scale;
 
               return (
                 <div
                   key={item.id}
                   className="absolute left-0 right-0"
                   style={{
-                    top: `${item.topPct}%`,
+                    top: `${top}%`,
                     transform: center ? 'translateY(-50%)' : undefined,
                   }}
                 >

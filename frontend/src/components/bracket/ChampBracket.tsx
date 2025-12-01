@@ -55,7 +55,7 @@ export const ChampBracket: FC<ChampBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
-      columnHeightClass="min-h-[600px]"
+      columnHeightClass="min-h-[540px] md:min-h-[760px]"
     />
   );
 };
