@@ -31,6 +31,8 @@ interface BracketGridProps {
   mode: 'score' | 'reward';
   /** Base column height if none is provided per column. */
   defaultColumnHeightClass?: string;
+  /** Optional override to apply the same height class to all columns (e.g., Keeper uses a shorter stack). */
+  columnHeightClass?: string;
   /** Horizontal gap between columns. */
   colGapClass?: string;
 }
@@ -57,6 +59,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
   highlightTeamId,
   mode,
   defaultColumnHeightClass = 'min-h-[600px] md:min-h-[720px]',
+  columnHeightClass,
   colGapClass = 'gap-3 md:gap-10',
 }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
@@ -91,7 +94,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
         {columns.map((col, colIdx) => (
           <div
             key={colIdx}
-            className={`relative ${col.columnHeightClass ?? defaultColumnHeightClass}`}
+            className={`relative ${col.columnHeightClass ?? columnHeightClass ?? defaultColumnHeightClass}`}
           >
             {col.items.map((item) => {
               if (!item.slotId) return null;
