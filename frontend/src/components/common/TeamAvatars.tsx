@@ -26,7 +26,7 @@ export const TeamAvatars: FC<TeamAvatarsProps> = ({
   teamAvatarUrl,
   userAvatarUrl,
   userDisplayName,
-  showUserAvatar = true,
+  showUserAvatar = false,
   size = 'md',
   className = '',
 }) => {

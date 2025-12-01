@@ -101,6 +101,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
             teamAvatarUrl={team.teamAvatarUrl}
             userAvatarUrl={team.userAvatarUrl}
             userDisplayName={team.ownerDisplayName}
+            showUserAvatar={false}
             size="md"
             className="md:scale-125"
           />

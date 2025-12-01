@@ -168,6 +168,7 @@ export default function PlayoffsLivePage() {
                   teamAvatarUrl={pvpInfo.selected.teamAvatarUrl}
                   userAvatarUrl={pvpInfo.selected.userAvatarUrl}
                   userDisplayName={pvpInfo.selected.ownerDisplayName}
+                  showUserAvatar={false}
                   size="md"
                 />
                 <div>
@@ -191,6 +192,7 @@ export default function PlayoffsLivePage() {
                     teamAvatarUrl={pvpInfo.opponent.teamAvatarUrl}
                     userAvatarUrl={pvpInfo.opponent.userAvatarUrl}
                     userDisplayName={pvpInfo.opponent.ownerDisplayName}
+                    showUserAvatar={false}
                     size="md"
                   />
                   <div className="text-right">

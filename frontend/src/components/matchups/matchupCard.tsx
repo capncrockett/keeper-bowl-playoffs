@@ -33,6 +33,7 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
                   teamAvatarUrl={teamA.teamAvatarUrl}
                   userAvatarUrl={teamA.userAvatarUrl}
                   userDisplayName={teamA.ownerDisplayName}
+                  showUserAvatar={false}
                   size="md"
                 />
               )}
@@ -67,6 +68,7 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
                   teamAvatarUrl={teamB.teamAvatarUrl}
                   userAvatarUrl={teamB.userAvatarUrl}
                   userDisplayName={teamB.ownerDisplayName}
+                  showUserAvatar={false}
                   size="md"
                 />
               )}

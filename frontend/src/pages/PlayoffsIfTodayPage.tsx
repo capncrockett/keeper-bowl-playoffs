@@ -262,6 +262,7 @@ function PlayoffsIfTodayPage() {
                   teamAvatarUrl={pvpInfo.selected.teamAvatarUrl}
                   userAvatarUrl={pvpInfo.selected.userAvatarUrl}
                   userDisplayName={pvpInfo.selected.ownerDisplayName}
+                  showUserAvatar={false}
                   size="md"
                 />
                 <div>
@@ -285,6 +286,7 @@ function PlayoffsIfTodayPage() {
                     teamAvatarUrl={pvpInfo.opponent.teamAvatarUrl}
                     userAvatarUrl={pvpInfo.opponent.userAvatarUrl}
                     userDisplayName={pvpInfo.opponent.ownerDisplayName}
+                    showUserAvatar={false}
                     size="md"
                   />
                   <div className="text-right">
