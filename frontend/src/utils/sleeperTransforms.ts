@@ -80,12 +80,18 @@ export function mergeRostersAndUsersToTeams(
     const pointsAgainst = pointsAgainstRaw + pointsAgainstDecimal;
 
     const teamName =
-      user?.metadata?.team_name ?? user?.display_name ?? `Team ${roster.roster_id.toString()}`;
+      roster.metadata?.team_name ??
+      user?.metadata?.team_name ??
+      user?.display_name ??
+      `Team ${roster.roster_id.toString()}`;
 
     const userAvatarUrl = buildSleeperAvatarUrl(user?.avatar ?? null);
     const teamAvatarUrl =
+      resolveAvatarUrl((roster.metadata?.avatar as string | undefined) ?? null) ??
+      resolveAvatarUrl((roster.metadata?.team_avatar as string | undefined) ?? null) ??
       resolveAvatarUrl((user?.metadata?.avatar as string | undefined) ?? null) ??
       resolveAvatarUrl((user?.metadata?.team_avatar as string | undefined) ?? null) ??
+      userAvatarUrl ??
       null;
 
     return {

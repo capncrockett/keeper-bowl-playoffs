@@ -335,6 +335,7 @@ export function StandingsPage() {
                             teamAvatarUrl={team.teamAvatarUrl}
                             userAvatarUrl={team.userAvatarUrl}
                             userDisplayName={team.ownerDisplayName}
+                            showUserAvatar={false}
                             size="md"
                           />
                           <span>{team.teamName}</span>

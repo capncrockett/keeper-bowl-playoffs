@@ -43,6 +43,7 @@ export interface SleeperRoster {
   league_id: string;
   division_id?: number | null;
   division?: number | null;
+  metadata?: Record<string, string | undefined>;
 }
 
 export interface SleeperUserMetadata {

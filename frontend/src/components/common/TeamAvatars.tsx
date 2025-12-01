@@ -7,6 +7,8 @@ interface TeamAvatarsProps {
   teamAvatarUrl?: string | null;
   userAvatarUrl?: string | null;
   userDisplayName?: string;
+  /** Whether to render the small manager avatar overlay. Defaults to true. */
+  showUserAvatar?: boolean;
   /** Visual size preset. */
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -24,11 +26,12 @@ export const TeamAvatars: FC<TeamAvatarsProps> = ({
   teamAvatarUrl,
   userAvatarUrl,
   userDisplayName,
+  showUserAvatar = true,
   size = 'md',
   className = '',
 }) => {
   const { main, sub } = SIZE_PRESETS[size] ?? SIZE_PRESETS.md;
-  const showUserAvatar = userAvatarUrl && userAvatarUrl !== teamAvatarUrl;
+  const shouldShowUserAvatar = showUserAvatar && userAvatarUrl && userAvatarUrl !== teamAvatarUrl;
   const initial = teamName?.charAt(0)?.toUpperCase() ?? '?';
 
   return (
@@ -52,7 +55,7 @@ export const TeamAvatars: FC<TeamAvatarsProps> = ({
         </div>
       </div>
 
-      {showUserAvatar && (
+      {shouldShowUserAvatar && (
         <div
           className="avatar absolute rounded-full shadow-sm"
           style={{
