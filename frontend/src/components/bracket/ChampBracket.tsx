@@ -18,7 +18,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
     title: 'Round 1',
     subtitle: 'Week 15',
     items: [
-      { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 0 },
+      { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 1 },
       { id: 'champ_r1_g1', slotId: 'champ_r1_g1', topPct: 25 },
       { id: 'champ_r1_g2', slotId: 'champ_r1_g2', topPct: 50 },
       { id: 'champ_bye2', slotId: 'champ_r2_g2', topPct: 75 },
@@ -37,7 +37,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
     subtitle: 'Week 17',
     items: [
       { id: 'champ_finals', slotId: 'champ_finals', topPct: 37.5 },
-      { id: 'champ_3rd', slotId: 'champ_3rd', topPct: 87.5 },
+      { id: 'champ_3rd', slotId: 'champ_3rd', topPct: 83 },
     ],
   },
 ];
@@ -55,6 +55,7 @@ export const ChampBracket: FC<ChampBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
+      columnHeightClass="min-h-[600px]"
     />
   );
 };

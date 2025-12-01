@@ -18,7 +18,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
     title: 'Round 1',
     subtitle: 'Week 15',
     items: [
-      { id: 'toilet_bye1', slotId: 'toilet_r2_g1', topPct: 0 },
+      { id: 'toilet_bye1', slotId: 'toilet_r2_g1', topPct: 1 },
       { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1', topPct: 25 },
       { id: 'toilet_bye2', slotId: 'toilet_r2_g2', topPct: 50 },
       { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2', topPct: 75 },
@@ -55,6 +55,7 @@ export const ToiletBracket: FC<ToiletBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
+      columnHeightClass="min-h-[600px]"
     />
   );
 };

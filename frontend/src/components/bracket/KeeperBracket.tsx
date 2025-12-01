@@ -51,7 +51,7 @@ export const KeeperBracket: FC<KeeperBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
-      columnHeightClass="h-[360px]"
+      columnHeightClass="h-[360px] md:h-[360px]"
     />
   );
 };
