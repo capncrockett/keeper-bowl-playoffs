@@ -23,6 +23,14 @@ interface TeamRowProps {
   mode: 'score' | 'reward';
 }
 
+const FLIPPABLE_ROUNDS = new Set<BracketSlot['round']>([
+  'champ_finals',
+  'champ_misc',
+  'keeper_misc',
+  'toilet_finals',
+  'toilet_misc',
+]);
+
 const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   const renderPlaceholderRow = (label: string) => (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
@@ -141,10 +149,9 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
     involvesHighlight ? 'ring-2 ring-primary shadow-lg' : 'shadow-sm',
   ].join(' ');
 
-  return (
+  const renderFront = (showReward: boolean) => (
     <div className={cardClassName}>
       <div className="card-body gap-1.5 p-2 md:p-3">
-        {/* Team rows */}
         <div className="divide-y divide-base-300">
           {slot.positions.map((pos, idx) => {
             const team = pos?.teamId != null ? teamsById.get(pos.teamId) : undefined;
@@ -152,13 +159,54 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
           })}
         </div>
 
-        {/* Reward text - only on desktop in reward mode */}
-        {slot.rewardTitle && mode === 'reward' && (
+        {slot.rewardTitle && showReward && (
           <div className="mt-2 text-[0.7rem] hidden md:block border-t border-base-300 pt-2 max-w-full overflow-hidden">
             <div className="font-semibold text-base-content/90">{slot.rewardTitle}</div>
             <div className="text-base-content/70 text-[0.65rem]">{slot.rewardText}</div>
           </div>
         )}
+      </div>
+    </div>
+  );
+
+  const renderBack = () => (
+    <div className={cardClassName}>
+      <div className="card-body gap-2 p-2 md:p-3">
+        <div className="text-[0.65rem] font-semibold uppercase text-base-content/60">Reward</div>
+        <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? slot.label}</div>
+        {slot.rewardText && (
+          <div className="text-[0.7rem] text-base-content/70 leading-snug">{slot.rewardText}</div>
+        )}
+      </div>
+    </div>
+  );
+
+  const isFlippable = slot.rewardTitle && FLIPPABLE_ROUNDS.has(slot.round);
+  const showBack = isFlippable && mode === 'reward';
+
+  if (!isFlippable) {
+    return renderFront(mode === 'reward');
+  }
+
+  return (
+    <div className="relative [perspective:1200px]">
+      <div
+        className="grid will-change-transform"
+        style={{
+          gridTemplateAreas: '"card"',
+          transformStyle: 'preserve-3d',
+          transition: 'transform 420ms ease',
+          transform: showBack ? 'rotateY(180deg)' : 'rotateY(0deg)',
+        }}
+      >
+        <div style={{ gridArea: 'card', backfaceVisibility: 'hidden', transform: 'rotateY(0deg)' }}>
+          {renderFront(false)}
+        </div>
+        <div
+          style={{ gridArea: 'card', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+        >
+          {renderBack()}
+        </div>
       </div>
     </div>
   );
