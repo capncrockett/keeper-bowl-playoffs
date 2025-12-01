@@ -23,6 +23,11 @@ export function mergeRostersAndUsersToTeams(
   const divisionNameById = new Map<number, string>();
   const divisionAvatarById = new Map<number, string | null>();
 
+  const resolveAvatarUrl = (avatarId?: string | null): string | null => {
+    if (!avatarId) return null;
+    return avatarId.startsWith('http') ? avatarId : buildSleeperAvatarUrl(avatarId);
+  };
+
   if (league?.metadata) {
     for (const [key, value] of Object.entries(league.metadata)) {
       if (typeof value !== 'string') continue;
@@ -77,12 +82,17 @@ export function mergeRostersAndUsersToTeams(
     const teamName =
       user?.metadata?.team_name ?? user?.display_name ?? `Team ${roster.roster_id.toString()}`;
 
-    const avatarUrl = buildSleeperAvatarUrl(user?.avatar ?? null);
+    const userAvatarUrl = buildSleeperAvatarUrl(user?.avatar ?? null);
+    const teamAvatarUrl =
+      resolveAvatarUrl((user?.metadata?.avatar as string | undefined) ?? null) ??
+      resolveAvatarUrl((user?.metadata?.team_avatar as string | undefined) ?? null) ??
+      null;
 
     return {
       teamName,
       ownerDisplayName: user?.display_name ?? 'Unknown Manager',
-      avatarUrl,
+      teamAvatarUrl,
+      userAvatarUrl,
       sleeperRosterId: roster.roster_id,
       sleeperUserId: roster.owner_id,
       divisionId,

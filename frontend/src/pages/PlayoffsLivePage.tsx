@@ -15,6 +15,7 @@ import { BRACKET_TEMPLATE } from '../bracket/template';
 import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 import { applyGameOutcomesToBracket } from '../bracket/state';
 import { Bracket } from '../components/bracket/Bracket';
+import { TeamAvatars } from '../components/common/TeamAvatars';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -162,13 +163,13 @@ export default function PlayoffsLivePage() {
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
               {/* left: selected team */}
               <div className="flex items-center gap-2">
-                {pvpInfo.selected.avatarUrl && (
-                  <div className="avatar">
-                    <div className="w-8 rounded-full">
-                      <img src={pvpInfo.selected.avatarUrl} alt={pvpInfo.selected.teamName} />
-                    </div>
-                  </div>
-                )}
+                <TeamAvatars
+                  teamName={pvpInfo.selected.teamName}
+                  teamAvatarUrl={pvpInfo.selected.teamAvatarUrl}
+                  userAvatarUrl={pvpInfo.selected.userAvatarUrl}
+                  userDisplayName={pvpInfo.selected.ownerDisplayName}
+                  size="md"
+                />
                 <div>
                   <div className="text-sm font-semibold">
                     {pvpInfo.selected.seed}. {pvpInfo.selected.teamName}
@@ -185,13 +186,13 @@ export default function PlayoffsLivePage() {
               {/* right: opponent */}
               {pvpInfo.opponent ? (
                 <div className="flex items-center gap-2">
-                  {pvpInfo.opponent.avatarUrl && (
-                    <div className="avatar">
-                      <div className="w-8 rounded-full">
-                        <img src={pvpInfo.opponent.avatarUrl} alt={pvpInfo.opponent.teamName} />
-                      </div>
-                    </div>
-                  )}
+                  <TeamAvatars
+                    teamName={pvpInfo.opponent.teamName}
+                    teamAvatarUrl={pvpInfo.opponent.teamAvatarUrl}
+                    userAvatarUrl={pvpInfo.opponent.userAvatarUrl}
+                    userDisplayName={pvpInfo.opponent.ownerDisplayName}
+                    size="md"
+                  />
                   <div className="text-right">
                     <div className="text-sm font-semibold">
                       {pvpInfo.opponent.seed}. {pvpInfo.opponent.teamName}

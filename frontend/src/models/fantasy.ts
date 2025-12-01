@@ -13,7 +13,10 @@ export interface TeamRecord {
 export interface Team {
   teamName: string;
   ownerDisplayName: string;
-  avatarUrl: string | null;
+  /** Team/league avatar (Sleeper league logo or team-specific avatar) */
+  teamAvatarUrl: string | null;
+  /** Manager's global profile avatar */
+  userAvatarUrl: string | null;
   sleeperRosterId: number;
   sleeperUserId: string;
   divisionId: number | null;

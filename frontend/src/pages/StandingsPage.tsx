@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getLeague, getLeagueRosters, getLeagueUsers } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
 import type { Team } from '../models/fantasy';
+import { TeamAvatars } from '../components/common/TeamAvatars';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -329,17 +330,28 @@ export function StandingsPage() {
                       <td className="font-semibold">{team.seed ?? team.rank}</td>
                       <td>
                         <div className="flex items-center gap-2">
-                          {team.avatarUrl && (
-                            <div className="avatar">
-                              <div className="w-8 rounded-full">
-                                <img src={team.avatarUrl} alt={team.teamName} />
-                              </div>
-                            </div>
-                          )}
+                          <TeamAvatars
+                            teamName={team.teamName}
+                            teamAvatarUrl={team.teamAvatarUrl}
+                            userAvatarUrl={team.userAvatarUrl}
+                            userDisplayName={team.ownerDisplayName}
+                            size="md"
+                          />
                           <span>{team.teamName}</span>
                         </div>
                       </td>
-                      <td>{team.ownerDisplayName}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          {team.userAvatarUrl && (
+                            <div className="avatar">
+                              <div className="w-8 rounded-full">
+                                <img src={team.userAvatarUrl} alt={team.ownerDisplayName} />
+                              </div>
+                            </div>
+                          )}
+                          <span>{team.ownerDisplayName}</span>
+                        </div>
+                      </td>
                       <td>
                         {team.record.wins}-{team.record.losses}
                         {team.record.ties ? `-${team.record.ties}` : ''}

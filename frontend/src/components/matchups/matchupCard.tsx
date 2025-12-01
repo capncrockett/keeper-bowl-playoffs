@@ -1,6 +1,7 @@
 // frontend/src/components/matchups/MatchupCard.tsx
 
 import type { LiveMatchData, Team } from '../../models/fantasy';
+import { TeamAvatars } from '../common/TeamAvatars';
 
 interface MatchupCardProps {
   live: LiveMatchData;
@@ -26,12 +27,14 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
           {/* Team A */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              {teamA?.avatarUrl && (
-                <div className="avatar">
-                  <div className="w-8 rounded-full">
-                    <img src={teamA.avatarUrl} alt={teamA.teamName} />
-                  </div>
-                </div>
+              {teamA && (
+                <TeamAvatars
+                  teamName={teamA.teamName}
+                  teamAvatarUrl={teamA.teamAvatarUrl}
+                  userAvatarUrl={teamA.userAvatarUrl}
+                  userDisplayName={teamA.ownerDisplayName}
+                  size="md"
+                />
               )}
               <div className="flex flex-col">
                 <span className="font-semibold truncate">{teamA?.teamName ?? 'Unknown'}</span>
@@ -58,12 +61,14 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
           {/* Team B */}
           <div className="flex flex-col gap-1 items-end text-right">
             <div className="flex items-center gap-2 flex-row-reverse">
-              {teamB?.avatarUrl && (
-                <div className="avatar">
-                  <div className="w-8 rounded-full">
-                    <img src={teamB.avatarUrl} alt={teamB.teamName} />
-                  </div>
-                </div>
+              {teamB && (
+                <TeamAvatars
+                  teamName={teamB.teamName}
+                  teamAvatarUrl={teamB.teamAvatarUrl}
+                  userAvatarUrl={teamB.userAvatarUrl}
+                  userDisplayName={teamB.ownerDisplayName}
+                  size="md"
+                />
               )}
               <div className="flex flex-col">
                 <span className="font-semibold truncate">{teamB?.teamName ?? 'BYE'}</span>

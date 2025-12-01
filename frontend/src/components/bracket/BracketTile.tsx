@@ -3,6 +3,7 @@
 import type { FC } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
+import { TeamAvatars } from '../common/TeamAvatars';
 
 interface BracketTileProps {
   slot: BracketSlot;
@@ -95,13 +96,14 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
       <div className="flex justify-between items-start gap-2">
         {/* Avatar (top-left) */}
         <div className="flex items-center gap-1 md:gap-2">
-          {team.avatarUrl && (
-            <div className="avatar flex-shrink-0">
-              <div className="w-6 md:w-10 rounded-full">
-                <img src={team.avatarUrl} alt={team.teamName} />
-              </div>
-            </div>
-          )}
+          <TeamAvatars
+            teamName={team.teamName}
+            teamAvatarUrl={team.teamAvatarUrl}
+            userAvatarUrl={team.userAvatarUrl}
+            userDisplayName={team.ownerDisplayName}
+            size="md"
+            className="md:scale-125"
+          />
         </div>
 
         {/* Scores on the right */}
