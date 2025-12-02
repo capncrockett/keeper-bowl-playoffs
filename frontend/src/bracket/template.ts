@@ -39,9 +39,8 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'champ_finals',
     label: 'Championship',
     positions: [null, null],
-    rewardTitle: 'CHAMPION!!!',
-    rewardText:
-      'CHAMPION!!! + The BELT! + Payout. Photos with the belt on its travels are required by law.',
+    rewardTitle: '1st / 2nd',
+    rewardText: 'The BELT! The Payout. Photos with the belt on its travels are required by law.',
   },
   {
     id: 'champ_3rd',
@@ -50,8 +49,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: '3rd Place Game',
     positions: [null, null],
     rewardTitle: '3rd / 4th',
-    rewardText:
-      'W = 3rd (1x buy-in). L = 4th. Next season is free for one of you. The other, at least you had a shot.',
+    rewardText: 'W = 3rd: Next season is free for one of you. L = 4th: You had a shot.',
   },
 
   //
@@ -70,9 +68,6 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'keeper_main',
     label: 'Splash Back 1',
     positions: [null, null],
-    rewardTitle: '5th Place',
-    rewardText:
-      'W = 5th. Barring a shot at glory this is pretty sweet. Hope you held on to some good ones. 1 extra keeper next season.',
   },
   {
     id: 'keeper_floater2',

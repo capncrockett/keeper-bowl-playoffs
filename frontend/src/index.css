@@ -34,4 +34,15 @@ body {
       white-space: normal;
     }
   }
+
+  /* Extra tightening for very small widths (e.g., 375px devices) */
+  @media (max-width: 420px) {
+    .bracket-team-name {
+      font-size: 0.6rem;
+    }
+
+    .bracket-score {
+      font-size: 0.65rem;
+    }
+  }
 }

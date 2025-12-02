@@ -12,6 +12,7 @@ This is a short, actionable plan to ship the current frontend-only SPA and leave
 ## ✅ Chosen Platform: Vercel
 
 Why Vercel
+
 - Zero configuration — auto-detects Vite projects
 - Free tier: 100GB bandwidth/month (plenty for a league site)
 - Automatic HTTPS and custom domains
@@ -20,6 +21,7 @@ Why Vercel
 - Deploys on every push to main
 
 Current Deployment
+
 - Repository: Connected to GitHub (`capncrockett/keeper-bowl-playoffs`)
 - Branch: `main` auto-deploys
 - Build command: Auto-detected (runs from `frontend` directory)
@@ -27,6 +29,7 @@ Current Deployment
 - Node version: 20.x (auto-detected)
 
 Vercel-Specific Notes
+
 - Vercel automatically handles SPA routing (no config needed)
 - Build cache speeds up subsequent deployments
 - Preview URLs generated for every PR
@@ -35,7 +38,7 @@ Vercel-Specific Notes
 ## Config / Secrets
 
 - League targeting: today the league ID is hard-coded in pages; before prod, centralize to `VITE_LEAGUE_ID` (and set it in the host) so we can change leagues without rebuilds.
-  - For Vercel: Project Settings → Environment Variables → Add `VITE_LEAGUE_ID`
+  - For Vercel: Project Settings -> Environment Variables -> Add `VITE_LEAGUE_ID`
 - No private API keys are required for Sleeper/ESPN right now.
 - Optional envs to add later:
   - `VITE_SENTRY_DSN` — error tracking
@@ -45,11 +48,13 @@ Vercel-Specific Notes
 ## CI/CD Flow
 
 Current Setup (Vercel)
+
 1. Push to main: Vercel automatically builds and deploys to production.
 2. Pull Requests: Vercel creates a preview deployment with a unique URL.
 3. Build checks: Vercel runs `npm run build` — build must succeed.
 
 Optional GitHub Actions (future)
+
 1. PRs: run `npm ci`, `npm run lint`, `npm run build` in `frontend`.
 2. Add tests when a framework is configured.
 3. Track bundle size changes.
@@ -72,14 +77,17 @@ Optional GitHub Actions (future)
 ## Common Issues
 
 Case-Sensitivity Errors
+
 - macOS filesystem is case-insensitive, but Linux (Vercel) is case-sensitive.
 - Always match import statements exactly to filename casing.
 - Test with `npm run build` locally before pushing.
 
 Build Timeouts
+
 - Vercel free tier has a ~45s build timeout (rarely an issue for this project).
 
 API Rate Limits
+
 - Sleeper API: generous; this app’s call volume is low.
 - ESPN API: generally permissive; also low volume per user.
 

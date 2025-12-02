@@ -77,8 +77,8 @@ src/
 │   ├── MatchupsPage.tsx              # Weekly matchup results
 │   └── StandingsPage.tsx             # Season standings table
 └── utils/
-    ├── sleeperTransforms.ts          # Sleeper data → Teams, seeds, standings
-    ├── sleeperPlayoffTransforms.ts   # Sleeper playoff matchups → BracketGameOutcomes
+    ├── sleeperTransforms.ts          # Sleeper data -> Teams, seeds, standings
+    ├── sleeperPlayoffTransforms.ts   # Sleeper playoff matchups -> BracketGameOutcomes
     └── applyMatchupScores.ts         # Apply current/projected points to bracket slots
 ```
 
@@ -87,14 +87,16 @@ src/
 The bracket system is **data-driven and immutable**. Understanding this is key to making changes.
 
 #### Core Files
+
 - `bracket/types.ts` - Type definitions for slots, routing rules, team references
 - `bracket/template.ts` - `BRACKET_TEMPLATE`: declarative structure of all 15 playoff slots across 3 brackets
-- `bracket/routingRules.ts` - `ROUTING_RULES`: defines winner/loser movement between slots (e.g., Champ R1 loser → Keeper Floater)
+- `bracket/routingRules.ts` - `ROUTING_RULES`: defines winner/loser movement between slots (e.g., Champ R1 loser -> Keeper Floater)
 - `bracket/seedAssignment.ts` - `assignSeedsToBracketSlots()`: places teams into initial bracket positions
 - `bracket/state.ts` - `applyGameOutcomesToBracket()`: immutable routing engine that applies game results
 
 #### How It Works
-1. Fetch Sleeper users/rosters → compute standings → assign seeds 1-12
+
+1. Fetch Sleeper users/rosters -> compute standings -> assign seeds 1-12
 2. Start with `BRACKET_TEMPLATE` (immutable baseline structure)
 3. Call `assignSeedsToBracketSlots(teams)` to populate initial positions
 4. For live playoffs: apply real game outcomes via `applyGameOutcomesToBracket(slots, outcomes)`
@@ -103,19 +105,21 @@ The bracket system is **data-driven and immutable**. Understanding this is key t
 **Key Principle:** Never mutate `BRACKET_TEMPLATE`. Always clone slots before applying outcomes.
 
 #### Bracket Structure
-- **Champ Bowl**: Seeds 1-6, traditional bracket with R1 → R2 → Finals + 3rd place
+
+- **Champ Bowl**: Seeds 1-6, traditional bracket with R1 -> R2 -> Finals + 3rd place
 - **Keeper Bowl**: Fed by Champ Bowl losers and Toilet Bowl winners. Contains Floater/Splashback games leading to 5th-8th place
-- **Toilet Bowl**: Seeds 7-12, bottom bracket with R1 → R2 → Poop King final + placement games
+- **Toilet Bowl**: Seeds 7-12, bottom bracket with R1 -> R2 -> Poop King final + placement games
 
 ### Data Flow
 
 ```
-Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.ts → BracketSlot[]
+Sleeper API -> sleeperTransforms.ts -> Team models -> bracket/seedAssignment.ts -> BracketSlot[]
                                                                                       ↓
                                                                             Bracket components
 ```
 
 **Important Transforms:**
+
 - `mergeRostersAndUsersToTeams()` in `utils/sleeperTransforms.ts` - combines raw Sleeper data into `Team` objects
 - `computeSeeds()` - converts standings rank to playoff seeds with custom tiebreakers
 - `assignSeedsToBracketSlots()` - maps seeds to bracket positions
@@ -123,6 +127,7 @@ Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.
 ### Components
 
 #### Bracket Components
+
 - `<Bracket />` - Main container that organizes 3 sub-brackets with mode toggle (score/reward)
 - `<BracketGrid />` - Shared layout engine using absolute positioning with `topPct` values and height scaling
   - Handles responsive column heights, gaps, and spacing
@@ -143,6 +148,7 @@ Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.
 - `/standings` - Season standings table
 
 **Both playoff pages share:**
+
 - Mode toggle: Score view (shows current/projected points) vs Reward view (shows prize text)
 - Team selector: Highlight a specific team across the bracket
 - Responsive layout: Mobile-first design with desktop enhancements
@@ -150,12 +156,14 @@ Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.
 ## Current Development Phase
 
 **Phase 4 (COMPLETE):** Live Playoffs Mode
+
 - ✅ Sleeper winners_bracket/losers_bracket endpoints integrated
 - ✅ `toBracketGameOutcomes()` transform implemented
 - ✅ Live bracket page with real game outcomes
 - ✅ Full responsive design (mobile + desktop)
 
 **Phase 3.2 (COMPLETE):** Bracket Geometry + Spacing
+
 - ✅ Fully responsive BracketTile component
 - ✅ Mobile-optimized minimal cards (<768px)
 - ✅ Desktop rich cards (≥768px) with seed, record, reward text
@@ -163,6 +171,7 @@ Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.
 - ⏸️ Connectors paused (Phase 3.3)
 
 **Current Status:** App is feature-complete with both preview and live bracket modes. Next work would be:
+
 - Phase 5: Keeper + Toilet visual refinements
 - Phase 3.3: Resume connector lines (currently paused)
 - Phase 6: Optional visual style pass (user-owned)
@@ -173,6 +182,7 @@ Sleeper API → sleeperTransforms.ts → Team models → bracket/seedAssignment.
 **No test framework is currently configured.** Before writing tests, check if one has been added to package.json.
 
 Run linting before committing:
+
 ```bash
 npm run lint
 ```
@@ -189,6 +199,7 @@ npm run lint
 ## Common Patterns
 
 ### Adding a New Bracket Slot
+
 1. Add new `BracketSlotId` to `bracket/types.ts`
 2. Add slot definition to `BRACKET_TEMPLATE` in `bracket/template.ts`
 3. Add routing rules to `ROUTING_RULES` in `bracket/routingRules.ts`
@@ -197,8 +208,14 @@ npm run lint
    - Optionally set `centerOnPct: true` for vertical centering
 
 ### Fetching Sleeper Data
+
 ```typescript
-import { getLeagueUsers, getLeagueRosters, getWinnersBracket, getLosersBracket } from '@/api/sleeper';
+import {
+  getLeagueUsers,
+  getLeagueRosters,
+  getWinnersBracket,
+  getLosersBracket,
+} from '@/api/sleeper';
 
 // For If-Today mode (standings-based)
 const users = await getLeagueUsers(leagueId);
@@ -210,6 +227,7 @@ const losersBracket = await getLosersBracket(leagueId);
 ```
 
 ### Building Teams from Sleeper Data
+
 ```typescript
 import { mergeRostersAndUsersToTeams, computeSeeds } from '@/utils/sleeperTransforms';
 
@@ -218,6 +236,7 @@ const teamsWithSeeds = computeSeeds(teams);
 ```
 
 ### Applying Live Playoff Outcomes
+
 ```typescript
 import { assignSeedsToBracketSlots } from '@/bracket/seedAssignment';
 import { applyGameOutcomesToBracket } from '@/bracket/state';
@@ -236,6 +255,7 @@ const liveSlots = applyGameOutcomesToBracket(initialSlots, outcomes, ROUTING_RUL
 ```
 
 ### Working with BracketGrid Layouts
+
 ```typescript
 import type { BracketLayoutColumn } from '@/components/bracket/BracketGrid';
 
@@ -250,9 +270,7 @@ const columns: BracketLayoutColumn[] = [
   },
   {
     title: 'Round 2',
-    items: [
-      { id: 'r2-g1', slotId: 'champ_r2_g1', topPct: 40, centerOnPct: true },
-    ],
+    items: [{ id: 'r2-g1', slotId: 'champ_r2_g1', topPct: 40, centerOnPct: true }],
     heightScale: 1.2, // Stretch vertical spacing
   },
 ];

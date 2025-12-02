@@ -69,14 +69,16 @@ const ROUND_TITLES: Record<BracketSlot['round'], string> = {
   toilet_misc: 'Toilet Placement',
 };
 
-const TEAM_NAME_CLASS =
-  'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
+const TEAM_NAME_CLASS = 'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
+const SCORE_CLASS = 'bracket-score text-[0.7rem] md:text-base font-semibold text-base-content/80';
 
-function describeDestination(dest: BracketRoutingRule['winnerGoesTo'] | BracketRoutingRule['loserGoesTo']) {
+function describeDestination(
+  dest: BracketRoutingRule['winnerGoesTo'] | BracketRoutingRule['loserGoesTo'],
+) {
   if (!dest) return null;
   const targetSlot = SLOT_BY_ID.get(dest.slotId);
   const label =
-    (targetSlot ? ROUND_TITLES[targetSlot.round] ?? cleanLabel(targetSlot.label) : null) ??
+    (targetSlot ? (ROUND_TITLES[targetSlot.round] ?? cleanLabel(targetSlot.label)) : null) ??
     cleanLabel(SLOT_LABEL_BY_ID.get(dest.slotId) ?? dest.slotId);
   const lane = dest.positionIndex === 0 ? 'top slot' : 'bottom slot';
   return `${label} (${lane})`;
@@ -91,7 +93,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
         </div>
         {mode === 'score' && (
           <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
-            <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80">-</div>
+            <div className={SCORE_CLASS}>-</div>
             <div className="text-[0.6rem] md:text-xs text-base-content/60"></div>
           </div>
         )}
@@ -124,7 +126,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
             {mode === 'score' && (
               <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
                 {/* Current week score */}
-                <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80">
+                <div className={SCORE_CLASS}>
                   {currentPoints != null && currentPoints !== 0 ? currentPoints.toFixed(2) : '-'}
                 </div>
               </div>
@@ -170,7 +172,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
         {mode === 'score' && (
           <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
             {/* Current week score */}
-            <div className="text-[0.7rem] md:text-base font-semibold text-base-content/80">
+            <div className={SCORE_CLASS}>
               {isBye
                 ? '-'
                 : currentPoints != null && currentPoints !== 0
@@ -229,12 +231,10 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
   const renderBack = () => (
     <div className={cardClassName}>
       <div className="card-body gap-2 p-2 md:p-3">
-        <div className="text-[0.65rem] font-semibold uppercase text-base-content/60">Reward</div>
         <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? roundLabel}</div>
         {hasBye ? (
           <div className="text-[0.7rem] text-base-content/70 leading-snug">
-            You lucky dog—BYE week. Advance to {winnerDest ?? 'the next round'} without lifting a
-            finger.
+            You lucky dog. Advance to {winnerDest ?? 'the next round'} without lifting a finger.
           </div>
         ) : (
           <>
@@ -254,7 +254,6 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
                   <span className="font-semibold text-base-content">Loser</span> → {loserDest}
                 </div>
               )}
-              {!winnerDest && !loserDest && <div>Season ends here.</div>}
             </div>
           </>
         )}

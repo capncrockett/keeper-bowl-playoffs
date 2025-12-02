@@ -12,7 +12,7 @@ import {
 import type { Team, PairedMatchup, LiveMatchData, SeasonState } from '../models/fantasy';
 import { countFinishedPlayers } from './playerGameStatus';
 
-// --- Merge rosters + users → Team[] ---
+// --- Merge rosters + users -> Team[] ---
 
 export function mergeRostersAndUsersToTeams(
   rosters: SleeperRoster[],
@@ -32,7 +32,8 @@ export function mergeRostersAndUsersToTeams(
     for (const [key, value] of Object.entries(league.metadata)) {
       if (typeof value !== 'string') continue;
       const nameMatch = key.match(/^division_(\d+)$/);
-      const avatarMatch = key.match(/^division_(\d+)_avatar$/) ?? key.match(/^division_avatar_(\d+)$/);
+      const avatarMatch =
+        key.match(/^division_(\d+)_avatar$/) ?? key.match(/^division_avatar_(\d+)$/);
 
       if (nameMatch) {
         const id = Number(nameMatch[1]);
@@ -102,8 +103,10 @@ export function mergeRostersAndUsersToTeams(
       sleeperRosterId: roster.roster_id,
       sleeperUserId: roster.owner_id,
       divisionId,
-      divisionName: divisionId ? divisionNameById.get(divisionId) ?? `Division ${divisionId}` : null,
-      divisionAvatarUrl: divisionId ? divisionAvatarById.get(divisionId) ?? null : null,
+      divisionName: divisionId
+        ? (divisionNameById.get(divisionId) ?? `Division ${divisionId}`)
+        : null,
+      divisionAvatarUrl: divisionId ? (divisionAvatarById.get(divisionId) ?? null) : null,
       record: { wins, losses, ties },
       pointsFor,
       pointsAgainst,
