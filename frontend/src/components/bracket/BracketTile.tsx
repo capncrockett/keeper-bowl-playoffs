@@ -111,8 +111,6 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   if (!team) {
     // BYE without a concrete team should still use the same visual layout
     if (pos.isBye) {
-      const currentPoints = mode === 'score' ? pos.currentPoints : undefined;
-
       return (
         <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
           {/* Top section: empty avatar space left, scores right */}
@@ -126,9 +124,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
             {mode === 'score' && (
               <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
                 {/* Current week score */}
-                <div className={SCORE_CLASS}>
-                  {currentPoints != null && currentPoints !== 0 ? currentPoints.toFixed(2) : '-'}
-                </div>
+                <div className={SCORE_CLASS}>-</div>
               </div>
             )}
           </div>
