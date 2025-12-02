@@ -26,7 +26,7 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
     heightScale: 1.15,
     items: [
       { id: 'keeper_splashback1', slotId: 'keeper_splashback1', topPct: 0, centerOnPct: false },
-      { id: 'keeper_splashback2', slotId: 'keeper_splashback2', topPct: 65, centerOnPct: true },
+      { id: 'keeper_splashback2', slotId: 'keeper_splashback2', topPct: 75, centerOnPct: true },
     ],
   },
   {

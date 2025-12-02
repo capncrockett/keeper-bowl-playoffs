@@ -13,3 +13,25 @@ body {
 @plugin "daisyui" {
   themes: light, cupcake, synthwave, dark --prefersdark;
 }
+
+@layer components {
+  /* Prevent long team names from stretching bracket cards on narrow screens */
+  .bracket-team-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .bracket-team-name {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+    }
+  }
+}

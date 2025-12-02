@@ -69,6 +69,9 @@ const ROUND_TITLES: Record<BracketSlot['round'], string> = {
   toilet_misc: 'Toilet Placement',
 };
 
+const TEAM_NAME_CLASS =
+  'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
+
 function describeDestination(dest: BracketRoutingRule['winnerGoesTo'] | BracketRoutingRule['loserGoesTo']) {
   if (!dest) return null;
   const targetSlot = SLOT_BY_ID.get(dest.slotId);
@@ -81,7 +84,7 @@ function describeDestination(dest: BracketRoutingRule['winnerGoesTo'] | BracketR
 
 const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   const renderPlaceholderRow = (label: string) => (
-    <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
+    <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
       <div className="flex justify-between items-start gap-2">
         <div className="flex items-center gap-1 md:gap-2">
           <div className="w-6 md:w-10 rounded-full bg-base-300/60" />
@@ -94,7 +97,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
         )}
       </div>
       <div className="mt-1 min-w-0">
-        <div className="font-semibold text-[0.65rem] md:text-sm truncate">{label}</div>
+        <div className={TEAM_NAME_CLASS}>{label}</div>
       </div>
     </div>
   );
@@ -109,7 +112,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
       const currentPoints = mode === 'score' ? pos.currentPoints : undefined;
 
       return (
-        <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
+        <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
           {/* Top section: empty avatar space left, scores right */}
           <div className="flex justify-between items-start gap-2">
             {/* Empty avatar placeholder to keep layout consistent */}
@@ -130,7 +133,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
 
           {/* Bottom row: BYE label across full width */}
           <div className="mt-1 min-w-0">
-            <div className="font-semibold text-[0.65rem] md:text-sm truncate">BYE</div>
+            <div className={TEAM_NAME_CLASS}>BYE</div>
           </div>
         </div>
       );
@@ -147,7 +150,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   const currentPoints = mode === 'score' ? (pos.currentPoints ?? team.pointsFor) : undefined;
 
   return (
-    <div className="py-1.5 md:py-2 max-w-full overflow-hidden">
+    <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
       {/* Top section: avatar left, scores right */}
       <div className="flex justify-between items-start gap-2">
         {/* Avatar (top-left) */}
@@ -180,7 +183,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
 
       {/* Bottom row: team name across full width (or BYE) */}
       <div className="mt-1 min-w-0">
-        <div className="font-semibold text-[0.65rem] md:text-sm truncate">
+        <div className={TEAM_NAME_CLASS} title={isBye ? undefined : team.teamName}>
           {isBye ? 'BYE' : team.teamName}
         </div>
       </div>
