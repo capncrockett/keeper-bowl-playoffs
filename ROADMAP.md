@@ -19,7 +19,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 
 - [ ] Smoke test all routes.
 - [ ] Verify Sleeper API errors are surfaced cleanly.
-- [ ] Confirm works on mobile widths.
+- [x] Confirm works on mobile widths.
 - [ ] Add minimal README usage notes.
 - [ ] Deploy to chosen host (Render/Azure/AWS).
 
@@ -40,6 +40,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 **Goal:** Display accurate projected scores and win probabilities on the Matchups page.
 
 **Current State:**
+
 - Matchup cards show current scores only
 - Win probability removed (not available from Sleeper API)
 - Basic `getPlayerProjections()` API client exists but is unused
@@ -48,16 +49,19 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 **What's Needed:**
 
 1. **Fetch Player Projections**
+
    - Call `getPlayerProjections(season, week)` for current week
    - Returns array of projections keyed by `player_id` with scoring formats (std/half_ppr/ppr)
 
 2. **Map to Team Totals**
+
    - For each matchup, get roster's starter player IDs from `SleeperMatchup.starters`
    - Look up each starter's projection
    - Sum projected points based on league scoring format (need to detect from league settings)
    - Add to current points for players who haven't played yet
 
 3. **Calculate Win Probability**
+
    - Simple approach: `winProbA = projectedA / (projectedA + projectedB)`
    - Better approach: Use statistical model considering variance, time remaining, players left to play
    - Note: Will never match Sleeper's proprietary win probability calculation
@@ -68,18 +72,21 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
    - Add disclaimer: "Projections are estimates and may differ from Sleeper's calculations"
 
 **Technical Notes:**
+
 - Projections API is separate domain: `api.sleeper.com` vs `api.sleeper.app`
 - May require league settings fetch to determine scoring format
 - Additional API calls per week view (consider caching)
 - Player projections change throughout the week as games complete
 
 **Files to Modify:**
+
 - `src/utils/sleeperTransforms.ts` - Enhance `buildLiveMatchData()` to use real projections
 - `src/pages/MatchupsPage.tsx` - Fetch projections alongside matchups
 - `src/components/matchups/MatchupCard.tsx` - Re-enable win probability display
 - `src/models/fantasy.ts` - Potentially add `LeagueSettings` type for scoring format
 
 **Estimated Effort:** Medium (4-6 hours)
+
 - API integration is straightforward
 - Complexity is in mapping player IDs to projections and handling edge cases
 - Testing across different weeks and scoring formats
@@ -89,6 +96,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 **Goal:** Show how many starters have finished playing vs yet to play on matchup cards.
 
 **Current State:**
+
 - Matchup cards only show current scores
 - No indication of game progress or remaining players
 - `startersA` and `startersB` fields exist in data model but not displayed
@@ -96,6 +104,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 **Approach Options:**
 
 1. **Use ESPN's undocumented API** (Recommended - Free)
+
    - ESPN scoreboard API: `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week={week}`
    - Returns game status: `STATUS_SCHEDULED`, `STATUS_IN_PROGRESS`, `STATUS_FINAL`, `STATUS_HALFTIME`, etc.
    - Get all players from Sleeper (`https://api.sleeper.app/v1/players/nfl`)
@@ -103,6 +112,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
    - Count starters whose games are `STATUS_FINAL` vs still in progress
 
 2. **Use Sleeper Stats API**
+
    - `https://api.sleeper.com/stats/nfl/{season}/{week}?season_type=regular`
    - Check if player has non-zero stats (indicates they've played)
    - Less reliable: player could be active but have 0 stats
@@ -129,6 +139,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
    - Update as games progress (requires periodic refresh)
 
 **Data Model Changes:**
+
 ```typescript
 interface LiveMatchData {
   // ... existing fields
@@ -138,11 +149,13 @@ interface LiveMatchData {
 ```
 
 **UI Changes:**
+
 - Add "5/9 finished" text under scores
 - Add progress bar showing completion ratio
 - Consider color coding: green for all done, yellow for in progress
 
 **Estimated Effort:** Medium (6-8 hours)
+
 - ESPN API integration
 - Player data caching and mapping
 - Cross-referencing logic
