@@ -1,4 +1,5 @@
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { ThemeSelector } from './components/ThemeSelector';
 import { MatchupsPage } from './pages/MatchupsPage';
 import PlayoffsIfTodayPage from './pages/PlayoffsIfTodayPage';
@@ -122,6 +123,7 @@ export default function App() {
       <footer className="footer footer-center p-4 mt-24 bg-base-100 text-xs opacity-70">
         <div>Keeper Bowl Playoffs - frontend POC</div>
       </footer>
+      <SpeedInsights />
     </div>
   );
 }
