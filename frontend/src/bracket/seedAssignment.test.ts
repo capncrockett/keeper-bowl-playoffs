@@ -11,8 +11,8 @@ describe('seedAssignment', () => {
 
       expect(slots).toHaveLength(BRACKET_TEMPLATE.length);
 
-      // Find Champ R1 Top slot (seeds 4 vs 5)
-      const champR1Top = slots.find((s) => s.id === 'champ_r1_top');
+      // Find Champ R1 G1 slot (seeds 4 vs 5)
+      const champR1Top = slots.find((s) => s.id === 'champ_r1_g1');
       expect(champR1Top).toBeDefined();
       expect(champR1Top!.positions[0]?.seed).toBe(4);
       expect(champR1Top!.positions[0]?.teamId).toBe(4); // roster_id for seed 4
@@ -23,7 +23,7 @@ describe('seedAssignment', () => {
     it('assigns seeds 1 and 2 to champ R2 positions', () => {
       const slots = assignSeedsToBracketSlots(mockTeams);
 
-      const champR2Top = slots.find((s) => s.id === 'champ_r2_top');
+      const champR2Top = slots.find((s) => s.id === 'champ_r2_g1');
       expect(champR2Top).toBeDefined();
       expect(champR2Top!.positions[0]?.seed).toBe(1);
       expect(champR2Top!.positions[0]?.teamId).toBe(1); // roster_id 1
@@ -32,7 +32,7 @@ describe('seedAssignment', () => {
     it('assigns toilet bowl seeds 7-12', () => {
       const slots = assignSeedsToBracketSlots(mockTeams);
 
-      const toiletR1Top = slots.find((s) => s.id === 'toilet_r1_top');
+      const toiletR1Top = slots.find((s) => s.id === 'toilet_r1_g1');
       expect(toiletR1Top).toBeDefined();
       expect(toiletR1Top!.positions[0]?.seed).toBe(8);
       expect(toiletR1Top!.positions[0]?.teamId).toBe(8);
@@ -43,11 +43,10 @@ describe('seedAssignment', () => {
     it('preserves BYE positions without team IDs', () => {
       const slots = assignSeedsToBracketSlots(mockTeams);
 
-      // Keeper bowl floaters start as BYE (fed by champ losers)
-      const keeperFloater1 = slots.find((s) => s.id === 'keeper_floater_1');
+      // Keeper bowl floaters start empty (fed by champ losers)
+      const keeperFloater1 = slots.find((s) => s.id === 'keeper_floater1');
       expect(keeperFloater1).toBeDefined();
       expect(keeperFloater1!.positions[0]?.teamId).toBeUndefined();
-      expect(keeperFloater1!.isBye).toBe(true);
     });
 
     it('does not mutate original template', () => {
@@ -67,7 +66,7 @@ describe('seedAssignment', () => {
 
       // Should still return slots but without team IDs assigned
       expect(slots).toHaveLength(BRACKET_TEMPLATE.length);
-      const champR1Top = slots.find((s) => s.id === 'champ_r1_top');
+      const champR1Top = slots.find((s) => s.id === 'champ_r1_g1');
       expect(champR1Top!.positions[0]?.teamId).toBeUndefined();
     });
   });

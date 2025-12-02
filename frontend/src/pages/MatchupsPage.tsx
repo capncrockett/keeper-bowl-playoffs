@@ -77,7 +77,7 @@ export function MatchupsPage() {
         const teamGameStatus = buildTeamGameStatusMap(espnScoreboard);
 
         // Pass player and game status data to pairMatchups
-        const paired = pairMatchups(week, matchups, playersById, teamGameStatus);
+        const paired = pairMatchups(week, matchups, playersById ?? undefined, teamGameStatus);
         const live = paired.map((p) => buildLiveMatchData(p));
         setLiveMatchups(live);
       } catch (err) {

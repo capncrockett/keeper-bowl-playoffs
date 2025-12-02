@@ -18,3 +18,14 @@ export function buildTeam(overrides: Partial<Team> = {}): Team {
     seed: overrides.seed,
   };
 }
+
+export const mockTeams: Team[] = Array.from({ length: 12 }, (_, index) =>
+  buildTeam({
+    teamName: `Team ${index + 1}`,
+    ownerDisplayName: `Owner ${index + 1}`,
+    sleeperRosterId: index + 1,
+    sleeperUserId: `user-${index + 1}`,
+    seed: index + 1,
+    rank: index + 1,
+  }),
+);

@@ -4,9 +4,9 @@ import { render, screen } from '@testing-library/react';
 import { MatchupCard } from './MatchupCard';
 import type { LiveMatchData, Team } from '../../models/fantasy';
 
-// Mock TeamAvatars to simplify testing
+// Mock TeamAvatars to simplify testing (avoid duplicate name text)
 jest.mock('../common/TeamAvatars', () => ({
-  TeamAvatars: ({ teamName }: { teamName: string }) => <div data-testid="team-avatar">{teamName}</div>,
+  TeamAvatars: () => <div data-testid="team-avatar" />,
 }));
 
 const mockTeamA: Team = {

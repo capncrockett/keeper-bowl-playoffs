@@ -7,7 +7,26 @@ import type {
   SleeperNFLState,
   SleeperPlayoffMatchup,
   SleeperPlayer,
+  SleeperLeague,
 } from '../../api/sleeper';
+
+export const mockSleeperLeague: SleeperLeague = {
+  total_rosters: 12,
+  status: 'in_season',
+  sport: 'nfl',
+  settings: {},
+  metadata: {
+    division_1: 'Alpha',
+    division_2: 'Beta',
+  },
+  season_type: 'regular',
+  season: '2025',
+  scoring_settings: {},
+  roster_positions: [],
+  name: 'Test League',
+  league_id: 'test_league',
+  draft_id: 'draft_1',
+};
 
 export const mockSleeperUsers: SleeperUser[] = [
   {
@@ -304,6 +323,18 @@ export const mockSleeperMatchupsWeek13: SleeperMatchup[] = [
     starters: ['player111', 'player112', 'player113', 'player114', 'player115', 'player116', 'player117', 'player118', 'player119'],
     players: ['player111', 'player112', 'player113', 'player114', 'player115', 'player116', 'player117', 'player118', 'player119', 'player120'],
   },
+];
+
+export const mockSleeperMatchupsWeek15: SleeperMatchup[] = [
+  { roster_id: 3, matchup_id: 1, points: 110.12, starters: ['player21'], players: ['player21'] },
+  { roster_id: 6, matchup_id: 1, points: 98.4, starters: ['player31'], players: ['player31'] },
+  { roster_id: 4, matchup_id: 2, points: 104.5, starters: ['player31'], players: ['player31'] },
+  { roster_id: 5, matchup_id: 2, points: 88.9, starters: ['player41'], players: ['player41'] },
+  // Toilet side
+  { roster_id: 8, matchup_id: 3, points: 76.0, starters: ['player71'], players: ['player71'] },
+  { roster_id: 9, matchup_id: 3, points: 82.3, starters: ['player81'], players: ['player81'] },
+  { roster_id: 10, matchup_id: 4, points: 90.1, starters: ['player91'], players: ['player91'] },
+  { roster_id: 11, matchup_id: 4, points: 70.5, starters: ['player101'], players: ['player101'] },
 ];
 
 export const mockNFLState: SleeperNFLState = {

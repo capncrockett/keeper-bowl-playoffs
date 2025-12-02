@@ -21,7 +21,9 @@ export interface ESPNCompetition {
 }
 
 export interface ESPNEvent {
+  id?: string;
   competitions: ESPNCompetition[];
+  status?: ESPNCompetition['status'];
 }
 
 export interface ESPNScoreboard {

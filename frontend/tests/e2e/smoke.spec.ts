@@ -35,4 +35,23 @@ test.describe('Happy path smoke', () => {
     await expect(page).toHaveURL(/\/playoffs\/live/);
     await expect(page.getByRole('heading', { name: /live playoffs/i })).toBeVisible();
   });
+
+  test('shows compact nav on mobile', async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.name.includes('iphone'), 'Mobile-only coverage');
+
+    await page.goto('/');
+
+    await expect(page.getByText(/KB Playoffs/i)).toBeVisible();
+    await expect(page.locator('nav a')).toHaveCount(4);
+  });
+
+  test('surfaces API errors as overlays', async ({ page }) => {
+    await page.route('**/apis/site/v2/sports/football/nfl/scoreboard**', (route) =>
+      route.fulfill({ status: 500, body: 'forced failure' }),
+    );
+
+    await page.goto('/matchups');
+
+    await expect(page.getByText(/ESPN API error/i)).toBeVisible();
+  });
 });

@@ -1,78 +1,87 @@
 // frontend/src/test/fixtures/espn.ts
 
-import type { ESPNScoreboard, ESPNEvent } from '../../api/espn';
+import type { ESPNScoreboard } from '../../api/espn';
+
+const finalStatus = { type: { name: 'STATUS_FINAL', state: 'post', completed: true } };
+const inProgressStatus = { type: { name: 'STATUS_IN_PROGRESS', state: 'in', completed: false } };
 
 export const mockESPNScoreboard: ESPNScoreboard = {
   events: [
     {
       id: 'game1',
-      status: { type: { completed: true } },
+      status: finalStatus,
       competitions: [
         {
           competitors: [
-            { team: { abbreviation: 'KC' } },
-            { team: { abbreviation: 'LV' } },
+            { team: { abbreviation: 'KC', displayName: 'KC' } },
+            { team: { abbreviation: 'LV', displayName: 'LV' } },
           ],
+          status: finalStatus,
         },
       ],
     },
     {
       id: 'game2',
-      status: { type: { completed: false } },
+      status: inProgressStatus,
       competitions: [
         {
           competitors: [
-            { team: { abbreviation: 'BUF' } },
-            { team: { abbreviation: 'NYJ' } },
+            { team: { abbreviation: 'BUF', displayName: 'BUF' } },
+            { team: { abbreviation: 'NYJ', displayName: 'NYJ' } },
           ],
+          status: inProgressStatus,
         },
       ],
     },
     {
       id: 'game3',
-      status: { type: { completed: true } },
+      status: finalStatus,
       competitions: [
         {
           competitors: [
-            { team: { abbreviation: 'MIA' } },
-            { team: { abbreviation: 'NE' } },
+            { team: { abbreviation: 'MIA', displayName: 'MIA' } },
+            { team: { abbreviation: 'NE', displayName: 'NE' } },
           ],
+          status: finalStatus,
         },
       ],
     },
     {
       id: 'game4',
-      status: { type: { completed: true } },
+      status: finalStatus,
       competitions: [
         {
           competitors: [
-            { team: { abbreviation: 'SF' } },
-            { team: { abbreviation: 'ARI' } },
+            { team: { abbreviation: 'SF', displayName: 'SF' } },
+            { team: { abbreviation: 'ARI', displayName: 'ARI' } },
           ],
+          status: finalStatus,
         },
       ],
     },
     {
       id: 'game5',
-      status: { type: { completed: true } },
+      status: finalStatus,
       competitions: [
         {
           competitors: [
-            { team: { abbreviation: 'DAL' } },
-            { team: { abbreviation: 'NYG' } },
+            { team: { abbreviation: 'DAL', displayName: 'DAL' } },
+            { team: { abbreviation: 'NYG', displayName: 'NYG' } },
           ],
+          status: finalStatus,
         },
       ],
     },
     {
       id: 'game6',
-      status: { type: { completed: true } },
+      status: finalStatus,
       competitions: [
         {
           competitors: [
-            { team: { abbreviation: 'PHI' } },
-            { team: { abbreviation: 'WAS' } },
+            { team: { abbreviation: 'PHI', displayName: 'PHI' } },
+            { team: { abbreviation: 'WAS', displayName: 'WAS' } },
           ],
+          status: finalStatus,
         },
       ],
     },
