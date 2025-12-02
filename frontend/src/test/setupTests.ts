@@ -11,3 +11,7 @@ if (!global.TextDecoder) {
   // @ts-expect-error - Jest's types don't include TextDecoder on global
   global.TextDecoder = TextDecoder;
 }
+
+// Mock fetch globally for tests
+// Individual tests can override with jest.spyOn or specific mock responses
+global.fetch = jest.fn();

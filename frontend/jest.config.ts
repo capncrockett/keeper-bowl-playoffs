@@ -9,6 +9,9 @@ const config: Config = {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(msw)/)',
+  ],
   setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'],
   transform: {
     '^.+\\.(t|j)sx?$': [
