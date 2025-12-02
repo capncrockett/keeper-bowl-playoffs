@@ -36,7 +36,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
       </div>
 
       {/* Keeper Bowl bracket */}
-      <div>
+      <div className="mt-20">
         <h2 className="text-sm md:text-lg font-bold mb-3 md:mb-4 text-base-content">Keeper Bowl</h2>
         <KeeperBracket
           slots={keeperSlots}
@@ -47,7 +47,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
       </div>
 
       {/* Toilet Bowl bracket */}
-      <div>
+      <div className="mt-20">
         <h2 className="text-sm md:text-lg font-bold mb-3 md:mb-4 text-base-content">Toilet Bowl</h2>
         <ToiletBracket
           slots={toiletSlots}
