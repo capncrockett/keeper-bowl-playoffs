@@ -216,26 +216,28 @@ export function mapNFLStateToSeasonState(nfl: SleeperNFLState): SeasonState {
 
 // --- Standings + seeding ---
 
+const sortByRecordThenPoints = (a: Team, b: Team) => {
+  // primary: wins desc
+  if (b.record.wins !== a.record.wins) {
+    return b.record.wins - a.record.wins;
+  }
+
+  // secondary: pointsFor desc
+  if (b.pointsFor !== a.pointsFor) {
+    return b.pointsFor - a.pointsFor;
+  }
+
+  // tertiary: losses asc
+  if (a.record.losses !== b.record.losses) {
+    return a.record.losses - b.record.losses;
+  }
+
+  // final: ties asc
+  return a.record.ties - b.record.ties;
+};
+
 export function computeStandings(teams: Team[]): Team[] {
-  const sorted = [...teams].sort((a, b) => {
-    // primary: wins desc
-    if (b.record.wins !== a.record.wins) {
-      return b.record.wins - a.record.wins;
-    }
-
-    // secondary: pointsFor desc
-    if (b.pointsFor !== a.pointsFor) {
-      return b.pointsFor - a.pointsFor;
-    }
-
-    // tertiary: losses asc
-    if (a.record.losses !== b.record.losses) {
-      return a.record.losses - b.record.losses;
-    }
-
-    // final: ties asc
-    return a.record.ties - b.record.ties;
-  });
+  const sorted = [...teams].sort(sortByRecordThenPoints);
 
   return sorted.map((team, index) => ({
     ...team,
@@ -243,10 +245,70 @@ export function computeStandings(teams: Team[]): Team[] {
   }));
 }
 
+/**
+ * League-specific seeding rules:
+ * - Seeds 1-3: Division winners (sorted by record > points for).
+ * - Seeds 4-5: Next best records regardless of division.
+ * - Seed 6: Highest points for among teams not already seeded.
+ * - Seeds 7-12: Remaining teams by record order.
+ */
 export function computeSeeds(teams: Team[]): Team[] {
   const standings = computeStandings(teams);
+  const sortedByRank = [...standings].sort((a, b) => a.rank - b.rank);
+  const seeded: Team[] = [];
+  const usedRosterIds = new Set<number>();
 
-  return standings.map((team, index) => ({
+  // Seeds 1-3: division winners
+  const divisionIds = Array.from(
+    new Set(
+      sortedByRank
+        .map((team) => team.divisionId)
+        .filter((id): id is number => id !== null && id !== undefined),
+    ),
+  );
+
+  const divisionWinners: Team[] = [];
+  for (const divisionId of divisionIds) {
+    const winner = sortedByRank.find(
+      (team) => team.divisionId === divisionId && !usedRosterIds.has(team.sleeperRosterId),
+    );
+    if (winner) {
+      divisionWinners.push(winner);
+      usedRosterIds.add(winner.sleeperRosterId);
+    }
+  }
+  divisionWinners.sort((a, b) => a.rank - b.rank);
+  seeded.push(...divisionWinners);
+
+  // Seeds 4-5: next best records (regardless of division)
+  for (const team of sortedByRank) {
+    if (seeded.length >= 5) break;
+    if (usedRosterIds.has(team.sleeperRosterId)) continue;
+    seeded.push(team);
+    usedRosterIds.add(team.sleeperRosterId);
+  }
+
+  // Seed 6: highest points for among remaining teams
+  const remainingAfterWildcards = sortedByRank.filter(
+    (team) => !usedRosterIds.has(team.sleeperRosterId),
+  );
+  const pfSeed = remainingAfterWildcards.reduce<Team | null>((currentBest, team) => {
+    if (!currentBest) return team;
+    if (team.pointsFor > currentBest.pointsFor) return team;
+    if (team.pointsFor === currentBest.pointsFor && team.rank < currentBest.rank) return team;
+    return currentBest;
+  }, null);
+
+  if (pfSeed) {
+    seeded.push(pfSeed);
+    usedRosterIds.add(pfSeed.sleeperRosterId);
+  }
+
+  // Seeds 7-12: fill in remaining teams by record order
+  const remainder = sortedByRank.filter((team) => !usedRosterIds.has(team.sleeperRosterId));
+  const finalOrder = [...seeded, ...remainder];
+
+  return finalOrder.map((team, index) => ({
     ...team,
     seed: index + 1,
   }));

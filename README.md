@@ -19,7 +19,15 @@ npm install
 npm run dev
 ```
 
-## Bracket rules (seeding and routing)
+## Playoff seeding
+
+- Playoffs begin Week 15 and conclude in Week 17.
+- Six-team championship bracket; seeds 1 and 2 earn first-round byes.
+- Seeds 1-3: Division winners, ordered by record (wins/losses/ties) > Points For.
+- Seeds 4-5: Next two best records regardless of division > Points For.
+- Seed 6: Highest Points For among teams not already seeded (ignores record/division).
+
+## Bracket rules (routing)
 
 - Champ Bowl
 
