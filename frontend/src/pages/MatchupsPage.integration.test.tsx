@@ -27,9 +27,9 @@ describe('MatchupsPage', () => {
 
     const { container } = render(<MatchupsPage />);
 
-    await waitFor(() =>
-      expect(container.querySelector('.loading-spinner')).toBeTruthy(),
-    );
+    await waitFor(() => {
+      expect(container.querySelector('.loading-spinner')).toBeTruthy();
+    });
   });
 
   it('surfaces API errors', async () => {

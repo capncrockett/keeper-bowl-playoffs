@@ -68,7 +68,6 @@ export default function PlayoffsLivePage() {
 
         setSlots(bracketSlots);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {

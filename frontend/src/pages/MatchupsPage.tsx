@@ -45,7 +45,6 @@ export function MatchupsPage() {
         setSelectedWeek(seasonState.displayWeek);
         setSeasonLabel(`${seasonState.season} • Week ${seasonState.displayWeek}`);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Failed to load NFL state');
       }
@@ -81,7 +80,6 @@ export function MatchupsPage() {
         const live = paired.map((p) => buildLiveMatchData(p));
         setLiveMatchups(live);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Failed to load matchups');
         setLiveMatchups([]);

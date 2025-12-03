@@ -31,7 +31,6 @@ export function StandingsPage() {
 
         setTeams(withSeeds);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {

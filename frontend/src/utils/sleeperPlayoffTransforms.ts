@@ -63,7 +63,6 @@ export function toBracketGameOutcomes(
     const slotId = SLEEPER_TO_BRACKET_MAP[key];
 
     if (!slotId) {
-      // eslint-disable-next-line no-console
       console.warn(`No bracket slot mapping found for ${key}`);
       return;
     }

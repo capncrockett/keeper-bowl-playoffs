@@ -19,13 +19,16 @@ export function buildTeam(overrides: Partial<Team> = {}): Team {
   };
 }
 
-export const mockTeams: Team[] = Array.from({ length: 12 }, (_, index) =>
-  buildTeam({
-    teamName: `Team ${index + 1}`,
-    ownerDisplayName: `Owner ${index + 1}`,
-    sleeperRosterId: index + 1,
-    sleeperUserId: `user-${index + 1}`,
-    seed: index + 1,
-    rank: index + 1,
-  }),
-);
+export const mockTeams: Team[] = Array.from({ length: 12 }, (_, index) => {
+  const label = String(index + 1);
+  const rosterId = index + 1;
+
+  return buildTeam({
+    teamName: `Team ${label}`,
+    ownerDisplayName: `Owner ${label}`,
+    sleeperRosterId: rosterId,
+    sleeperUserId: `user-${label}`,
+    seed: rosterId,
+    rank: rosterId,
+  });
+});

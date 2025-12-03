@@ -1,32 +1,11 @@
 import '@testing-library/jest-dom';
 import { TextDecoder, TextEncoder } from 'util';
 import { TransformStream, WritableStream, ReadableStream } from 'stream/web';
+import type { SetupServerApi } from 'msw/node';
 
 // Silence expected console noise from error-state tests
 const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-// Polyfill TextEncoder/TextDecoder for react-router in Jest
-if (!global.TextEncoder) {
-  global.TextEncoder = TextEncoder;
-}
-
-if (!global.TextDecoder) {
-  // @ts-expect-error - Jest's types don't include TextDecoder on global
-  global.TextDecoder = TextDecoder;
-}
-
-if (!(global as any).TransformStream) {
-  (global as any).TransformStream = TransformStream;
-}
-
-if (!(global as any).ReadableStream) {
-  (global as any).ReadableStream = ReadableStream;
-}
-
-if (!(global as any).WritableStream) {
-  (global as any).WritableStream = WritableStream;
-}
 
 class SafeMessagePort {
   onmessage: ((event: { data?: unknown }) => void) | null = null;
@@ -59,40 +38,114 @@ class SafeMessageChannel {
   }
 }
 
-(global as any).MessageChannel = SafeMessageChannel;
-(global as any).MessagePort = (global as any).MessagePort ?? SafeMessagePort;
-
-// Prefer Node/undici fetch so MSW's node server can intercept
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { fetch: nodeFetch, Headers: NodeHeaders, Request: NodeRequest, Response: NodeResponse } =
-  require('undici');
-
-(global as any).fetch = (global as any).fetch ?? nodeFetch;
-(global as any).Headers = (global as any).Headers ?? NodeHeaders;
-(global as any).Request = (global as any).Request ?? NodeRequest;
-(global as any).Response = (global as any).Response ?? NodeResponse;
-
-if (!(global as any).BroadcastChannel) {
-  class MockBroadcastChannel {
-    name: string;
-    constructor(name: string) {
-      this.name = name;
-    }
-    postMessage() {}
-    close() {}
-    addEventListener() {}
-    removeEventListener() {}
+class MockBroadcastChannel {
+  name: string;
+  onmessage: ((ev: MessageEvent) => void) | null = null;
+  onmessageerror: ((ev: MessageEvent) => void) | null = null;
+  constructor(name: string) {
+    this.name = name;
   }
-  (global as any).BroadcastChannel = MockBroadcastChannel;
+  postMessage(data?: unknown) {
+    const event = new MessageEvent('message', { data });
+    this.onmessage?.(event);
+  }
+  close() {}
+  addEventListener() {}
+  removeEventListener() {}
+  dispatchEvent() {
+    return true;
+  }
 }
 
-// Lazy import server after globals are patched
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { server } = require('./server');
+type PolyfillableGlobals = {
+  TextEncoder?: typeof globalThis.TextEncoder;
+  TextDecoder?: typeof globalThis.TextDecoder;
+  TransformStream?: typeof globalThis.TransformStream;
+  ReadableStream?: typeof globalThis.ReadableStream;
+  WritableStream?: typeof globalThis.WritableStream;
+  fetch?: typeof globalThis.fetch;
+  Headers?: typeof globalThis.Headers;
+  Request?: typeof globalThis.Request;
+  Response?: typeof globalThis.Response;
+};
+
+type TestGlobal = Omit<
+  typeof globalThis,
+  keyof PolyfillableGlobals | 'MessageChannel' | 'MessagePort' | 'BroadcastChannel'
+> &
+  PolyfillableGlobals & {
+    MessageChannel?: typeof globalThis.MessageChannel | typeof SafeMessageChannel;
+    MessagePort?: typeof globalThis.MessagePort | typeof SafeMessagePort;
+    BroadcastChannel?: typeof globalThis.BroadcastChannel | typeof MockBroadcastChannel;
+  };
+
+const globalScope = globalThis as TestGlobal;
+const polyfillTextEncoder = TextEncoder as unknown as typeof globalThis.TextEncoder;
+const polyfillTextDecoder = TextDecoder as unknown as typeof globalThis.TextDecoder;
+const polyfillTransformStream = TransformStream as unknown as typeof globalThis.TransformStream;
+const polyfillReadableStream = ReadableStream as unknown as typeof globalThis.ReadableStream;
+const polyfillWritableStream = WritableStream as unknown as typeof globalThis.WritableStream;
+const polyfillBroadcastChannel =
+  MockBroadcastChannel as unknown as typeof globalThis.BroadcastChannel;
+let polyfillFetch: typeof globalThis.fetch;
+let polyfillHeaders: typeof globalThis.Headers;
+let polyfillRequest: typeof globalThis.Request;
+let polyfillResponse: typeof globalThis.Response;
+let server: SetupServerApi;
+
+// Polyfill TextEncoder/TextDecoder for react-router in Jest
+if (!globalScope.TextEncoder) {
+  globalScope.TextEncoder = polyfillTextEncoder;
+}
+
+if (!globalScope.TextDecoder) {
+  globalScope.TextDecoder = polyfillTextDecoder;
+}
+
+if (!globalScope.TransformStream) {
+  globalScope.TransformStream = polyfillTransformStream;
+}
+
+if (!globalScope.ReadableStream) {
+  globalScope.ReadableStream = polyfillReadableStream;
+}
+
+if (!globalScope.WritableStream) {
+  globalScope.WritableStream = polyfillWritableStream;
+}
+
+globalScope.MessageChannel = globalScope.MessageChannel ?? SafeMessageChannel;
+globalScope.MessagePort = globalScope.MessagePort ?? SafeMessagePort;
+
+// Load undici only after global TextEncoder/TextDecoder are available
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const undici = require('undici') as typeof import('undici');
+polyfillFetch = undici.fetch as unknown as typeof globalThis.fetch;
+polyfillHeaders = undici.Headers as unknown as typeof globalThis.Headers;
+polyfillRequest = undici.Request as unknown as typeof globalThis.Request;
+polyfillResponse = undici.Response as unknown as typeof globalThis.Response;
+
+// Prefer Node/undici fetch so MSW's node server can intercept
+globalScope.fetch = globalScope.fetch ?? polyfillFetch;
+globalScope.Headers = globalScope.Headers ?? polyfillHeaders;
+globalScope.Request = globalScope.Request ?? polyfillRequest;
+globalScope.Response = globalScope.Response ?? polyfillResponse;
+
+if (!globalScope.BroadcastChannel) {
+  globalScope.BroadcastChannel = polyfillBroadcastChannel;
+}
+
+// Load MSW server only after fetch/Response are defined
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+({ server } = require('./server') as typeof import('./server'));
 
 // MSW: start/stop per test lifecycle
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'error' });
+});
+afterEach(() => {
+  server.resetHandlers();
+});
 afterAll(() => {
   server.close();
   consoleErrorSpy.mockRestore();
