@@ -2,6 +2,10 @@ import '@testing-library/jest-dom';
 import { TextDecoder, TextEncoder } from 'util';
 import { TransformStream, WritableStream, ReadableStream } from 'stream/web';
 
+// Silence expected console noise from error-state tests
+const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
 // Polyfill TextEncoder/TextDecoder for react-router in Jest
 if (!global.TextEncoder) {
   global.TextEncoder = TextEncoder;
@@ -89,4 +93,8 @@ const { server } = require('./server');
 // MSW: start/stop per test lifecycle
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+afterAll(() => {
+  server.close();
+  consoleErrorSpy.mockRestore();
+  consoleWarnSpy.mockRestore();
+});
