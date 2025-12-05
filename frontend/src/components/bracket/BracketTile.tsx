@@ -24,6 +24,7 @@ interface TeamRowProps {
     currentPoints?: number;
   } | null;
   mode: 'score' | 'reward';
+  round: BracketSlot['round'];
 }
 
 const FLIPPABLE_ROUNDS = new Set<BracketSlot['round']>([
@@ -84,7 +85,10 @@ function describeDestination(
   return `${label} (${lane})`;
 }
 
-const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
+const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
+  const seed = pos?.seed ?? team?.seed;
+  const showSeedBadge = seed != null && (round === 'champ_round_1' || round === 'toilet_round_1');
+
   const renderPlaceholderRow = (label: string) => (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
       <div className="flex justify-between items-start gap-2">
@@ -162,6 +166,11 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
             size="md"
             className="md:scale-125"
           />
+          {showSeedBadge && (
+            <span className="px-1.5 py-0.5 rounded-md bg-base-300 text-[0.6rem] font-semibold text-base-content/80 whitespace-nowrap">
+              Seed {seed}
+            </span>
+          )}
         </div>
 
         {/* Scores on the right */}
@@ -205,7 +214,7 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
         <div className="divide-y divide-base-300">
           {slot.positions.map((pos, idx) => {
             const team = pos?.teamId != null ? teamsById.get(pos.teamId) : undefined;
-            return <TeamRow key={idx} team={team} pos={pos} mode={mode} />;
+            return <TeamRow key={idx} team={team} pos={pos} mode={mode} round={slot.round} />;
           })}
         </div>
 

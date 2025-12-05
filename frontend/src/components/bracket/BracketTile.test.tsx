@@ -50,7 +50,7 @@ describe('BracketTile', () => {
 
     render(<BracketTile slot={slot} teamsById={teamsById} highlightTeamId={null} mode="reward" />);
 
-    expect(screen.getByText('CHAMPION!!!')).toBeInTheDocument();
-    expect(screen.getByText(/reward/i)).toBeInTheDocument();
+    expect(screen.getByText('1st / 2nd')).toBeInTheDocument();
+    expect(screen.getByText('W = 1st | L = 2nd')).toBeInTheDocument();
   });
 });
