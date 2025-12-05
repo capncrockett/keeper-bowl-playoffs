@@ -34,6 +34,9 @@ describe('BracketTile', () => {
   it('shows reward details on reward mode', () => {
     const finalsTemplate = BRACKET_TEMPLATE.find((s) => s.id === 'champ_finals');
     if (!finalsTemplate) throw new Error('Missing slot template for champ_finals');
+    if (!finalsTemplate.rewardTitle || !finalsTemplate.rewardText) {
+      throw new Error('Missing reward metadata for champ_finals');
+    }
 
     const teamsById = new Map([
       [1, buildTeam({ sleeperRosterId: 1, teamName: 'Alpha' })],
@@ -50,7 +53,7 @@ describe('BracketTile', () => {
 
     render(<BracketTile slot={slot} teamsById={teamsById} highlightTeamId={null} mode="reward" />);
 
-    expect(screen.getByText('1st / 2nd')).toBeInTheDocument();
-    expect(screen.getByText('W = 1st | L = 2nd')).toBeInTheDocument();
+    expect(screen.getByText(finalsTemplate.rewardTitle)).toBeInTheDocument();
+    expect(screen.getByText(finalsTemplate.rewardText)).toBeInTheDocument();
   });
 });

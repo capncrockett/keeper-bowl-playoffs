@@ -39,7 +39,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'champ_finals',
     label: 'Championship',
     positions: [null, null],
-    rewardTitle: '1st / 2nd',
+    rewardTitle: 'Grundle Champ',
     rewardText: 'W = 1st ( BELT + 👑 + 💰) | L = 2nd (2x buy-in)',
   },
   {
