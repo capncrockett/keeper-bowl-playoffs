@@ -1,0 +1,30 @@
+import { screen } from '@testing-library/react';
+import App from './App';
+import { renderWithRouter } from './test/testUtils';
+
+describe('App routing and navigation', () => {
+  it('redirects "/" to "/matchups" and highlights nav', async () => {
+    renderWithRouter(<App />, { route: '/' });
+
+    expect(await screen.findByRole('heading', { name: /matchups/i })).toBeInTheDocument();
+    const matchupsLink = screen.getByRole('link', { name: /matchups/i });
+    expect(matchupsLink).toHaveClass('btn-active');
+  });
+
+  it('keeps nav visible on unknown routes', () => {
+    renderWithRouter(<App />, { route: '/not-a-route' });
+
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    const matchupsLink = screen.getByRole('link', { name: /matchups/i });
+    expect(matchupsLink).not.toHaveClass('btn-active');
+  });
+
+  it('shows mobile brand text at small widths', async () => {
+    Object.defineProperty(window, 'innerWidth', { writable: true, value: 480 });
+    window.dispatchEvent(new Event('resize'));
+
+    renderWithRouter(<App />, { route: '/' });
+
+    expect(await screen.findByText(/KB Playoffs/i)).toBeInTheDocument();
+  });
+});

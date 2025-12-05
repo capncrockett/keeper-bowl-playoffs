@@ -1,0 +1,382 @@
+// frontend/src/test/fixtures/sleeper.ts
+
+import type {
+  SleeperUser,
+  SleeperRoster,
+  SleeperMatchup,
+  SleeperNFLState,
+  SleeperPlayoffMatchup,
+  SleeperPlayer,
+  SleeperLeague,
+} from '../../api/sleeper';
+
+export const mockSleeperLeague: SleeperLeague = {
+  total_rosters: 12,
+  status: 'in_season',
+  sport: 'nfl',
+  settings: {},
+  metadata: {
+    division_1: 'Alpha',
+    division_2: 'Beta',
+  },
+  season_type: 'regular',
+  season: '2025',
+  scoring_settings: {},
+  roster_positions: [],
+  name: 'Test League',
+  league_id: 'test_league',
+  draft_id: 'draft_1',
+};
+
+export const mockSleeperUsers: SleeperUser[] = [
+  {
+    user_id: 'user1',
+    username: 'champion_joe',
+    display_name: 'Joe Champion',
+    avatar: 'avatar1',
+    metadata: { team_name: 'Big Ol\' TDs' },
+  },
+  {
+    user_id: 'user2',
+    username: 'winner_sarah',
+    display_name: 'Sarah Winner',
+    avatar: 'avatar2',
+    metadata: { team_name: 'Glaurung & Foes' },
+  },
+  {
+    user_id: 'user3',
+    username: 'playoff_mike',
+    display_name: 'Mike Playoff',
+    avatar: 'avatar3',
+    metadata: { team_name: 'The Dudes From Cocoon' },
+  },
+  {
+    user_id: 'user4',
+    username: 'contender_lisa',
+    display_name: 'Lisa Contender',
+    avatar: 'avatar4',
+    metadata: { team_name: 'There Goes Nabers\' Hood' },
+  },
+  {
+    user_id: 'user5',
+    username: 'bubble_team',
+    display_name: 'Bubble Team',
+    avatar: 'avatar5',
+    metadata: { team_name: '5 Fingers 2 Ur Face' },
+  },
+  {
+    user_id: 'user6',
+    username: 'wildcard_win',
+    display_name: 'Wildcard Win',
+    avatar: 'avatar6',
+    metadata: { team_name: 'Kitchen Chubbards' },
+  },
+  {
+    user_id: 'user7',
+    username: 'toilet_bound',
+    display_name: 'Toilet Bound',
+    avatar: 'avatar7',
+    metadata: { team_name: 'Inappropriate touchdowns' },
+  },
+  {
+    user_id: 'user8',
+    username: 'basement_dweller',
+    display_name: 'Basement Dweller',
+    avatar: 'avatar8',
+    metadata: { team_name: 'Lux73lip' },
+  },
+  {
+    user_id: 'user9',
+    username: 'second_chance',
+    display_name: 'Second Chance',
+    avatar: 'avatar9',
+    metadata: { team_name: 'Team Nine' },
+  },
+  {
+    user_id: 'user10',
+    username: 'almost_there',
+    display_name: 'Almost There',
+    avatar: 'avatar10',
+    metadata: { team_name: 'Team Ten' },
+  },
+  {
+    user_id: 'user11',
+    username: 'poop_king_candidate',
+    display_name: 'Poop King Candidate',
+    avatar: 'avatar11',
+    metadata: { team_name: 'Team Eleven' },
+  },
+  {
+    user_id: 'user12',
+    username: 'last_place',
+    display_name: 'Last Place',
+    avatar: 'avatar12',
+    metadata: { team_name: 'Team Twelve' },
+  },
+];
+
+export const mockSleeperRosters: SleeperRoster[] = [
+  {
+    roster_id: 1,
+    owner_id: 'user1',
+    league_id: 'test_league',
+    starters: ['player1', 'player2', 'player3', 'player4', 'player5', 'player6', 'player7', 'player8', 'player9'],
+    players: ['player1', 'player2', 'player3', 'player4', 'player5', 'player6', 'player7', 'player8', 'player9', 'player10'],
+    reserve: [],
+    settings: { wins: 11, losses: 2, ties: 0, fpts: 1650, fpts_decimal: 50, fpts_against: 1400 },
+    division_id: 1,
+  },
+  {
+    roster_id: 2,
+    owner_id: 'user2',
+    league_id: 'test_league',
+    starters: ['player11', 'player12', 'player13', 'player14', 'player15', 'player16', 'player17', 'player18', 'player19'],
+    players: ['player11', 'player12', 'player13', 'player14', 'player15', 'player16', 'player17', 'player18', 'player19', 'player20'],
+    reserve: [],
+    settings: { wins: 10, losses: 3, ties: 0, fpts: 1600, fpts_decimal: 25, fpts_against: 1420 },
+    division_id: 1,
+  },
+  {
+    roster_id: 3,
+    owner_id: 'user3',
+    league_id: 'test_league',
+    starters: ['player21', 'player22', 'player23', 'player24', 'player25', 'player26', 'player27', 'player28', 'player29'],
+    players: ['player21', 'player22', 'player23', 'player24', 'player25', 'player26', 'player27', 'player28', 'player29', 'player30'],
+    reserve: [],
+    settings: { wins: 9, losses: 4, ties: 0, fpts: 1575, fpts_decimal: 80, fpts_against: 1450 },
+    division_id: 2,
+  },
+  {
+    roster_id: 4,
+    owner_id: 'user4',
+    league_id: 'test_league',
+    starters: ['player31', 'player32', 'player33', 'player34', 'player35', 'player36', 'player37', 'player38', 'player39'],
+    players: ['player31', 'player32', 'player33', 'player34', 'player35', 'player36', 'player37', 'player38', 'player39', 'player40'],
+    reserve: [],
+    settings: { wins: 8, losses: 5, ties: 0, fpts: 1550, fpts_decimal: 60, fpts_against: 1475 },
+    division_id: 2,
+  },
+  {
+    roster_id: 5,
+    owner_id: 'user5',
+    league_id: 'test_league',
+    starters: ['player41', 'player42', 'player43', 'player44', 'player45', 'player46', 'player47', 'player48', 'player49'],
+    players: ['player41', 'player42', 'player43', 'player44', 'player45', 'player46', 'player47', 'player48', 'player49', 'player50'],
+    reserve: [],
+    settings: { wins: 7, losses: 6, ties: 0, fpts: 1525, fpts_decimal: 40, fpts_against: 1500 },
+    division_id: 1,
+  },
+  {
+    roster_id: 6,
+    owner_id: 'user6',
+    league_id: 'test_league',
+    starters: ['player51', 'player52', 'player53', 'player54', 'player55', 'player56', 'player57', 'player58', 'player59'],
+    players: ['player51', 'player52', 'player53', 'player54', 'player55', 'player56', 'player57', 'player58', 'player59', 'player60'],
+    reserve: [],
+    settings: { wins: 7, losses: 6, ties: 0, fpts: 1700, fpts_decimal: 10, fpts_against: 1550 },
+    division_id: 2,
+  },
+  {
+    roster_id: 7,
+    owner_id: 'user7',
+    league_id: 'test_league',
+    starters: ['player61', 'player62', 'player63', 'player64', 'player65', 'player66', 'player67', 'player68', 'player69'],
+    players: ['player61', 'player62', 'player63', 'player64', 'player65', 'player66', 'player67', 'player68', 'player69', 'player70'],
+    reserve: [],
+    settings: { wins: 6, losses: 7, ties: 0, fpts: 1450, fpts_decimal: 90, fpts_against: 1525 },
+    division_id: 1,
+  },
+  {
+    roster_id: 8,
+    owner_id: 'user8',
+    league_id: 'test_league',
+    starters: ['player71', 'player72', 'player73', 'player74', 'player75', 'player76', 'player77', 'player78', 'player79'],
+    players: ['player71', 'player72', 'player73', 'player74', 'player75', 'player76', 'player77', 'player78', 'player79', 'player80'],
+    reserve: [],
+    settings: { wins: 5, losses: 8, ties: 0, fpts: 1400, fpts_decimal: 30, fpts_against: 1575 },
+    division_id: 2,
+  },
+  {
+    roster_id: 9,
+    owner_id: 'user9',
+    league_id: 'test_league',
+    starters: ['player81', 'player82', 'player83', 'player84', 'player85', 'player86', 'player87', 'player88', 'player89'],
+    players: ['player81', 'player82', 'player83', 'player84', 'player85', 'player86', 'player87', 'player88', 'player89', 'player90'],
+    reserve: [],
+    settings: { wins: 4, losses: 9, ties: 0, fpts: 1375, fpts_decimal: 70, fpts_against: 1600 },
+    division_id: 1,
+  },
+  {
+    roster_id: 10,
+    owner_id: 'user10',
+    league_id: 'test_league',
+    starters: ['player91', 'player92', 'player93', 'player94', 'player95', 'player96', 'player97', 'player98', 'player99'],
+    players: ['player91', 'player92', 'player93', 'player94', 'player95', 'player96', 'player97', 'player98', 'player99', 'player100'],
+    reserve: [],
+    settings: { wins: 3, losses: 10, ties: 0, fpts: 1350, fpts_decimal: 55, fpts_against: 1625 },
+    division_id: 2,
+  },
+  {
+    roster_id: 11,
+    owner_id: 'user11',
+    league_id: 'test_league',
+    starters: ['player101', 'player102', 'player103', 'player104', 'player105', 'player106', 'player107', 'player108', 'player109'],
+    players: ['player101', 'player102', 'player103', 'player104', 'player105', 'player106', 'player107', 'player108', 'player109', 'player110'],
+    reserve: [],
+    settings: { wins: 2, losses: 11, ties: 0, fpts: 1300, fpts_decimal: 20, fpts_against: 1650 },
+    division_id: 1,
+  },
+  {
+    roster_id: 12,
+    owner_id: 'user12',
+    league_id: 'test_league',
+    starters: ['player111', 'player112', 'player113', 'player114', 'player115', 'player116', 'player117', 'player118', 'player119'],
+    players: ['player111', 'player112', 'player113', 'player114', 'player115', 'player116', 'player117', 'player118', 'player119', 'player120'],
+    reserve: [],
+    settings: { wins: 1, losses: 12, ties: 0, fpts: 1250, fpts_decimal: 45, fpts_against: 1700 },
+    division_id: 2,
+  },
+];
+
+export const mockSleeperMatchupsWeek13: SleeperMatchup[] = [
+  {
+    roster_id: 1,
+    matchup_id: 1,
+    points: 87.88,
+    starters: ['player1', 'player2', 'player3', 'player4', 'player5', 'player6', 'player7', 'player8', 'player9'],
+    players: ['player1', 'player2', 'player3', 'player4', 'player5', 'player6', 'player7', 'player8', 'player9', 'player10'],
+  },
+  {
+    roster_id: 4,
+    matchup_id: 1,
+    points: 85.64,
+    starters: ['player31', 'player32', 'player33', 'player34', 'player35', 'player36', 'player37', 'player38', 'player39'],
+    players: ['player31', 'player32', 'player33', 'player34', 'player35', 'player36', 'player37', 'player38', 'player39', 'player40'],
+  },
+  {
+    roster_id: 2,
+    matchup_id: 2,
+    points: 115.10,
+    starters: ['player11', 'player12', 'player13', 'player14', 'player15', 'player16', 'player17', 'player18', 'player19'],
+    players: ['player11', 'player12', 'player13', 'player14', 'player15', 'player16', 'player17', 'player18', 'player19', 'player20'],
+  },
+  {
+    roster_id: 7,
+    matchup_id: 2,
+    points: 104.96,
+    starters: ['player61', 'player62', 'player63', 'player64', 'player65', 'player66', 'player67', 'player68', 'player69'],
+    players: ['player61', 'player62', 'player63', 'player64', 'player65', 'player66', 'player67', 'player68', 'player69', 'player70'],
+  },
+  {
+    roster_id: 3,
+    matchup_id: 3,
+    points: 126.24,
+    starters: ['player21', 'player22', 'player23', 'player24', 'player25', 'player26', 'player27', 'player28', 'player29'],
+    players: ['player21', 'player22', 'player23', 'player24', 'player25', 'player26', 'player27', 'player28', 'player29', 'player30'],
+  },
+  {
+    roster_id: 5,
+    matchup_id: 3,
+    points: 89.02,
+    starters: ['player41', 'player42', 'player43', 'player44', 'player45', 'player46', 'player47', 'player48', 'player49'],
+    players: ['player41', 'player42', 'player43', 'player44', 'player45', 'player46', 'player47', 'player48', 'player49', 'player50'],
+  },
+  {
+    roster_id: 6,
+    matchup_id: 4,
+    points: 106.74,
+    starters: ['player51', 'player52', 'player53', 'player54', 'player55', 'player56', 'player57', 'player58', 'player59'],
+    players: ['player51', 'player52', 'player53', 'player54', 'player55', 'player56', 'player57', 'player58', 'player59', 'player60'],
+  },
+  {
+    roster_id: 8,
+    matchup_id: 4,
+    points: 92.24,
+    starters: ['player71', 'player72', 'player73', 'player74', 'player75', 'player76', 'player77', 'player78', 'player79'],
+    players: ['player71', 'player72', 'player73', 'player74', 'player75', 'player76', 'player77', 'player78', 'player79', 'player80'],
+  },
+  {
+    roster_id: 9,
+    matchup_id: 5,
+    points: 78.50,
+    starters: ['player81', 'player82', 'player83', 'player84', 'player85', 'player86', 'player87', 'player88', 'player89'],
+    players: ['player81', 'player82', 'player83', 'player84', 'player85', 'player86', 'player87', 'player88', 'player89', 'player90'],
+  },
+  {
+    roster_id: 10,
+    matchup_id: 5,
+    points: 95.30,
+    starters: ['player91', 'player92', 'player93', 'player94', 'player95', 'player96', 'player97', 'player98', 'player99'],
+    players: ['player91', 'player92', 'player93', 'player94', 'player95', 'player96', 'player97', 'player98', 'player99', 'player100'],
+  },
+  {
+    roster_id: 11,
+    matchup_id: 6,
+    points: 68.40,
+    starters: ['player101', 'player102', 'player103', 'player104', 'player105', 'player106', 'player107', 'player108', 'player109'],
+    players: ['player101', 'player102', 'player103', 'player104', 'player105', 'player106', 'player107', 'player108', 'player109', 'player110'],
+  },
+  {
+    roster_id: 12,
+    matchup_id: 6,
+    points: 82.15,
+    starters: ['player111', 'player112', 'player113', 'player114', 'player115', 'player116', 'player117', 'player118', 'player119'],
+    players: ['player111', 'player112', 'player113', 'player114', 'player115', 'player116', 'player117', 'player118', 'player119', 'player120'],
+  },
+];
+
+export const mockSleeperMatchupsWeek15: SleeperMatchup[] = [
+  { roster_id: 3, matchup_id: 1, points: 110.12, starters: ['player21'], players: ['player21'] },
+  { roster_id: 6, matchup_id: 1, points: 98.4, starters: ['player31'], players: ['player31'] },
+  { roster_id: 4, matchup_id: 2, points: 104.5, starters: ['player31'], players: ['player31'] },
+  { roster_id: 5, matchup_id: 2, points: 88.9, starters: ['player41'], players: ['player41'] },
+  // Toilet side
+  { roster_id: 8, matchup_id: 3, points: 76.0, starters: ['player71'], players: ['player71'] },
+  { roster_id: 9, matchup_id: 3, points: 82.3, starters: ['player81'], players: ['player81'] },
+  { roster_id: 10, matchup_id: 4, points: 90.1, starters: ['player91'], players: ['player91'] },
+  { roster_id: 11, matchup_id: 4, points: 70.5, starters: ['player101'], players: ['player101'] },
+];
+
+export const mockNFLState: SleeperNFLState = {
+  week: 13,
+  display_week: 13,
+  season: '2025',
+  season_type: 'regular',
+  season_start_date: '2025-09-05',
+  previous_season: '2024',
+  leg: 1,
+  league_season: '2025',
+  league_create_season: '2025',
+};
+
+export const mockPlayoffWinnersBracket: SleeperPlayoffMatchup[] = [
+  // Round 1 (Week 15)
+  { r: 1, m: 1, t1: 3, t2: 6, w: null, l: null, p: null },
+  { r: 1, m: 2, t1: 4, t2: 5, w: null, l: null, p: null },
+  // Round 2 (Week 16) - seeds 1 and 2 have byes
+  { r: 2, m: 1, t1: 1, t2_from: { w: 1 }, w: null, l: null, p: null },
+  { r: 2, m: 2, t1: 2, t2_from: { w: 2 }, w: null, l: null, p: null },
+  // Finals (Week 17)
+  { r: 3, m: 1, t1_from: { w: 1 }, t2_from: { w: 2 }, w: null, l: null, p: null },
+];
+
+export const mockPlayoffLosersBracket: SleeperPlayoffMatchup[] = [
+  // Round 1 (Week 15)
+  { r: 1, m: 1, t1: 8, t2: 9, w: null, l: null, p: null },
+  { r: 1, m: 2, t1: 7, t2: 10, w: null, l: null, p: null },
+  // Round 2 (Week 16) - seeds 11 and 12 "punished" with byes
+  { r: 2, m: 1, t1: 12, t2_from: { l: 1 }, w: null, l: null, p: null },
+  { r: 2, m: 2, t1: 11, t2_from: { l: 2 }, w: null, l: null, p: null },
+  // Finals (Week 17)
+  { r: 3, m: 1, t1_from: { w: 1 }, t2_from: { w: 2 }, w: null, l: null, p: null },
+];
+
+export const mockSleeperPlayers: Record<string, SleeperPlayer> = {
+  player1: { player_id: 'player1', team: 'KC', position: 'QB', first_name: 'Patrick', last_name: 'Mahomes' },
+  player2: { player_id: 'player2', team: 'BUF', position: 'RB', first_name: 'James', last_name: 'Cook' },
+  player3: { player_id: 'player3', team: 'MIA', position: 'WR', first_name: 'Tyreek', last_name: 'Hill' },
+  player11: { player_id: 'player11', team: 'SF', position: 'QB', first_name: 'Brock', last_name: 'Purdy' },
+  player21: { player_id: 'player21', team: 'DAL', position: 'QB', first_name: 'Dak', last_name: 'Prescott' },
+  player31: { player_id: 'player31', team: 'PHI', position: 'QB', first_name: 'Jalen', last_name: 'Hurts' },
+  // Add more as needed for tests
+};

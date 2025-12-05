@@ -9,6 +9,11 @@ import { TeamAvatars } from '../components/common/TeamAvatars';
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
 
+const formatRecord = (record: Team['record']): string => {
+  const base = `${record.wins.toString()}-${record.losses.toString()}`;
+  return record.ties ? `${base}-${record.ties.toString()}` : base;
+};
+
 export function StandingsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -31,7 +36,6 @@ export function StandingsPage() {
 
         setTeams(withSeeds);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -85,9 +89,7 @@ export function StandingsPage() {
             curr.fortuneScore < prev.fortuneScore ? curr : prev,
           );
 
-          const hasDivisionData = derived.some(
-            (team) => team.divisionId !== null && team.divisionId !== undefined,
-          );
+          const hasDivisionData = derived.some((team) => team.divisionId !== null);
 
           const divisionBuckets = hasDivisionData
             ? derived.reduce((map, team) => {
@@ -113,7 +115,7 @@ export function StandingsPage() {
               );
               const divisionName =
                 members[0]?.divisionName ??
-                (divisionId === -1 ? 'Unassigned division' : `Division ${divisionId}`);
+                (divisionId === -1 ? 'Unassigned division' : `Division ${divisionId.toString()}`);
               const divisionAvatarUrl = members[0]?.divisionAvatarUrl ?? null;
 
               return {
@@ -273,10 +275,7 @@ export function StandingsPage() {
                           {div.divisionAvatarUrl ? (
                             <div className="avatar">
                               <div className="w-8 rounded">
-                                <img
-                                  src={div.divisionAvatarUrl}
-                                  alt={div.divisionName ?? 'Division avatar'}
-                                />
+                                <img src={div.divisionAvatarUrl} alt={div.divisionName} />
                               </div>
                             </div>
                           ) : (
@@ -354,8 +353,7 @@ export function StandingsPage() {
                         </div>
                       </td>
                       <td>
-                        {team.record.wins}-{team.record.losses}
-                        {team.record.ties ? `-${team.record.ties}` : ''}
+                        {formatRecord(team.record)}
                       </td>
                       <td>{team.pointsFor.toFixed(2)}</td>
                       <td>{team.pointsAgainst.toFixed(2)}</td>

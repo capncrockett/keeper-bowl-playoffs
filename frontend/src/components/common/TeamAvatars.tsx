@@ -30,9 +30,11 @@ export const TeamAvatars: FC<TeamAvatarsProps> = ({
   size = 'md',
   className = '',
 }) => {
-  const { main, sub } = SIZE_PRESETS[size] ?? SIZE_PRESETS.md;
-  const shouldShowUserAvatar = showUserAvatar && userAvatarUrl && userAvatarUrl !== teamAvatarUrl;
-  const initial = teamName?.charAt(0)?.toUpperCase() ?? '?';
+  const { main, sub } = SIZE_PRESETS[size];
+  const normalizedUserAvatarUrl = userAvatarUrl ?? undefined;
+  const shouldShowUserAvatar =
+    showUserAvatar && normalizedUserAvatarUrl != null && normalizedUserAvatarUrl !== teamAvatarUrl;
+  const initial = teamName.charAt(0).toUpperCase() || '?';
 
   return (
     <div
@@ -70,7 +72,7 @@ export const TeamAvatars: FC<TeamAvatarsProps> = ({
             className="rounded-full border-2 border-base-100 bg-base-200 overflow-hidden"
             style={{ width: sub, height: sub }}
           >
-            <img src={userAvatarUrl ?? undefined} alt={userDisplayName ?? 'Manager avatar'} />
+            <img src={normalizedUserAvatarUrl} alt={userDisplayName ?? 'Manager avatar'} />
           </div>
         </div>
       )}

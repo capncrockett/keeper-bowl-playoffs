@@ -22,6 +22,11 @@ const LEAGUE_ID = '1251950356187840512';
 
 type BracketMode = 'score' | 'reward';
 
+const formatRecord = (record: Team['record']): string => {
+  const base = `${record.wins.toString()}-${record.losses.toString()}`;
+  return record.ties ? `${base}-${record.ties.toString()}` : base;
+};
+
 export default function PlayoffsLivePage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [slots, setSlots] = useState<BracketSlot[]>(BRACKET_TEMPLATE);
@@ -68,7 +73,6 @@ export default function PlayoffsLivePage() {
 
         setSlots(bracketSlots);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -122,7 +126,9 @@ export default function PlayoffsLivePage() {
               className={`btn btn-xs sm:btn-sm join-item ${
                 mode === 'score' ? 'btn-primary' : 'btn-ghost'
               }`}
-              onClick={() => setMode('score')}
+              onClick={() => {
+                setMode('score');
+              }}
             >
               Score mode
             </button>
@@ -131,7 +137,9 @@ export default function PlayoffsLivePage() {
               className={`btn btn-xs sm:btn-sm join-item ${
                 mode === 'reward' ? 'btn-primary' : 'btn-ghost'
               }`}
-              onClick={() => setMode('reward')}
+              onClick={() => {
+                setMode('reward');
+              }}
             >
               Reward mode
             </button>
@@ -176,8 +184,7 @@ export default function PlayoffsLivePage() {
                     {pvpInfo.selected.seed}. {pvpInfo.selected.teamName}
                   </div>
                   <div className="text-[0.7rem] text-base-content/60">
-                    ({pvpInfo.selected.record.wins}-{pvpInfo.selected.record.losses}
-                    {pvpInfo.selected.record.ties ? `-${pvpInfo.selected.record.ties}` : ''})
+                    ({formatRecord(pvpInfo.selected.record)})
                   </div>
                 </div>
               </div>
@@ -200,8 +207,7 @@ export default function PlayoffsLivePage() {
                       {pvpInfo.opponent.seed}. {pvpInfo.opponent.teamName}
                     </div>
                     <div className="text-[0.7rem] text-base-content/60">
-                      ({pvpInfo.opponent.record.wins}-{pvpInfo.opponent.record.losses}
-                      {pvpInfo.opponent.record.ties ? `-${pvpInfo.opponent.record.ties}` : ''})
+                      ({formatRecord(pvpInfo.opponent.record)})
                     </div>
                   </div>
                 </div>

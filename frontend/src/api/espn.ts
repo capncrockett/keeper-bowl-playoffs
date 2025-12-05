@@ -21,7 +21,9 @@ export interface ESPNCompetition {
 }
 
 export interface ESPNEvent {
+  id?: string;
   competitions: ESPNCompetition[];
+  status?: ESPNCompetition['status'];
 }
 
 export interface ESPNScoreboard {
@@ -37,14 +39,20 @@ export async function getESPNScoreboard(
   week: number,
   seasonType: number = 2,
 ): Promise<ESPNScoreboard> {
-  const url = `${ESPN_BASE_URL}/scoreboard?seasontype=${seasonType}&week=${week}`;
-  
+  const params = new URLSearchParams({
+    seasontype: String(seasonType),
+    week: String(week),
+  });
+  const url = `${ESPN_BASE_URL}/scoreboard?${params.toString()}`;
+
   const response = await fetch(url, {
     cache: 'no-store', // Always get fresh game status
   });
 
   if (!response.ok) {
-    throw new Error(`ESPN API error (${response.status}): ${response.statusText}`);
+    throw new Error(
+      `ESPN API error (${response.status.toString()}): ${response.statusText}`,
+    );
   }
 
   return (await response.json()) as ESPNScoreboard;

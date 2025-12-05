@@ -11,6 +11,11 @@ Playoff visualization and bracket UI for a Sleeper keeper league.
 - DaisyUI
 - ESLint + Prettier (soon)
 
+## Testing
+
+- Unit/integration: `cd frontend && npm test` (Jest + RTL, jsdom). See `TESTING.md` for roadmap.
+- E2E smoke: `cd frontend && npm run test:e2e` (Playwright). Configure base URL via `E2E_BASE_URL` in `.env` (root uses the deployed Vercel URL by default).
+
 ## Getting Started
 
 ```bash
