@@ -3,15 +3,18 @@
 const SLEEPER_BASE_URL = 'https://api.sleeper.app/v1';
 const SLEEPER_PROJECTIONS_BASE = 'https://api.sleeper.com/projections/nfl';
 
+type SleeperSeasonType = 'pre' | 'regular' | 'post';
+type SleeperLeagueStatus = 'pre_draft' | 'drafting' | 'in_season' | 'complete';
+
 // --- Raw Sleeper API types (mirror docs) ---
 
 export interface SleeperLeague {
   total_rosters: number;
-  status: 'pre_draft' | 'drafting' | 'in_season' | 'complete';
+  status: SleeperLeagueStatus;
   sport: 'nfl';
   settings: Record<string, unknown>;
   metadata?: Record<string, string | undefined>;
-  season_type: 'pre' | 'regular' | 'post';
+  season_type: SleeperSeasonType;
   season: string;
   scoring_settings: Record<string, number>;
   roster_positions: string[];
@@ -30,6 +33,8 @@ export interface SleeperRosterSettings {
   fpts_decimal?: number;
   fpts_against?: number;
   fpts_against_decimal?: number;
+  division_id?: number;
+  division?: number;
   [key: string]: number | undefined;
 }
 

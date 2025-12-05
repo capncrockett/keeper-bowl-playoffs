@@ -58,8 +58,8 @@ export function mergeRostersAndUsersToTeams(
     const divisionIdRaw =
       roster.division_id ??
       roster.division ??
-      (roster.settings as { division_id?: number; division?: number }).division_id ??
-      (roster.settings as { division?: number }).division ??
+      roster.settings.division_id ??
+      roster.settings.division ??
       null;
     const divisionId =
       typeof divisionIdRaw === 'number' && !Number.isNaN(divisionIdRaw) ? divisionIdRaw : null;
@@ -99,10 +99,11 @@ export function mergeRostersAndUsersToTeams(
       sleeperRosterId: roster.roster_id,
       sleeperUserId: roster.owner_id,
       divisionId,
-      divisionName: divisionId
+      divisionName: divisionId != null
         ? (divisionNameById.get(divisionId) ?? `Division ${divisionId.toString()}`)
         : null,
-      divisionAvatarUrl: divisionId ? (divisionAvatarById.get(divisionId) ?? null) : null,
+      divisionAvatarUrl:
+        divisionId != null ? (divisionAvatarById.get(divisionId) ?? null) : null,
       record: { wins, losses, ties },
       pointsFor,
       pointsAgainst,
