@@ -57,12 +57,13 @@ const ROUTE_BY_FROM_ID = ROUTING_RULES.reduce(
 
 const cleanLabel = (label: string): string => label.replace(/\s*\(.*?\)\s*$/, '');
 
-const ROUND_TITLES: Record<BracketSlot['round'], string> = {
+const ROUND_TITLES: Partial<Record<BracketSlot['round'], string>> = {
   champ_round_1: 'Champ Round 1',
   champ_round_2: 'Champ Semis',
   champ_finals: 'Championship',
   champ_misc: 'Champ Placement',
   keeper_main: 'Keeper Bowl',
+  // TODO: these names don't make sense. It's not a misc or a Placement card. The titles for these cards don't need to re-state what's at the top of the column. We already have Round 1, 2, and Finals with Week #'s as subtitles. Maybe it should be CR1G1, KR2G3. That seems lame though. We'll think of something later.
   keeper_misc: 'Keeper Placement',
   toilet_round_1: 'Toilet Round 1',
   toilet_round_2: 'Toilet Semis',
@@ -143,7 +144,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
 
     // For non-BYE unknown teams, just show seed or TBD
     if (pos.seed != null) {
-      return renderPlaceholderRow(`Seed ${pos.seed}`);
+      return renderPlaceholderRow(`Seed ${pos.seed.toString()}`);
     }
     return renderPlaceholderRow('TBD');
   }

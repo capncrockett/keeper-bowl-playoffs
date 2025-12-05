@@ -11,18 +11,14 @@ type ThemeValue = (typeof THEMES)[number]['value'];
 
 const STORAGE_KEY = 'keeper-bowl-theme';
 
-export function ThemeSelector() {
-  const [theme, setTheme] = useState<ThemeValue>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return (stored as ThemeValue) || 'dark';
-  });
+const getStoredTheme = (): ThemeValue => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  const isStoredTheme = THEMES.some(({ value }) => value === stored);
+  return isStoredTheme ? (stored as ThemeValue) : 'dark';
+};
 
-  // Initialize theme on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const initialTheme = (stored as ThemeValue) || 'dark';
-    document.documentElement.setAttribute('data-theme', initialTheme);
-  }, []);
+export function ThemeSelector() {
+  const [theme, setTheme] = useState<ThemeValue>(getStoredTheme);
 
   // Update theme when changed
   useEffect(() => {
@@ -55,7 +51,9 @@ export function ThemeSelector() {
         {THEMES.map((t) => (
           <li key={t.value}>
             <button
-              onClick={() => setTheme(t.value)}
+              onClick={() => {
+                setTheme(t.value);
+              }}
               className={theme === t.value ? 'active' : ''}
             >
               {t.label}

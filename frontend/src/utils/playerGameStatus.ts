@@ -11,7 +11,7 @@ import type { SleeperPlayer } from '../api/sleeper';
  */
 export function countFinishedPlayers(
   starterIds: string[],
-  playersById: Record<string, SleeperPlayer>,
+  playersById: Record<string, SleeperPlayer | undefined>,
   teamGameStatus: Map<string, boolean>,
 ): { total: number; finished: number } {
   let finished = 0;

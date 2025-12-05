@@ -8,10 +8,10 @@ const SLEEPER_PROJECTIONS_BASE = 'https://api.sleeper.com/projections/nfl';
 export interface SleeperLeague {
   total_rosters: number;
   status: 'pre_draft' | 'drafting' | 'in_season' | 'complete';
-  sport: 'nfl' | string;
+  sport: 'nfl';
   settings: Record<string, unknown>;
   metadata?: Record<string, string | undefined>;
-  season_type: 'pre' | 'regular' | 'post' | string;
+  season_type: 'pre' | 'regular' | 'post';
   season: string;
   scoring_settings: Record<string, number>;
   roster_positions: string[];
@@ -71,7 +71,7 @@ export interface SleeperMatchup {
 
 export interface SleeperNFLState {
   week: number;
-  season_type: 'pre' | 'regular' | 'post' | string;
+  season_type: 'pre' | 'regular' | 'post';
   season_start_date: string;
   season: string;
   previous_season: string;
@@ -121,7 +121,7 @@ async function sleeperFetch<T>(path: string, bustCache = false): Promise<T> {
   // Add cache-busting query param instead of headers to avoid CORS issues
   if (bustCache) {
     const separator = path.includes('?') ? '&' : '?';
-    url += `${separator}_t=${Date.now()}`;
+    url += `${separator}_t=${Date.now().toString()}`;
   }
 
   const response = await fetch(url, {
@@ -131,7 +131,9 @@ async function sleeperFetch<T>(path: string, bustCache = false): Promise<T> {
 
   if (!response.ok) {
     // You can add more robust logging / error boundaries later
-    throw new Error(`Sleeper API error (${response.status}): ${response.statusText}`);
+    throw new Error(
+      `Sleeper API error (${response.status.toString()}): ${response.statusText}`,
+    );
   }
 
   return (await response.json()) as T;
@@ -155,7 +157,10 @@ export async function getLeagueMatchupsForWeek(
   leagueId: string,
   week: number,
 ): Promise<SleeperMatchup[]> {
-  return sleeperFetch<SleeperMatchup[]>(`/league/${leagueId}/matchups/${week}`, true);
+  return sleeperFetch<SleeperMatchup[]>(
+    `/league/${leagueId}/matchups/${String(week)}`,
+    true,
+  );
 }
 
 export async function getNFLState(): Promise<SleeperNFLState> {
@@ -174,10 +179,14 @@ export async function getPlayerProjections(
   season: number,
   week: number,
 ): Promise<SleeperPlayerProjection[]> {
-  const url = `${SLEEPER_PROJECTIONS_BASE}/${season}/${week}?season_type=regular`;
+  const url = `${SLEEPER_PROJECTIONS_BASE}/${String(season)}/${String(
+    week,
+  )}?season_type=regular`;
   const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) {
-    throw new Error(`Projections API error (${response.status}): ${response.statusText}`);
+    throw new Error(
+      `Projections API error (${response.status.toString()}): ${response.statusText}`,
+    );
   }
   return (await response.json()) as SleeperPlayerProjection[];
 }
@@ -198,7 +207,9 @@ export async function getAllPlayers(): Promise<Record<string, SleeperPlayer>> {
     cache: 'force-cache', // Cache aggressively since player data changes rarely
   });
   if (!response.ok) {
-    throw new Error(`Players API error (${response.status}): ${response.statusText}`);
+    throw new Error(
+      `Players API error (${response.status.toString()}): ${response.statusText}`,
+    );
   }
   return (await response.json()) as Record<string, SleeperPlayer>;
 }
