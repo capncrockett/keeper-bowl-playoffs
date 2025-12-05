@@ -16,7 +16,7 @@ import type { BracketSlotId } from '../bracket/types';
 /**
  * Maps Sleeper matchup identifiers to our BracketSlotIds
  */
-const SLEEPER_TO_BRACKET_MAP: Record<string, BracketSlotId> = {
+const SLEEPER_TO_BRACKET_MAP: Partial<Record<string, BracketSlotId>> = {
   // Winners Bracket (Champ Bowl)
   'winners_r1_m1': 'champ_r1_g1', // 4 vs 2 -> actually should be 4 vs 5
   'winners_r1_m2': 'champ_r1_g2', // 7 vs 3 -> actually should be 3 vs 6
@@ -37,7 +37,7 @@ const SLEEPER_TO_BRACKET_MAP: Record<string, BracketSlotId> = {
 };
 
 function makeMatchupKey(bracket: 'winners' | 'losers', round: number, matchup: number): string {
-  return `${bracket}_r${round}_m${matchup}`;
+  return `${bracket}_r${round.toString()}_m${matchup.toString()}`;
 }
 
 /**
@@ -78,8 +78,12 @@ export function toBracketGameOutcomes(
   };
 
   // Process all matchups from both brackets
-  winnersBracket.forEach((m) => processMatchup(m, 'winners'));
-  losersBracket.forEach((m) => processMatchup(m, 'losers'));
+  winnersBracket.forEach((m) => {
+    processMatchup(m, 'winners');
+  });
+  losersBracket.forEach((m) => {
+    processMatchup(m, 'losers');
+  });
 
   return outcomes;
 }

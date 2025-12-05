@@ -68,10 +68,10 @@ export const BracketGrid: FC<BracketGridProps> = ({
   columnHeightClass,
   defaultHeightScale = 1,
   colGapClass = 'gap-3 md:gap-10',
-}) => {
+  }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
 
-  const gridTemplateColumns = `repeat(${columns.length}, minmax(0, 1fr))`;
+  const gridTemplateColumns = `repeat(${columns.length.toString()}, minmax(0, 1fr))`;
 
   return (
     <div className="w-full">
@@ -128,7 +128,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
                   key={item.id}
                   className="absolute left-0 right-0"
                   style={{
-                    top: `${top}%`,
+                    top: `${top.toString()}%`,
                     transform: center ? 'translateY(-50%)' : undefined,
                   }}
                 >

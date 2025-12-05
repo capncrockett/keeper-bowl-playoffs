@@ -87,11 +87,6 @@ const polyfillReadableStream = ReadableStream as unknown as typeof globalThis.Re
 const polyfillWritableStream = WritableStream as unknown as typeof globalThis.WritableStream;
 const polyfillBroadcastChannel =
   MockBroadcastChannel as unknown as typeof globalThis.BroadcastChannel;
-let polyfillFetch: typeof globalThis.fetch;
-let polyfillHeaders: typeof globalThis.Headers;
-let polyfillRequest: typeof globalThis.Request;
-let polyfillResponse: typeof globalThis.Response;
-let server: SetupServerApi;
 
 // Polyfill TextEncoder/TextDecoder for react-router in Jest
 if (!globalScope.TextEncoder) {
@@ -120,10 +115,10 @@ globalScope.MessagePort = globalScope.MessagePort ?? SafeMessagePort;
 // Load undici only after global TextEncoder/TextDecoder are available
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const undici = require('undici') as typeof import('undici');
-polyfillFetch = undici.fetch as unknown as typeof globalThis.fetch;
-polyfillHeaders = undici.Headers as unknown as typeof globalThis.Headers;
-polyfillRequest = undici.Request as unknown as typeof globalThis.Request;
-polyfillResponse = undici.Response as unknown as typeof globalThis.Response;
+const polyfillFetch = undici.fetch as unknown as typeof globalThis.fetch;
+const polyfillHeaders = undici.Headers as unknown as typeof globalThis.Headers;
+const polyfillRequest = undici.Request as unknown as typeof globalThis.Request;
+const polyfillResponse = undici.Response as unknown as typeof globalThis.Response;
 
 // Prefer Node/undici fetch so MSW's node server can intercept
 globalScope.fetch = globalScope.fetch ?? polyfillFetch;
@@ -137,7 +132,7 @@ if (!globalScope.BroadcastChannel) {
 
 // Load MSW server only after fetch/Response are defined
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-({ server } = require('./server') as typeof import('./server'));
+const { server } = require('./server') as { server: SetupServerApi };
 
 // MSW: start/stop per test lifecycle
 beforeAll(() => {

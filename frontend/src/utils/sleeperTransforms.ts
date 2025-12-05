@@ -62,11 +62,7 @@ export function mergeRostersAndUsersToTeams(
       (roster.settings as { division?: number }).division ??
       null;
     const divisionId =
-      divisionIdRaw === null || divisionIdRaw === undefined
-        ? null
-        : Number.isNaN(Number(divisionIdRaw))
-          ? null
-          : Number(divisionIdRaw);
+      typeof divisionIdRaw === 'number' && !Number.isNaN(divisionIdRaw) ? divisionIdRaw : null;
 
     const wins = roster.settings.wins ?? 0;
     const losses = roster.settings.losses ?? 0;
@@ -88,10 +84,10 @@ export function mergeRostersAndUsersToTeams(
 
     const userAvatarUrl = buildSleeperAvatarUrl(user?.avatar ?? null);
     const teamAvatarUrl =
-      resolveAvatarUrl((roster.metadata?.avatar as string | undefined) ?? null) ??
-      resolveAvatarUrl((roster.metadata?.team_avatar as string | undefined) ?? null) ??
-      resolveAvatarUrl((user?.metadata?.avatar as string | undefined) ?? null) ??
-      resolveAvatarUrl((user?.metadata?.team_avatar as string | undefined) ?? null) ??
+      resolveAvatarUrl(roster.metadata?.avatar ?? null) ??
+      resolveAvatarUrl(roster.metadata?.team_avatar ?? null) ??
+      resolveAvatarUrl(user?.metadata?.avatar ?? null) ??
+      resolveAvatarUrl(user?.metadata?.team_avatar ?? null) ??
       userAvatarUrl ??
       null;
 
@@ -104,7 +100,7 @@ export function mergeRostersAndUsersToTeams(
       sleeperUserId: roster.owner_id,
       divisionId,
       divisionName: divisionId
-        ? (divisionNameById.get(divisionId) ?? `Division ${divisionId}`)
+        ? (divisionNameById.get(divisionId) ?? `Division ${divisionId.toString()}`)
         : null,
       divisionAvatarUrl: divisionId ? (divisionAvatarById.get(divisionId) ?? null) : null,
       record: { wins, losses, ties },
@@ -124,7 +120,7 @@ export function mergeRostersAndUsersToTeams(
 export function pairMatchups(
   week: number,
   matchups: SleeperMatchup[],
-  playersById?: Record<string, SleeperPlayer>,
+  playersById?: Record<string, SleeperPlayer | undefined>,
   teamGameStatus?: Map<string, boolean>,
 ): PairedMatchup[] {
   const map = new Map<number, SleeperMatchup[]>();
@@ -146,19 +142,19 @@ export function pairMatchups(
     const [a, b] = entries;
 
     // Count finished players if data is available
-    const canCountFinished = playersById && teamGameStatus;
-    const finishedA = canCountFinished
-      ? countFinishedPlayers(a.starters, playersById, teamGameStatus)
-      : { total: a.starters?.length ?? 0, finished: a.starters?.length ?? 0 };
+    const finishedA =
+      playersById && teamGameStatus
+        ? countFinishedPlayers(a.starters, playersById, teamGameStatus)
+        : { total: a.starters.length, finished: a.starters.length };
 
-    if (!b) {
+    if (entries.length < 2) {
       // bye / incomplete data - treat second side as null
       paired.push({
         matchupId,
         week,
         rosterIdA: a.roster_id,
         rosterIdB: null,
-        pointsA: a.points ?? 0,
+        pointsA: a.points,
         pointsB: 0,
         startersA: finishedA.total,
         startersB: 0,
@@ -168,17 +164,18 @@ export function pairMatchups(
       continue;
     }
 
-    const finishedB = canCountFinished
-      ? countFinishedPlayers(b.starters, playersById, teamGameStatus)
-      : { total: b.starters?.length ?? 0, finished: b.starters?.length ?? 0 };
+    const finishedB =
+      playersById && teamGameStatus
+        ? countFinishedPlayers(b.starters, playersById, teamGameStatus)
+        : { total: b.starters.length, finished: b.starters.length };
 
     paired.push({
       matchupId,
       week,
       rosterIdA: a.roster_id,
       rosterIdB: b.roster_id,
-      pointsA: a.points ?? 0,
-      pointsB: b.points ?? 0,
+      pointsA: a.points,
+      pointsB: b.points,
       startersA: finishedA.total,
       startersB: finishedB.total,
       playersFinishedA: finishedA.finished,
@@ -266,7 +263,7 @@ export function computeSeeds(teams: Team[]): Team[] {
     new Set(
       sortedByRank
         .map((team) => team.divisionId)
-        .filter((id): id is number => id !== null && id !== undefined),
+        .filter((id): id is number => id !== null),
     ),
   );
 

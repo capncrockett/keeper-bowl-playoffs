@@ -30,10 +30,10 @@ export function applyMatchupScoresToBracket(
 
       const matchup = matchupByRosterId.get(pos.teamId);
       if (!matchup) return pos;
-      
+
       return {
         ...pos,
-        currentPoints: matchup.points ?? 0,
+        currentPoints: matchup.points,
       };
     }) as typeof slot.positions;
 
