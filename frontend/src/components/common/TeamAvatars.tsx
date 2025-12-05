@@ -23,18 +23,18 @@ const SIZE_PRESETS: Record<NonNullable<TeamAvatarsProps['size']>, { main: number
 
 export const TeamAvatars: FC<TeamAvatarsProps> = ({
   teamName,
-  teamAvatarUrl,
-  userAvatarUrl,
+  teamAvatarUrl = null,
+  userAvatarUrl = null,
   userDisplayName,
   showUserAvatar = false,
   size = 'md',
   className = '',
 }) => {
   const { main, sub } = SIZE_PRESETS[size];
-  const normalizedUserAvatarUrl = userAvatarUrl ?? undefined;
   const shouldShowUserAvatar =
-    showUserAvatar && normalizedUserAvatarUrl != null && normalizedUserAvatarUrl !== teamAvatarUrl;
+    showUserAvatar && userAvatarUrl != null && userAvatarUrl !== teamAvatarUrl;
   const initial = teamName.charAt(0).toUpperCase() || '?';
+  const userAvatarAlt = userDisplayName ?? 'Manager avatar';
 
   return (
     <div
@@ -72,7 +72,7 @@ export const TeamAvatars: FC<TeamAvatarsProps> = ({
             className="rounded-full border-2 border-base-100 bg-base-200 overflow-hidden"
             style={{ width: sub, height: sub }}
           >
-            <img src={normalizedUserAvatarUrl} alt={userDisplayName ?? 'Manager avatar'} />
+            <img src={userAvatarUrl} alt={userAvatarAlt} />
           </div>
         </div>
       )}
