@@ -40,7 +40,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: 'Championship',
     positions: [null, null],
     rewardTitle: '1st / 2nd',
-    rewardText: 'W = 1st | L = 2nd',
+    rewardText: 'W = 1st ( BELT + 👑 + 💰) | L = 2nd (2x buy-in)',
   },
   {
     id: 'champ_3rd',
@@ -49,7 +49,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: '3rd Place Game',
     positions: [null, null],
     rewardTitle: '3rd / 4th',
-    rewardText: 'W = 3rd | L = 4th',
+    rewardText: 'W = 3rd (1x buy-in) | L = 4th',
   },
 
   //
@@ -89,8 +89,8 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'keeper_misc',
     label: '5th / 6th Game',
     positions: [null, null],
-    rewardTitle: '5th / 6th',
-    rewardText: 'W = 5th | L = 6th',
+    rewardTitle: 'Keeper Bowl Champ',
+    rewardText: 'W = 5th (+1 keeper next season) | L = 6th',
   },
   {
     id: 'keeper_7th_8th',
@@ -140,7 +140,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: 'Poop King Final',
     positions: [null, null],
     rewardTitle: 'Toilet King',
-    rewardText: 'W = 12th (Toilet King) | L = 11th',
+    rewardText: 'W = 12th (1.01 + $50 FAAB 🚽👑 ) | L = 11th',
   },
   {
     id: 'toilet_9th_10th',
@@ -149,6 +149,6 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: '9th / 10th Game',
     positions: [null, null],
     rewardTitle: 'Poop King',
-    rewardText: 'W = 10th | L = 9th (Poop King)',
+    rewardText: 'W = 10th | L = 9th (The Real 💩🫅)',
   },
 ];
