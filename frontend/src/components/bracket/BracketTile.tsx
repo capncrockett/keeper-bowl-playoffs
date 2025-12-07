@@ -13,6 +13,7 @@ interface BracketTileProps {
   teamsById: Map<number, Team>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
+  titleOverride?: string;
 }
 
 interface TeamRowProps {
@@ -24,6 +25,7 @@ interface TeamRowProps {
     currentPoints?: number;
   } | null;
   mode: 'score' | 'reward';
+  round: BracketSlot['round'];
 }
 
 const FLIPPABLE_ROUNDS = new Set<BracketSlot['round']>([
@@ -56,18 +58,30 @@ const ROUTE_BY_FROM_ID = ROUTING_RULES.reduce(
 
 const cleanLabel = (label: string): string => label.replace(/\s*\(.*?\)\s*$/, '');
 
+const SLOT_TITLES: Partial<Record<BracketSlot['id'], string>> = {
+  // Champ round 1 games
+  champ_r1_g1: 'Game 1',
+  champ_r1_g2: 'Game 2',
+  // Keeper semis
+  keeper_splashback1: 'Keeper Semis',
+  keeper_splashback2: 'Keeper Semis',
+  // Toilet round 1 games
+  toilet_r1_g1: 'Game 1',
+  toilet_r1_g2: 'Game 2',
+};
+
 const ROUND_TITLES: Partial<Record<BracketSlot['round'], string>> = {
   champ_round_1: 'Champ Round 1',
   champ_round_2: 'Champ Semis',
   champ_finals: 'Championship',
-  champ_misc: 'Champ Placement',
+  // Let 3rd place games use their labels (e.g., "3rd Place Game")
   keeper_main: 'Keeper Bowl',
-  // TODO: these names don't make sense. It's not a misc or a Placement card. The titles for these cards don't need to re-state what's at the top of the column. We already have Round 1, 2, and Finals with Week #'s as subtitles. Maybe it should be CR1G1, KR2G3. That seems lame though. We'll think of something later.
-  keeper_misc: 'Keeper Placement',
+  // Let keeper placement games use their labels (5th/6th, 7th/8th)
   toilet_round_1: 'Toilet Round 1',
   toilet_round_2: 'Toilet Semis',
   toilet_finals: 'Toilet Final',
-  toilet_misc: 'Toilet Placement',
+  // Show losers from Toilet R2 flowing to Poop Final (9th/10th)
+  toilet_misc: 'Poop Final',
 };
 
 const TEAM_NAME_CLASS = 'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
@@ -85,7 +99,10 @@ function describeDestination(
   return `${label} (${lane})`;
 }
 
-const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
+const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
+  const seed = pos?.seed ?? team?.seed;
+  const showSeedBadge = seed != null && (round === 'champ_round_1' || round === 'toilet_round_1');
+
   const renderPlaceholderRow = (label: string) => (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
       <div className="flex justify-between items-start gap-2">
@@ -163,6 +180,11 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
             size="md"
             className="md:scale-125"
           />
+          {showSeedBadge && (
+            <span className="px-1.5 py-0.5 rounded-md bg-base-300 text-[0.6rem] font-semibold text-base-content/80 whitespace-nowrap">
+              Seed {seed}
+            </span>
+          )}
         </div>
 
         {/* Scores on the right */}
@@ -190,7 +212,13 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode }) => {
   );
 };
 
-export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTeamId, mode }) => {
+export const BracketTile: FC<BracketTileProps> = ({
+  slot,
+  teamsById,
+  highlightTeamId,
+  mode,
+  titleOverride,
+}) => {
   const involvesHighlight =
     highlightTeamId != null && slot.positions.some((pos) => pos?.teamId === highlightTeamId);
   const hasBye = slot.positions.some((pos) => pos?.isBye);
@@ -206,7 +234,7 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
         <div className="divide-y divide-base-300">
           {slot.positions.map((pos, idx) => {
             const team = pos?.teamId != null ? teamsById.get(pos.teamId) : undefined;
-            return <TeamRow key={idx} team={team} pos={pos} mode={mode} />;
+            return <TeamRow key={idx} team={team} pos={pos} mode={mode} round={slot.round} />;
           })}
         </div>
 
@@ -223,7 +251,9 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
   const route = ROUTE_BY_FROM_ID.get(slot.id);
   const winnerDest = describeDestination(route?.winnerGoesTo);
   const loserDest = describeDestination(route?.loserGoesTo);
-  const roundLabel = ROUND_TITLES[slot.round] ?? cleanLabel(slot.label);
+  const baseRoundLabel = ROUND_TITLES[slot.round] ?? cleanLabel(slot.label);
+  const roundLabel =
+    titleOverride ?? SLOT_TITLES[slot.id] ?? ROUND_TITLES[slot.round] ?? cleanLabel(slot.label);
 
   const renderBack = () => (
     <div className={cardClassName}>
@@ -231,7 +261,14 @@ export const BracketTile: FC<BracketTileProps> = ({ slot, teamsById, highlightTe
         <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? roundLabel}</div>
         {hasBye ? (
           <div className="text-[0.7rem] text-base-content/70 leading-snug">
-            You lucky dog. Advance to {winnerDest ?? 'the next round'} without lifting a finger.
+            {(() => {
+              const byeIndex = slot.positions.findIndex((p) => p?.isBye);
+              const teamLane = byeIndex === 0 ? 'bottom slot' : 'top slot';
+              if (slot.bracketId === 'toilet') {
+                return `Unlucky bye. Advance to ${baseRoundLabel} (${teamLane}) with no keeper shot.`;
+              }
+              return `You lucky dog. Advance to ${baseRoundLabel} (${teamLane}) without lifting a finger.`;
+            })()}
           </div>
         ) : (
           <>
