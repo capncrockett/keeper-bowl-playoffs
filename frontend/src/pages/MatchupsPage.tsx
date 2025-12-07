@@ -43,9 +43,8 @@ export function MatchupsPage() {
         const seasonState = mapNFLStateToSeasonState(nflState);
         setPlayersById(players);
         setSelectedWeek(seasonState.displayWeek);
-        setSeasonLabel(`${seasonState.season} • Week ${seasonState.displayWeek}`);
+        setSeasonLabel(`${seasonState.season} • Week ${seasonState.displayWeek.toString()}`);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Failed to load NFL state');
       }
@@ -77,11 +76,10 @@ export function MatchupsPage() {
         const teamGameStatus = buildTeamGameStatusMap(espnScoreboard);
 
         // Pass player and game status data to pairMatchups
-        const paired = pairMatchups(week, matchups, playersById, teamGameStatus);
+        const paired = pairMatchups(week, matchups, playersById ?? undefined, teamGameStatus);
         const live = paired.map((p) => buildLiveMatchData(p));
         setLiveMatchups(live);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(err);
         setError(err instanceof Error ? err.message : 'Failed to load matchups');
         setLiveMatchups([]);
@@ -117,7 +115,9 @@ export function MatchupsPage() {
           <select
             className="select select-bordered select-sm"
             value={selectedWeek ?? ''}
-            onChange={(e) => setSelectedWeek(Number(e.target.value))}
+            onChange={(e) => {
+              setSelectedWeek(Number(e.target.value));
+            }}
             disabled={selectedWeek == null}
           >
             <option disabled value="">
@@ -155,10 +155,15 @@ export function MatchupsPage() {
         {liveMatchups.map((live) => {
           const teamA = teamsByRosterId.get(live.teamIdA);
           const teamB = live.teamIdB !== null ? teamsByRosterId.get(live.teamIdB) : undefined;
+          const matchupKey = [
+            live.week.toString(),
+            live.teamIdA.toString(),
+            live.teamIdB?.toString() ?? 'bye',
+          ].join('-');
 
           return (
             <MatchupCard
-              key={`${live.week}-${live.teamIdA}-${live.teamIdB ?? 'bye'}`}
+              key={matchupKey}
               live={live}
               teamA={teamA}
               teamB={teamB}

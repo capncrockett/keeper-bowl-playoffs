@@ -39,8 +39,8 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'champ_finals',
     label: 'Championship',
     positions: [null, null],
-    rewardTitle: '1st / 2nd',
-    rewardText: 'The BELT! The Payout. Photos with the belt on its travels are required by law.',
+    rewardTitle: 'Grundle Champ',
+    rewardText: 'W = 1st ( BELT + 👑 + 💰) | L = 2nd (2x buy-in)',
   },
   {
     id: 'champ_3rd',
@@ -49,7 +49,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: '3rd Place Game',
     positions: [null, null],
     rewardTitle: '3rd / 4th',
-    rewardText: 'W = 3rd: Next season is free for one of you. L = 4th: You had a shot.',
+    rewardText: 'W = 3rd (1x buy-in) | L = 4th',
   },
 
   //
@@ -89,8 +89,8 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'keeper_misc',
     label: '5th / 6th Game',
     positions: [null, null],
-    rewardTitle: '5th / 6th',
-    rewardText: 'W = 5th with an extra keeper. L = 6th. So close, no matter how far.',
+    rewardTitle: 'Keeper Bowl Champ',
+    rewardText: 'W = 5th (+1 keeper next season) | L = 6th',
   },
   {
     id: 'keeper_7th_8th',
@@ -99,7 +99,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     label: '7th / 8th Game',
     positions: [null, null],
     rewardTitle: '7th / 8th',
-    rewardText: "W = 7th | L = 8th. Could've been better. Could've been worse.",
+    rewardText: 'W = 7th | L = 8th',
   },
 
   //
@@ -139,8 +139,8 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'toilet_finals',
     label: 'Poop King Final',
     positions: [null, null],
-    rewardTitle: 'Poop King!!!',
-    rewardText: "W = 12th. You're the winner of the poopiest. 1.01 + 50 FAAB next season.",
+    rewardTitle: 'Toilet King',
+    rewardText: 'W = 12th (1.01 + $50 FAAB 🚽👑 ) | L = 11th',
   },
   {
     id: 'toilet_9th_10th',
@@ -148,8 +148,7 @@ export const BRACKET_TEMPLATE: BracketSlot[] = [
     round: 'toilet_misc',
     label: '9th / 10th Game',
     positions: [null, null],
-    rewardTitle: '9th / 10th / 11th',
-    rewardText:
-      "W = 10th (at least you're not the worst). L = 9th AKA ^^^ (Yaaaa. You're the actual poop. King!) 11th took a shart for 1.02.",
+    rewardTitle: 'Poop King',
+    rewardText: 'W = 10th | L = 9th (The Real 💩🫅)',
   },
 ];

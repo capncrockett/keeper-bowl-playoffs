@@ -33,7 +33,9 @@ describe('App routing + nav', () => {
     expect(await screen.findByText('Matchups Page')).toBeInTheDocument();
 
     const matchupsLink = screen.getByRole('link', { name: /matchups/i });
-    await waitFor(() => expect(matchupsLink).toHaveClass('btn-active'));
+    await waitFor(() => {
+      expect(matchupsLink).toHaveClass('btn-active');
+    });
   });
 
   it('renders requested route and nav state', () => {
