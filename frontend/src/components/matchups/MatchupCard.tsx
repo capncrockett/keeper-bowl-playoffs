@@ -9,6 +9,11 @@ interface MatchupCardProps {
   teamB: Team | undefined;
 }
 
+const formatRecord = (record: Team['record']): string => {
+  const base = `${record.wins.toString()}-${record.losses.toString()}`;
+  return record.ties ? `${base}-${record.ties.toString()}` : base;
+};
+
 export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
 
   return (
@@ -41,9 +46,7 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
                 <span className="font-semibold truncate">{teamA?.teamName ?? 'Unknown'}</span>
                 <span className="text-xs text-base-content/60">
                   {teamA
-                    ? `${teamA.record.wins}-${teamA.record.losses}${
-                        teamA.record.ties ? `-${teamA.record.ties}` : ''
-                      }`
+                    ? formatRecord(teamA.record)
                     : '-'}
                 </span>
               </div>
@@ -76,9 +79,7 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
                 <span className="font-semibold truncate">{teamB?.teamName ?? 'BYE'}</span>
                 <span className="text-xs text-base-content/60">
                   {teamB
-                    ? `${teamB.record.wins}-${teamB.record.losses}${
-                        teamB.record.ties ? `-${teamB.record.ties}` : ''
-                      }`
+                    ? formatRecord(teamB.record)
                     : '-'}
                 </span>
               </div>

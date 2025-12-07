@@ -15,6 +15,8 @@ interface LayoutItem {
   centerOnPct?: boolean;
   /** Optional: mask one position to show a BYE/TBD without altering the real slot data. */
   maskOppIndex?: 0 | 1;
+  /** Optional override for the card title (e.g., BYE when masking a slot in Round 1). */
+  titleOverride?: string;
 }
 
 export interface BracketLayoutColumn {
@@ -68,10 +70,10 @@ export const BracketGrid: FC<BracketGridProps> = ({
   columnHeightClass,
   defaultHeightScale = 1,
   colGapClass = 'gap-3 md:gap-10',
-}) => {
+  }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
 
-  const gridTemplateColumns = `repeat(${columns.length}, minmax(0, 1fr))`;
+  const gridTemplateColumns = `repeat(${columns.length.toString()}, minmax(0, 1fr))`;
 
   return (
     <div className="w-full">
@@ -128,17 +130,18 @@ export const BracketGrid: FC<BracketGridProps> = ({
                   key={item.id}
                   className="absolute left-0 right-0"
                   style={{
-                    top: `${top}%`,
+                    top: `${top.toString()}%`,
                     transform: center ? 'translateY(-50%)' : undefined,
                   }}
                 >
                   <BracketMatchShell itemId={item.id}>
-                    <BracketTile
-                      slot={displaySlot}
-                      teamsById={teamsById}
-                      highlightTeamId={highlightTeamId}
-                      mode={mode}
-                    />
+                  <BracketTile
+                    slot={displaySlot}
+                    teamsById={teamsById}
+                    highlightTeamId={highlightTeamId}
+                    mode={mode}
+                    titleOverride={item.titleOverride}
+                  />
                   </BracketMatchShell>
                 </div>
               );
