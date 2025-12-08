@@ -26,6 +26,7 @@ interface TeamRowProps {
   } | null;
   mode: 'score' | 'reward';
   round: BracketSlot['round'];
+  hasBye: boolean;
 }
 
 const FLIPPABLE_ROUNDS = new Set<BracketSlot['round']>([
@@ -99,15 +100,23 @@ function describeDestination(
   return `${label} (${lane})`;
 }
 
-const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
+const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round, hasBye }) => {
   const seed = pos?.seed ?? team?.seed;
-  const showSeedBadge = seed != null && (round === 'champ_round_1' || round === 'toilet_round_1');
+  const showSeedBadge =
+    seed != null && ((round === 'champ_round_1' || round === 'toilet_round_1') || hasBye);
+  const seedBadge = showSeedBadge ? (
+    <span className="shrink-0 px-1 py-0.5 rounded bg-base-200 text-[0.55rem] md:text-[0.65rem] font-semibold text-base-content/70 leading-none whitespace-nowrap">
+      <span className="md:hidden">{seed}</span>
+      <span className="hidden md:inline">Seed {seed}</span>
+    </span>
+  ) : null;
 
   const renderPlaceholderRow = (label: string) => (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex items-center gap-1 md:gap-2">
+      <div className="flex justify-between items-start gap-2 min-w-0">
+        <div className="flex items-center gap-1 md:gap-2 min-w-0">
           <div className="w-6 md:w-10 rounded-full bg-base-300/60" />
+          {seedBadge}
         </div>
         {mode === 'score' && (
           <div className="flex flex-col items-end text-right leading-tight flex-shrink-0">
@@ -117,7 +126,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
         )}
       </div>
       <div className="mt-1 min-w-0">
-        <div className={TEAM_NAME_CLASS}>{label}</div>
+        <div className={`${TEAM_NAME_CLASS} truncate`}>{label}</div>
       </div>
     </div>
   );
@@ -132,9 +141,9 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
       return (
         <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
           {/* Top section: empty avatar space left, scores right */}
-          <div className="flex justify-between items-start gap-2">
+          <div className="flex justify-between items-start gap-2 min-w-0">
             {/* Empty avatar placeholder to keep layout consistent */}
-            <div className="flex items-center gap-1 md:gap-2">
+            <div className="flex items-center gap-1 md:gap-2 min-w-0">
               <div className="w-6 md:w-10" />
             </div>
 
@@ -149,7 +158,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
 
           {/* Bottom row: BYE label across full width */}
           <div className="mt-1 min-w-0">
-            <div className={TEAM_NAME_CLASS}>BYE</div>
+            <div className={`${TEAM_NAME_CLASS} truncate`}>BYE</div>
           </div>
         </div>
       );
@@ -159,7 +168,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
     if (pos.seed != null) {
       return renderPlaceholderRow(`Seed ${pos.seed.toString()}`);
     }
-    return renderPlaceholderRow('TBD');
+      return renderPlaceholderRow('TBD');
   }
 
   const isBye = !!pos.isBye;
@@ -168,9 +177,9 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
   return (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">
       {/* Top section: avatar left, scores right */}
-      <div className="flex justify-between items-start gap-2">
+      <div className="flex justify-between items-start gap-2 min-w-0">
         {/* Avatar (top-left) */}
-        <div className="flex items-center gap-1 md:gap-2">
+        <div className="flex items-center gap-1 md:gap-2 min-w-0">
           <TeamAvatars
             teamName={team.teamName}
             teamAvatarUrl={team.teamAvatarUrl}
@@ -180,11 +189,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
             size="md"
             className="md:scale-125"
           />
-          {showSeedBadge && (
-            <span className="px-1.5 py-0.5 rounded-md bg-base-300 text-[0.6rem] font-semibold text-base-content/80 whitespace-nowrap">
-              Seed {seed}
-            </span>
-          )}
+          {seedBadge}
         </div>
 
         {/* Scores on the right */}
@@ -204,7 +209,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round }) => {
 
       {/* Bottom row: team name across full width (or BYE) */}
       <div className="mt-1 min-w-0">
-        <div className={TEAM_NAME_CLASS} title={isBye ? undefined : team.teamName}>
+        <div className={`${TEAM_NAME_CLASS} truncate`} title={isBye ? undefined : team.teamName}>
           {isBye ? 'BYE' : team.teamName}
         </div>
       </div>
@@ -234,7 +239,16 @@ export const BracketTile: FC<BracketTileProps> = ({
         <div className="divide-y divide-base-300">
           {slot.positions.map((pos, idx) => {
             const team = pos?.teamId != null ? teamsById.get(pos.teamId) : undefined;
-            return <TeamRow key={idx} team={team} pos={pos} mode={mode} round={slot.round} />;
+            return (
+              <TeamRow
+                key={idx}
+                team={team}
+                pos={pos}
+                mode={mode}
+                round={slot.round}
+                hasBye={hasBye}
+              />
+            );
           })}
         </div>
 
