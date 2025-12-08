@@ -5,6 +5,7 @@ import { getLeague, getLeagueRosters, getLeagueUsers } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
 import type { Team } from '../models/fantasy';
 import { TeamAvatars } from '../components/common/TeamAvatars';
+import { computeStandingsInsights } from './standingsInsights';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -46,117 +47,7 @@ export function StandingsPage() {
     void load();
   }, []);
 
-  const insights =
-    teams.length > 0
-      ? (() => {
-          const pfSorted = [...teams].sort((a, b) => b.pointsFor - a.pointsFor);
-          const pfRankByRosterId = new Map<number, number>(
-            pfSorted.map((team, index) => [team.sleeperRosterId, index + 1]),
-          );
-
-          const derived = teams.map((team) => {
-            const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
-            const pfPerGame = gamesPlayed > 0 ? team.pointsFor / gamesPlayed : 0;
-            const paPerGame = gamesPlayed > 0 ? team.pointsAgainst / gamesPlayed : 0;
-            const pfRank = pfRankByRosterId.get(team.sleeperRosterId) ?? teams.length;
-            const standingRank = team.seed ?? team.rank;
-            const fortuneScore = pfRank - standingRank; // positive: record outpaces PF, negative: unlucky
-
-            return {
-              ...team,
-              gamesPlayed,
-              pfPerGame,
-              paPerGame,
-              pfRank,
-              standingRank,
-              fortuneScore,
-            };
-          });
-
-          const leagueAvgPaPerGame =
-            derived.reduce((sum, team) => sum + team.paPerGame, 0) / derived.length;
-
-          const toughestSchedule = derived.reduce((prev, curr) =>
-            curr.paPerGame > prev.paPerGame ? curr : prev,
-          );
-          const easiestSchedule = derived.reduce((prev, curr) =>
-            curr.paPerGame < prev.paPerGame ? curr : prev,
-          );
-          const luckiestRecord = derived.reduce((prev, curr) =>
-            curr.fortuneScore > prev.fortuneScore ? curr : prev,
-          );
-          const unluckiestRecord = derived.reduce((prev, curr) =>
-            curr.fortuneScore < prev.fortuneScore ? curr : prev,
-          );
-
-          const hasDivisionData = derived.some((team) => team.divisionId !== null);
-
-          const divisionBuckets = hasDivisionData
-            ? derived.reduce((map, team) => {
-                const key = team.divisionId ?? -1;
-                const current = map.get(key);
-                if (current) {
-                  current.push(team);
-                } else {
-                  map.set(key, [team]);
-                }
-                return map;
-              }, new Map<number, (typeof derived)[number][]>())
-            : new Map<number, (typeof derived)[number][]>();
-
-          const divisionStats = Array.from(divisionBuckets.entries()).map(
-            ([divisionId, members]) => {
-              const avgPfPerGame =
-                members.reduce((sum, team) => sum + team.pfPerGame, 0) / members.length;
-              const avgPaPerGame =
-                members.reduce((sum, team) => sum + team.paPerGame, 0) / members.length;
-              const topSeed = members.reduce((prev, curr) =>
-                curr.standingRank < prev.standingRank ? curr : prev,
-              );
-              const divisionName =
-                members[0]?.divisionName ??
-                (divisionId === -1 ? 'Unassigned division' : `Division ${divisionId.toString()}`);
-              const divisionAvatarUrl = members[0]?.divisionAvatarUrl ?? null;
-
-              return {
-                divisionId,
-                divisionName,
-                divisionAvatarUrl,
-                members,
-                avgPfPerGame,
-                avgPaPerGame,
-                topSeed,
-              };
-            },
-          );
-
-          const highestAvgPfDivision =
-            divisionStats.length > 0
-              ? divisionStats.reduce((prev, curr) =>
-                  curr.avgPfPerGame > prev.avgPfPerGame ? curr : prev,
-                )
-              : null;
-          const lowestAvgPaDivision =
-            divisionStats.length > 0
-              ? divisionStats.reduce((prev, curr) =>
-                  curr.avgPaPerGame < prev.avgPaPerGame ? curr : prev,
-                )
-              : null;
-
-          return {
-            derived,
-            leagueAvgPaPerGame,
-            toughestSchedule,
-            easiestSchedule,
-            luckiestRecord,
-            unluckiestRecord,
-            divisionStats,
-            highestAvgPfDivision,
-            lowestAvgPaDivision,
-            hasDivisionData,
-          };
-        })()
-      : null;
+  const insights = computeStandingsInsights(teams);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -314,15 +205,15 @@ export function StandingsPage() {
                   <th>Points For</th>
                   <th>Points Against</th>
                   <th>Avg PF/Week</th>
-                  <th>PF:PA</th>
+                  <th>PA/PF</th>
                 </tr>
               </thead>
               <tbody>
                 {teams.map((team) => {
                   const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
                   const avgPoints = gamesPlayed > 0 ? team.pointsFor / gamesPlayed : 0;
-                  const pfPaRatio =
-                    team.pointsAgainst > 0 ? team.pointsFor / team.pointsAgainst : null;
+                  const paPfRatio =
+                    team.pointsFor > 0 ? team.pointsAgainst / team.pointsFor : null;
 
                   return (
                     <tr key={team.sleeperRosterId}>
@@ -358,7 +249,7 @@ export function StandingsPage() {
                       <td>{team.pointsFor.toFixed(2)}</td>
                       <td>{team.pointsAgainst.toFixed(2)}</td>
                       <td>{avgPoints.toFixed(2)}</td>
-                      <td>{pfPaRatio !== null ? pfPaRatio.toFixed(2) : '—'}</td>
+                      <td>{paPfRatio !== null ? paPfRatio.toFixed(2) : '—'}</td>
                     </tr>
                   );
                 })}

@@ -161,3 +161,7 @@ interface LiveMatchData {
 - Cross-referencing logic
 - UI updates
 - Testing with live games
+
+### Multi-League Expansion
+
+- Handle leagues without divisions gracefully (skip division insights/cards when no division IDs available).
