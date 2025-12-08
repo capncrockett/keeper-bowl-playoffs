@@ -7,6 +7,8 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false,
     "isolatedModules": false,
+    "noEmit": false,
+    "outDir": "./node_modules/.tmp/ts-jest",
     "types": ["node", "jest"]
   }
 }

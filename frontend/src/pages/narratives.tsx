@@ -75,6 +75,12 @@ const pfSwingNeeded = (leader: Team, chaser: Team): number => {
   return Number(rounded.toFixed(1));
 };
 
+const formatPfEdge = (gap: number, withPlus = false): string => {
+  if (gap === 0) return 'any PF edge';
+  const value = gap.toFixed(1);
+  return withPlus ? `+${value}` : value;
+};
+
 type RecordGap = {
   leader: Team | null;
   trailer: Team | null;
@@ -129,6 +135,8 @@ const buildBubbleNarrative = (teams: Team[]): NarrativeSection | null => {
   const recordGap = recordLead(cutoff, challenger);
   const tiedOnRecord = recordGap.games === 0;
   const pfGap = pfSwingNeeded(cutoff, challenger);
+  const pfEdgePlus = formatPfEdge(pfGap, true);
+  const pfEdgePlain = formatPfEdge(pfGap, false);
   const avgPf = leagueAvgPfPerGame(teams);
   const thirdTeam = findBubbleThirdTeam(teams, cutoff, challenger, avgPf);
 
@@ -143,23 +151,23 @@ const buildBubbleNarrative = (teams: Team[]): NarrativeSection | null => {
           standings.{' '}
         </>
       )}
-      {seedToken(cutoff)} holds the No. 6 seed right now because of a +{pfGap.toFixed(1)} PF edge.
+      {seedToken(cutoff)} holds the No. 6 seed right now because of a {pfEdgePlus} Points For (PF)
+      edge.
     </>
   );
 
-  const pfSwingText = pfGap.toFixed(1);
   const scenarios = tiedOnRecord
     ? [
         <>
           {boldName(cutoff)} keeps No. 6 with a win and higher PF than {boldName(challenger)}.
         </>,
         <>
-          {boldName(challenger)} flips to No. 6 by winning and outscoring {boldName(cutoff)} by +
-          {pfSwingText}.
+          {boldName(challenger)} flips to No. 6 by winning and outscoring {boldName(cutoff)} by{' '}
+          {pfEdgePlus}.
         </>,
         <>
           If both lose, the flip still happens if {boldName(challenger)} outscores {boldName(cutoff)}{' '}
-          by +{pfSwingText}.
+          by {pfEdgePlus}.
         </>,
       ]
     : recordGap.leader?.sleeperRosterId === cutoff.sleeperRosterId
@@ -169,7 +177,7 @@ const buildBubbleNarrative = (teams: Team[]): NarrativeSection | null => {
             outright.
           </>,
           <>
-            {boldName(challenger)} needs a result swing plus a {pfSwingText} PF edge to steal the
+            {boldName(challenger)} needs a result swing plus {pfEdgePlain} to steal the
             clutch rule spot.
           </>,
           <>
@@ -179,10 +187,10 @@ const buildBubbleNarrative = (teams: Team[]): NarrativeSection | null => {
       : [
           <>
             {boldName(cutoff)} still owns the clutch rule spot until {boldName(challenger)} erases
-            the +{pfSwingText} PF gap.
+            {pfEdgePlus}.
           </>,
           <>
-            {boldName(challenger)} can take it by outscoring {boldName(cutoff)} by +{pfSwingText}{' '}
+            {boldName(challenger)} can take it by outscoring {boldName(cutoff)} by {pfEdgePlus}{' '}
             while keeping their record edge.
           </>,
           <>
@@ -242,6 +250,8 @@ const buildByeNarrative = (teams: Team[]): NarrativeSection | null => {
   const recordGap = recordLead(holder, challenger);
   const tiedOnRecord = recordGap.games === 0;
   const pfGap = pfSwingNeeded(holder, challenger);
+  const pfEdgePlus = formatPfEdge(pfGap, true);
+  const pfEdgePlain = formatPfEdge(pfGap, false);
   const avgPf = leagueAvgPfPerGame(teams);
   const thirdTeam = findByeThirdTeam(teams, holder, challenger, avgPf);
 
@@ -250,37 +260,36 @@ const buildByeNarrative = (teams: Team[]): NarrativeSection | null => {
       {seedToken(holder)} currently holds the Round 1 bye.{' '}
       {tiedOnRecord ? (
         <>
-          {seedToken(challenger)} has the same record but trails on Points For (PF) by{' '}
-          {pfGap.toFixed(1)}.
+          {seedToken(challenger)} has the same record but trails on Points For (PF) by {pfEdgePlain}
+          .
         </>
       ) : recordGap.leader?.sleeperRosterId === holder.sleeperRosterId ? (
         <>
           {seedToken(challenger)} is {recordGap.games.toFixed(1)} games back and trails on PF by{' '}
-          {pfGap.toFixed(1)}.
+          {pfEdgePlain}.
         </>
       ) : (
         <>
           {seedToken(challenger)} is {recordGap.games.toFixed(1)} games ahead on record but still
-          trails on PF by {pfGap.toFixed(1)}, which is the current separator.
+          trails on PF by {pfEdgePlain}, which is the current separator.
         </>
       )}
     </>
   );
 
   const scenarios = tiedOnRecord
-    ? [
-        <>
-          {boldName(challenger)} claims the bye with a win that erases the {pfGap.toFixed(1)} PF
-          gap.
-        </>,
-        <>
-          {boldName(challenger)} also gets the bye if they win while {boldName(holder)} loses (no PF
-          math needed).
-        </>,
-        <>
-          If both win or both lose, the bye stays with {boldName(holder)} unless the PF gap closes.
-        </>,
-      ]
+      ? [
+          <>
+            {boldName(challenger)} claims the bye with a win that erases the {pfEdgePlain} PF gap.
+          </>,
+          <>
+            {boldName(challenger)} also gets the bye if they win while {boldName(holder)} loses (no PF
+            math needed).
+          </>,
+          <>
+            If both win or both lose, the bye stays with {boldName(holder)} unless the PF gap closes.
+          </>,
+        ]
     : recordGap.leader?.sleeperRosterId === holder.sleeperRosterId
       ? [
           <>
@@ -288,13 +297,13 @@ const buildByeNarrative = (teams: Team[]): NarrativeSection | null => {
             {recordGap.games.toFixed(1)}-game gap.
           </>,
           <>
-            If records tie, PF decides; current gap favors {boldName(holder)} by {pfGap.toFixed(1)}.
+            If records tie, PF decides; current gap favors {boldName(holder)} by {pfEdgePlain}.
           </>,
         ]
       : [
           <>
             {boldName(challenger)} can claim the bye by holding the record edge and outscoring{' '}
-            {boldName(holder)} by {pfGap.toFixed(1)}+ to flip PF.
+            {boldName(holder)} by {pfEdgePlus} to flip PF.
           </>,
           <>
             {boldName(holder)} keeps the bye if they maintain the PF cushion even if{' '}
@@ -323,6 +332,8 @@ const buildDivisionNarratives = (teams: Team[]): NarrativeSection[] => {
 
   return insights.divisionRaces.map((race) => {
     const pfGap = pfSwingNeeded(race.leader, race.chaser);
+    const pfEdgePlain = formatPfEdge(pfGap, false);
+    const pfEdgePlus = formatPfEdge(pfGap, true);
     const tiedOnRecord = race.gamesBack === 0;
     const divisionLabel = race.divisionName ?? 'Division';
 
@@ -330,13 +341,13 @@ const buildDivisionNarratives = (teams: Team[]): NarrativeSection[] => {
       <>
         {divisionLabel}: {seedToken(race.leader)} and {seedToken(race.chaser)} share the same
         record. Points For is the division tiebreaker and {boldName(race.leader)} leads by{' '}
-        {pfGap.toFixed(1)}.
+        {pfEdgePlain}.
       </>
     ) : (
       <>
         {divisionLabel}: {seedToken(race.leader)} leads {seedToken(race.chaser)} by{' '}
         {race.gamesBack.toFixed(1)} games. Points For will decide it if the records tie (gap{' '}
-        {pfGap.toFixed(1)}).
+        {pfEdgePlain}).
       </>
     );
 
@@ -344,7 +355,7 @@ const buildDivisionNarratives = (teams: Team[]): NarrativeSection[] => {
       ? [
           <>
             {boldName(race.chaser)} takes the banner by outscoring {boldName(race.leader)} by{' '}
-            {pfGap.toFixed(1)}+ while the records stay tied.
+            {pfEdgePlus} while the records stay tied.
           </>,
           <>
             {boldName(race.chaser)} also takes it with a win and a {boldName(race.leader)} loss (no
@@ -357,7 +368,7 @@ const buildDivisionNarratives = (teams: Team[]): NarrativeSection[] => {
           </>,
           <>
             If they tie on record, PF decides; current gap favors {boldName(race.leader)} by{' '}
-            {pfGap.toFixed(1)}.
+            {pfEdgePlain}.
           </>,
         ];
 
