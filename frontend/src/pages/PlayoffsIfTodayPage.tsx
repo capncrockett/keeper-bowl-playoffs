@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getLeagueRosters, getLeagueUsers } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
 import { applyGameOutcomesToBracket } from '../bracket/state';
@@ -151,7 +151,9 @@ function NarrativeAccordion({ title, subtitle, children }: NarrativeAccordionPro
       <summary className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer select-none">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-semibold leading-snug">{title}</span>
-          {subtitle && <span className="text-xs text-base-content/70 leading-tight">{subtitle}</span>}
+          {subtitle && (
+            <span className="text-xs text-base-content/70 leading-tight">{subtitle}</span>
+          )}
         </div>
         <span className="text-[0.65rem] uppercase tracking-wide text-base-content/60">Expand</span>
       </summary>
@@ -320,7 +322,7 @@ function PlayoffsIfTodayPage() {
           {narratives.divisions.length > 0 && (
             <NarrativeAccordion
               title="Division Races"
-              subtitle={`${narratives.divisions.length} divisions in play`}
+              subtitle={`${narratives.divisions.length.toString()} divisions in play`}
             >
               <div className="space-y-3">
                 {narratives.divisions.map((race, idx) => (
