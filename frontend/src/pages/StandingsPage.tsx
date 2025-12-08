@@ -215,9 +215,9 @@ export function StandingsPage() {
                   </div>
                 </div>
               </div>
-              <div className="overflow-x-auto mb-6">
+              <div className="overflow-auto overscroll-x-contain touch-pan-y max-h-[60vh] mb-6 border border-base-300 rounded-lg">
                 <table className="table table-compact w-full">
-                  <thead>
+                  <thead className="sticky top-0 z-10 bg-base-200">
                     <tr>
                       <th>Avatar</th>
                       <th>Division</th>
@@ -242,6 +242,7 @@ export function StandingsPage() {
                           )}
                         </td>
                         <td>{div.divisionName}</td>
+                        <td className="text-center">{div.members.length}</td>
                         <td>{div.avgPfPerGame.toFixed(1)}</td>
                         <td>{div.avgPaPerGame.toFixed(1)}</td>
                         <td>
@@ -261,9 +262,9 @@ export function StandingsPage() {
               </span>
             </div>
           )}
-          <div className="overflow-x-auto">
+          <div className="overflow-auto overscroll-x-contain touch-pan-y max-h-[70vh]">
             <table className="table table-zebra w-full">
-              <thead>
+              <thead className="sticky top-0 z-10 bg-base-200">
                 <tr>
                   <th>Seed</th>
                   <th>Team</th>

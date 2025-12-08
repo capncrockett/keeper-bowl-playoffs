@@ -11,7 +11,7 @@ body {
 
 /* DaisyUI theme configuration for Tailwind 4 */
 @plugin "daisyui" {
-  themes: light, cupcake, synthwave, dark --prefersdark;
+  themes: cupcake, retro, dim, dracula --prefersdark;
 }
 
 @layer components {
