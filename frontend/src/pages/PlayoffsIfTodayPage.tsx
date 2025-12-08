@@ -273,14 +273,14 @@ function PlayoffsIfTodayPage() {
               <div className="card-body p-4 space-y-1.5">
                 <div className="card-title text-sm">Bubble Watch</div>
                 <p className="text-sm leading-snug">
-                  #{raceInsights.bubbleRace.cutoff.seed} {raceInsights.bubbleRace.cutoff.teamName}{' '}
-                  vs #{raceInsights.bubbleRace.challenger.seed} {raceInsights.bubbleRace.challenger.teamName}:{' '}
+                  ({raceInsights.bubbleRace.cutoff.seed}) {raceInsights.bubbleRace.cutoff.teamName}{' '}
+                  vs ({raceInsights.bubbleRace.challenger.seed}) {raceInsights.bubbleRace.challenger.teamName}:{' '}
                   {raceInsights.bubbleRace.gamesBack === 0
                     ? 'deadlocked on record'
                     : `up ${raceInsights.bubbleRace.gamesBack.toFixed(1)} games`}. PF edge{' '}
                   {raceInsights.bubbleRace.pfGap >= 0 ? '+' : ''}
-                  {raceInsights.bubbleRace.pfGap.toFixed(1)} keeps #{raceInsights.bubbleRace.cutoff.seed} in for now;
-                  one swing week swaps #6/#7.
+                  {raceInsights.bubbleRace.pfGap.toFixed(1)} keeps ({raceInsights.bubbleRace.cutoff.seed}) in for now;
+                  one swing week swaps the seeds.
                 </p>
               </div>
             </div>
@@ -291,8 +291,8 @@ function PlayoffsIfTodayPage() {
               <div className="card-body p-4 space-y-1.5">
                 <div className="card-title text-sm">Bye Chase</div>
                 <p className="text-sm leading-snug">
-                  #{raceInsights.byeRace.holder.seed} {raceInsights.byeRace.holder.teamName}{' '}
-                  holds the bye; #{raceInsights.byeRace.challenger.seed}{' '}
+                  ({raceInsights.byeRace.holder.seed}) {raceInsights.byeRace.holder.teamName}{' '}
+                  holds the bye; ({raceInsights.byeRace.challenger.seed}){' '}
                   {raceInsights.byeRace.challenger.teamName}{' '}
                   {raceInsights.byeRace.gamesBack === 0
                     ? 'is tied on record but behind on tiebreaks'
@@ -310,10 +310,10 @@ function PlayoffsIfTodayPage() {
                 <ul className="text-sm leading-snug space-y-1">
                   {raceInsights.divisionRaces.map((race) => (
                     <li key={race.divisionId ?? race.leader.divisionName ?? race.leader.sleeperRosterId}>
-                      {race.divisionName ?? 'Division'}: #{race.leader.seed} {race.leader.teamName}{' '}
+                      {race.divisionName ?? 'Division'}: ({race.leader.seed}) {race.leader.teamName}{' '}
                       {race.gamesBack === 0
                         ? 'is tied with'
-                        : `leads`} #{race.chaser.seed} {race.chaser.teamName}{' '}
+                        : `leads`} ({race.chaser.seed}) {race.chaser.teamName}{' '}
                       {race.gamesBack === 0
                         ? '(tiebreak holds the banner for now)'
                         : `by ${race.gamesBack.toFixed(1)} games`}. One slip hands the banner to the chaser.
