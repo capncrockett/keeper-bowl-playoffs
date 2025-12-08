@@ -316,7 +316,7 @@ function PlayoffsIfTodayPage() {
                         : `leads`} #{race.chaser.seed} {race.chaser.teamName}{' '}
                       {race.gamesBack === 0
                         ? '(tiebreak holds the banner for now)'
-                        : `by ${race.gamesBack.toFixed(1)} games`}. Next meeting likely decides the banner.
+                        : `by ${race.gamesBack.toFixed(1)} games`}. One slip hands the banner to the chaser.
                     </li>
                   ))}
                 </ul>
