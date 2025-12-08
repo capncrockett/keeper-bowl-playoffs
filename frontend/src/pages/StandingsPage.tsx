@@ -5,6 +5,8 @@ import { getLeague, getLeagueRosters, getLeagueUsers } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
 import type { Team } from '../models/fantasy';
 import { TeamAvatars } from '../components/common/TeamAvatars';
+import { computeStandingsInsights } from './standingsInsights';
+import { STANDINGS_GLOSSARY } from './narratives.tsx';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -18,6 +20,67 @@ export function StandingsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [regularSeasonWeeks, setRegularSeasonWeeks] = useState<number>(14);
+
+  const winPoints = (team: Team): number => team.record.wins + team.record.ties * 0.5;
+
+  const rankTeams = (entries: { winPoints: number; pf: number; id: number }[]): number[] => {
+    const sorted = [...entries].sort((a, b) => {
+      if (b.winPoints !== a.winPoints) return b.winPoints - a.winPoints;
+      return b.pf - a.pf;
+    });
+    return sorted.map((entry) => entry.id);
+  };
+
+  const bestWorstRange = (
+    team: Team,
+    allTeams: Team[],
+  ): { best: number; worst: number; label: string } => {
+    const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
+    const remaining = Math.max(regularSeasonWeeks - gamesPlayed, 0);
+    const minWinPoints = winPoints(team);
+    const maxWinPoints = minWinPoints + remaining;
+
+    const optimisticEntries = allTeams.map((t) => {
+      const isSelf = t.sleeperRosterId === team.sleeperRosterId;
+      return {
+        id: t.sleeperRosterId,
+        winPoints: isSelf ? maxWinPoints : winPoints(t), // others at their floor for best case
+        pf: isSelf ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY,
+      };
+    });
+
+    const pessimisticEntries = allTeams.map((t) => {
+      const gp = t.record.wins + t.record.losses + t.record.ties;
+      const rem = Math.max(regularSeasonWeeks - gp, 0);
+      const isSelf = t.sleeperRosterId === team.sleeperRosterId;
+      return {
+        id: t.sleeperRosterId,
+        winPoints: isSelf ? minWinPoints : winPoints(t) + rem, // others at their ceiling for worst case
+        pf: isSelf ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      };
+    });
+
+    const bestRank = rankTeams(optimisticEntries).indexOf(team.sleeperRosterId) + 1;
+    const worstRank = rankTeams(pessimisticEntries).indexOf(team.sleeperRosterId) + 1;
+
+    return { best: bestRank, worst: worstRank, label: `${bestRank.toString()}-${worstRank.toString()}` };
+  };
+
+  const teamBadges = (team: Team, bw: { best: number; worst: number }): string[] => {
+    const badges = new Set<string>();
+    const seed = team.seed ?? team.rank;
+    if (bw.worst <= 1) {
+      badges.add('*');
+      badges.add('z');
+    } else if (bw.worst <= 2) {
+      badges.add('z');
+    }
+    if (bw.worst <= 3) badges.add('y');
+    if (bw.worst <= 6) badges.add('x');
+    if (seed === 6) badges.add('6');
+    return Array.from(badges);
+  };
 
   useEffect(() => {
     async function load() {
@@ -30,6 +93,12 @@ export function StandingsPage() {
           getLeagueUsers(LEAGUE_ID),
           getLeagueRosters(LEAGUE_ID),
         ]);
+
+        const totalWeeks =
+          typeof league.settings.playoff_week_start === 'number'
+            ? Math.max(1, league.settings.playoff_week_start - 1)
+            : 14;
+        setRegularSeasonWeeks(totalWeeks);
 
         const merged = mergeRostersAndUsersToTeams(rosters, users, league);
         const withSeeds = computeSeeds(merged);
@@ -46,117 +115,7 @@ export function StandingsPage() {
     void load();
   }, []);
 
-  const insights =
-    teams.length > 0
-      ? (() => {
-          const pfSorted = [...teams].sort((a, b) => b.pointsFor - a.pointsFor);
-          const pfRankByRosterId = new Map<number, number>(
-            pfSorted.map((team, index) => [team.sleeperRosterId, index + 1]),
-          );
-
-          const derived = teams.map((team) => {
-            const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
-            const pfPerGame = gamesPlayed > 0 ? team.pointsFor / gamesPlayed : 0;
-            const paPerGame = gamesPlayed > 0 ? team.pointsAgainst / gamesPlayed : 0;
-            const pfRank = pfRankByRosterId.get(team.sleeperRosterId) ?? teams.length;
-            const standingRank = team.seed ?? team.rank;
-            const fortuneScore = pfRank - standingRank; // positive: record outpaces PF, negative: unlucky
-
-            return {
-              ...team,
-              gamesPlayed,
-              pfPerGame,
-              paPerGame,
-              pfRank,
-              standingRank,
-              fortuneScore,
-            };
-          });
-
-          const leagueAvgPaPerGame =
-            derived.reduce((sum, team) => sum + team.paPerGame, 0) / derived.length;
-
-          const toughestSchedule = derived.reduce((prev, curr) =>
-            curr.paPerGame > prev.paPerGame ? curr : prev,
-          );
-          const easiestSchedule = derived.reduce((prev, curr) =>
-            curr.paPerGame < prev.paPerGame ? curr : prev,
-          );
-          const luckiestRecord = derived.reduce((prev, curr) =>
-            curr.fortuneScore > prev.fortuneScore ? curr : prev,
-          );
-          const unluckiestRecord = derived.reduce((prev, curr) =>
-            curr.fortuneScore < prev.fortuneScore ? curr : prev,
-          );
-
-          const hasDivisionData = derived.some((team) => team.divisionId !== null);
-
-          const divisionBuckets = hasDivisionData
-            ? derived.reduce((map, team) => {
-                const key = team.divisionId ?? -1;
-                const current = map.get(key);
-                if (current) {
-                  current.push(team);
-                } else {
-                  map.set(key, [team]);
-                }
-                return map;
-              }, new Map<number, (typeof derived)[number][]>())
-            : new Map<number, (typeof derived)[number][]>();
-
-          const divisionStats = Array.from(divisionBuckets.entries()).map(
-            ([divisionId, members]) => {
-              const avgPfPerGame =
-                members.reduce((sum, team) => sum + team.pfPerGame, 0) / members.length;
-              const avgPaPerGame =
-                members.reduce((sum, team) => sum + team.paPerGame, 0) / members.length;
-              const topSeed = members.reduce((prev, curr) =>
-                curr.standingRank < prev.standingRank ? curr : prev,
-              );
-              const divisionName =
-                members[0]?.divisionName ??
-                (divisionId === -1 ? 'Unassigned division' : `Division ${divisionId.toString()}`);
-              const divisionAvatarUrl = members[0]?.divisionAvatarUrl ?? null;
-
-              return {
-                divisionId,
-                divisionName,
-                divisionAvatarUrl,
-                members,
-                avgPfPerGame,
-                avgPaPerGame,
-                topSeed,
-              };
-            },
-          );
-
-          const highestAvgPfDivision =
-            divisionStats.length > 0
-              ? divisionStats.reduce((prev, curr) =>
-                  curr.avgPfPerGame > prev.avgPfPerGame ? curr : prev,
-                )
-              : null;
-          const lowestAvgPaDivision =
-            divisionStats.length > 0
-              ? divisionStats.reduce((prev, curr) =>
-                  curr.avgPaPerGame < prev.avgPaPerGame ? curr : prev,
-                )
-              : null;
-
-          return {
-            derived,
-            leagueAvgPaPerGame,
-            toughestSchedule,
-            easiestSchedule,
-            luckiestRecord,
-            unluckiestRecord,
-            divisionStats,
-            highestAvgPfDivision,
-            lowestAvgPaDivision,
-            hasDivisionData,
-          };
-        })()
-      : null;
+  const insights = computeStandingsInsights(teams);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -283,11 +242,10 @@ export function StandingsPage() {
                           )}
                         </td>
                         <td>{div.divisionName}</td>
-                        <td>{div.members.length}</td>
                         <td>{div.avgPfPerGame.toFixed(1)}</td>
                         <td>{div.avgPaPerGame.toFixed(1)}</td>
                         <td>
-                          #{div.topSeed.standingRank} {div.topSeed.teamName}
+                          ({div.topSeed.standingRank}) {div.topSeed.teamName}
                         </td>
                       </tr>
                     ))}
@@ -309,20 +267,21 @@ export function StandingsPage() {
                 <tr>
                   <th>Seed</th>
                   <th>Team</th>
+                  <th>B/W</th>
                   <th>Owner</th>
                   <th>Record</th>
                   <th>Points For</th>
                   <th>Points Against</th>
                   <th>Avg PF/Week</th>
-                  <th>PF:PA</th>
+                  <th>PA/PF</th>
                 </tr>
               </thead>
               <tbody>
                 {teams.map((team) => {
                   const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
                   const avgPoints = gamesPlayed > 0 ? team.pointsFor / gamesPlayed : 0;
-                  const pfPaRatio =
-                    team.pointsAgainst > 0 ? team.pointsFor / team.pointsAgainst : null;
+                  const paPfRatio = team.pointsFor > 0 ? team.pointsAgainst / team.pointsFor : null;
+                  const bw = bestWorstRange(team, teams);
 
                   return (
                     <tr key={team.sleeperRosterId}>
@@ -337,9 +296,25 @@ export function StandingsPage() {
                             showUserAvatar={false}
                             size="md"
                           />
-                          <span>{team.teamName}</span>
+                          <span className="flex items-center gap-1">
+                            {team.teamName}
+                            <span className="flex items-center gap-0.5 text-[0.6rem] text-base-content/60">
+                              {teamBadges(team, bw).map((code) => (
+                                <span
+                                  key={code}
+                                  title={
+                                    STANDINGS_GLOSSARY.find((g) => g.code === code)?.description ??
+                                    ''
+                                  }
+                                >
+                                  {code}
+                                </span>
+                              ))}
+                            </span>
+                          </span>
                         </div>
                       </td>
+                      <td className="text-sm text-base-content/80">{bw.label}</td>
                       <td>
                         <div className="flex items-center gap-2">
                           {team.userAvatarUrl && (
@@ -352,18 +327,28 @@ export function StandingsPage() {
                           <span>{team.ownerDisplayName}</span>
                         </div>
                       </td>
-                      <td>
-                        {formatRecord(team.record)}
-                      </td>
+                      <td>{formatRecord(team.record)}</td>
                       <td>{team.pointsFor.toFixed(2)}</td>
                       <td>{team.pointsAgainst.toFixed(2)}</td>
                       <td>{avgPoints.toFixed(2)}</td>
-                      <td>{pfPaRatio !== null ? pfPaRatio.toFixed(2) : '—'}</td>
+                      <td>{paPfRatio !== null ? paPfRatio.toFixed(2) : '—'}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+          </div>
+          <div className="card bg-base-200 mt-4">
+            <div className="card-body p-4 space-y-1">
+              <h3 className="card-title text-sm">Standings Glossary</h3>
+              <ul className="text-sm leading-snug space-y-1">
+                {STANDINGS_GLOSSARY.map((entry) => (
+                  <li key={entry.code}>
+                    <span className="font-semibold">{entry.code}</span> – {entry.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </>
       )}

@@ -8,6 +8,7 @@ import { BRACKET_TEMPLATE } from '../bracket/template';
 import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 import { Bracket } from '../components/bracket/Bracket';
 import { TeamAvatars } from '../components/common/TeamAvatars';
+import { buildPlayoffNarratives } from './narratives.tsx';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -145,6 +146,7 @@ function PlayoffsIfTodayPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [mode, setMode] = useState<BracketMode>('score');
+  const narratives = useMemo(() => buildPlayoffNarratives(teams), [teams]);
 
   useEffect(() => {
     async function load() {
@@ -263,6 +265,65 @@ function PlayoffsIfTodayPage() {
           </select>
         </div>
       </div>
+
+      {narratives && (
+        <div className="grid gap-3 lg:grid-cols-3">
+          {narratives.bubble && (
+            <div className="card bg-base-200">
+              <div className="card-body p-4 space-y-2">
+                <div className="card-title text-sm">{narratives.bubble.heading}</div>
+                <p className="text-sm leading-snug">{narratives.bubble.summary}</p>
+                <ul className="list-disc list-inside text-sm leading-snug space-y-1 text-base-content/80">
+                  {narratives.bubble.scenarios.map((line, idx) => (
+                    <li key={idx}>{line}</li>
+                  ))}
+                </ul>
+                {narratives.bubble.note && (
+                  <p className="text-xs text-base-content/70">{narratives.bubble.note}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {narratives.bye && (
+            <div className="card bg-base-200">
+              <div className="card-body p-4 space-y-2">
+                <div className="card-title text-sm">{narratives.bye.heading}</div>
+                <p className="text-sm leading-snug">{narratives.bye.summary}</p>
+                <ul className="list-disc list-inside text-sm leading-snug space-y-1 text-base-content/80">
+                  {narratives.bye.scenarios.map((line, idx) => (
+                    <li key={idx}>{line}</li>
+                  ))}
+                </ul>
+                {narratives.bye.note && (
+                  <p className="text-xs text-base-content/70">{narratives.bye.note}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {narratives.divisions.length > 0 && (
+            <div className="card bg-base-200">
+              <div className="card-body p-4 space-y-3">
+                <div className="card-title text-sm">Division Races</div>
+                <div className="space-y-3">
+                  {narratives.divisions.map((race, idx) => (
+                    <div key={race.id ?? idx} className="space-y-1">
+                      <div className="text-sm font-semibold leading-snug">{race.summary}</div>
+                      <ul className="list-disc list-inside text-xs sm:text-sm leading-snug space-y-1 text-base-content/80">
+                        {race.scenarios.map((line, idx) => (
+                          <li key={idx}>{line}</li>
+                        ))}
+                      </ul>
+                      {race.note && <p className="text-xs text-base-content/70">{race.note}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {pvpInfo && (
         <div className="card bg-base-200 shadow-md">

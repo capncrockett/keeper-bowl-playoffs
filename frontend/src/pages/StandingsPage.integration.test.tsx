@@ -37,6 +37,29 @@ describe('StandingsPage', () => {
     expect(row).toHaveTextContent(/\b1\b/);
   });
 
+  it('renders insights cards with fixture data', async () => {
+    render(<StandingsPage />);
+
+    const toughestCardHeading = await screen.findByText(/Toughest Schedule/i);
+    const toughestCard = toughestCardHeading.closest('.card');
+    expect(toughestCard).toBeInTheDocument();
+    if (toughestCard instanceof HTMLElement) {
+      expect(
+        within(toughestCard).getByText(/Team Twelve is eating 130\.8 PA per week/i),
+      ).toBeInTheDocument();
+      expect(within(toughestCard).getByText(/118\.4/)).toBeInTheDocument();
+    }
+
+    const easiestCardHeading = await screen.findByText(/Easiest Schedule/i);
+    const easiestCard = easiestCardHeading.closest('.card');
+    expect(easiestCard).toBeInTheDocument();
+    if (easiestCard instanceof HTMLElement) {
+      expect(
+        within(easiestCard).getByText(/Big Ol' TDs sees only 107\.7 PA per week/i),
+      ).toBeInTheDocument();
+    }
+  });
+
   it('shows empty state when no teams', async () => {
     rostersSpy.mockResolvedValueOnce([]);
     usersSpy.mockResolvedValueOnce([]);
@@ -56,5 +79,30 @@ describe('StandingsPage', () => {
     expect(
       await screen.findByText(/Failed to load standings/i),
     ).toBeInTheDocument();
+  });
+
+  it('hides insights before any games are played', async () => {
+    const zeroed = mockSleeperRosters.map((roster) => ({
+      ...roster,
+      settings: {
+        ...roster.settings,
+        wins: 0,
+        losses: 0,
+        ties: 0,
+        fpts: 0,
+        fpts_decimal: 0,
+        fpts_against: 0,
+        fpts_against_decimal: 0,
+      },
+    }));
+    rostersSpy.mockResolvedValueOnce(zeroed);
+
+    render(<StandingsPage />);
+
+    expect(
+      await screen.findByRole('heading', { name: /standings/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Toughest Schedule/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Easiest Schedule/i)).not.toBeInTheDocument();
   });
 });
