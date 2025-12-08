@@ -274,10 +274,13 @@ function PlayoffsIfTodayPage() {
                 <div className="card-title text-sm">Bubble Watch</div>
                 <p className="text-sm leading-snug">
                   #{raceInsights.bubbleRace.cutoff.seed} {raceInsights.bubbleRace.cutoff.teamName}{' '}
-                  holds the final ticket by {raceInsights.bubbleRace.gamesBack.toFixed(1)} games over{' '}
-                  #{raceInsights.bubbleRace.challenger.seed} {raceInsights.bubbleRace.challenger.teamName}.{' '}
-                  PF edge: {raceInsights.bubbleRace.pfGap >= 0 ? '+' : ''}
-                  {raceInsights.bubbleRace.pfGap.toFixed(1)}; a swing week flips #6.
+                  vs #{raceInsights.bubbleRace.challenger.seed} {raceInsights.bubbleRace.challenger.teamName}:{' '}
+                  {raceInsights.bubbleRace.gamesBack === 0
+                    ? 'deadlocked on record'
+                    : `up ${raceInsights.bubbleRace.gamesBack.toFixed(1)} games`}. PF edge{' '}
+                  {raceInsights.bubbleRace.pfGap >= 0 ? '+' : ''}
+                  {raceInsights.bubbleRace.pfGap.toFixed(1)} keeps #{raceInsights.bubbleRace.cutoff.seed} in for now;
+                  one swing week swaps #6/#7.
                 </p>
               </div>
             </div>
@@ -288,11 +291,13 @@ function PlayoffsIfTodayPage() {
               <div className="card-body p-4 space-y-1.5">
                 <div className="card-title text-sm">Bye Chase</div>
                 <p className="text-sm leading-snug">
-                  #{raceInsights.byeRace.holder.seed} {raceInsights.byeRace.holder.teamName} holds a bye.{' '}
-                  #{raceInsights.byeRace.challenger.seed} {raceInsights.byeRace.challenger.teamName}{' '}
-                  sits {Math.abs(raceInsights.byeRace.gamesBack).toFixed(1)} games{' '}
-                  {raceInsights.byeRace.gamesBack > 0 ? 'back' : 'ahead on record but trailing on tiebreaks'}.{' '}
-                  One stumble swaps the bye.
+                  #{raceInsights.byeRace.holder.seed} {raceInsights.byeRace.holder.teamName}{' '}
+                  holds the bye; #{raceInsights.byeRace.challenger.seed}{' '}
+                  {raceInsights.byeRace.challenger.teamName}{' '}
+                  {raceInsights.byeRace.gamesBack === 0
+                    ? 'is tied on record but behind on tiebreaks'
+                    : `is ${Math.abs(raceInsights.byeRace.gamesBack).toFixed(1)} games ${raceInsights.byeRace.gamesBack > 0 ? 'back' : 'ahead'}`}.{' '}
+                  A single result can flip who rests in Round 1.
                 </p>
               </div>
             </div>
@@ -306,8 +311,12 @@ function PlayoffsIfTodayPage() {
                   {raceInsights.divisionRaces.map((race) => (
                     <li key={race.divisionId ?? race.leader.divisionName ?? race.leader.sleeperRosterId}>
                       {race.divisionName ?? 'Division'}: #{race.leader.seed} {race.leader.teamName}{' '}
-                      leads #{race.chaser.seed} {race.chaser.teamName} by {race.gamesBack.toFixed(1)} games.{' '}
-                      Next meeting likely decides the crown.
+                      {race.gamesBack === 0
+                        ? 'is tied with'
+                        : `leads`} #{race.chaser.seed} {race.chaser.teamName}{' '}
+                      {race.gamesBack === 0
+                        ? '(tiebreak holds the banner for now)'
+                        : `by ${race.gamesBack.toFixed(1)} games`}. Next meeting likely decides the banner.
                     </li>
                   ))}
                 </ul>
