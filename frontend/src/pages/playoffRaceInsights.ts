@@ -1,6 +1,6 @@
 import type { Team } from '../models/fantasy';
 
-const gamesBack = (leader: Team, chaser: Team): number => {
+export const gamesBack = (leader: Team, chaser: Team): number => {
   const winDiff = leader.record.wins - chaser.record.wins;
   const lossDiff = chaser.record.losses - leader.record.losses;
   const tieDiff = leader.record.ties - chaser.record.ties;

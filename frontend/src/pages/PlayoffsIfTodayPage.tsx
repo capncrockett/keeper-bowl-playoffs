@@ -8,7 +8,7 @@ import { BRACKET_TEMPLATE } from '../bracket/template';
 import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 import { Bracket } from '../components/bracket/Bracket';
 import { TeamAvatars } from '../components/common/TeamAvatars';
-import { computePlayoffRaceInsights } from './playoffRaceInsights';
+import { buildPlayoffNarratives } from './narratives';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -146,7 +146,7 @@ function PlayoffsIfTodayPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [mode, setMode] = useState<BracketMode>('score');
-  const raceInsights = useMemo(() => computePlayoffRaceInsights(teams), [teams]);
+  const narratives = useMemo(() => buildPlayoffNarratives(teams), [teams]);
 
   useEffect(() => {
     async function load() {
@@ -266,60 +266,59 @@ function PlayoffsIfTodayPage() {
         </div>
       </div>
 
-      {raceInsights && (
+      {narratives && (
         <div className="grid gap-3 lg:grid-cols-3">
-          {raceInsights.bubbleRace && (
+          {narratives.bubble && (
             <div className="card bg-base-200">
-              <div className="card-body p-4 space-y-1.5">
-                <div className="card-title text-sm">Bubble Watch</div>
-                <p className="text-sm leading-snug">
-                  ({raceInsights.bubbleRace.cutoff.seed}) {raceInsights.bubbleRace.cutoff.teamName}{' '}
-                  vs ({raceInsights.bubbleRace.challenger.seed}) {raceInsights.bubbleRace.challenger.teamName}:{' '}
-                  {raceInsights.bubbleRace.gamesBack === 0
-                    ? 'deadlocked on record'
-                    : `up ${raceInsights.bubbleRace.gamesBack.toFixed(1)} games`}. PF edge{' '}
-                  {raceInsights.bubbleRace.pfGap >= 0 ? '+' : ''}
-                  {raceInsights.bubbleRace.pfGap.toFixed(1)} keeps ({raceInsights.bubbleRace.cutoff.seed}) in for now;
-                  one swing week swaps the seeds.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {raceInsights.byeRace && (
-            <div className="card bg-base-200">
-              <div className="card-body p-4 space-y-1.5">
-                <div className="card-title text-sm">Bye Chase</div>
-                <p className="text-sm leading-snug">
-                  ({raceInsights.byeRace.holder.seed}) {raceInsights.byeRace.holder.teamName}{' '}
-                  holds the bye; ({raceInsights.byeRace.challenger.seed}){' '}
-                  {raceInsights.byeRace.challenger.teamName}{' '}
-                  {raceInsights.byeRace.gamesBack === 0
-                    ? 'is tied on record but behind on tiebreaks'
-                    : `is ${Math.abs(raceInsights.byeRace.gamesBack).toFixed(1)} games ${raceInsights.byeRace.gamesBack > 0 ? 'back' : 'ahead'}`}.{' '}
-                  A single result can flip who rests in Round 1.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {raceInsights.divisionRaces.length > 0 && (
-            <div className="card bg-base-200">
-              <div className="card-body p-4 space-y-1.5">
-                <div className="card-title text-sm">Tight Divisions</div>
-                <ul className="text-sm leading-snug space-y-1">
-                  {raceInsights.divisionRaces.map((race) => (
-                    <li key={race.divisionId ?? race.leader.divisionName ?? race.leader.sleeperRosterId}>
-                      {race.divisionName ?? 'Division'}: ({race.leader.seed}) {race.leader.teamName}{' '}
-                      {race.gamesBack === 0
-                        ? 'is tied with'
-                        : `leads`} ({race.chaser.seed}) {race.chaser.teamName}{' '}
-                      {race.gamesBack === 0
-                        ? '(tiebreak holds the banner for now)'
-                        : `by ${race.gamesBack.toFixed(1)} games`}. One slip hands the banner to the chaser.
-                    </li>
+              <div className="card-body p-4 space-y-2">
+                <div className="card-title text-sm">{narratives.bubble.heading}</div>
+                <p className="text-sm leading-snug">{narratives.bubble.summary}</p>
+                <ul className="list-disc list-inside text-sm leading-snug space-y-1 text-base-content/80">
+                  {narratives.bubble.scenarios.map((line, idx) => (
+                    <li key={idx}>{line}</li>
                   ))}
                 </ul>
+                {narratives.bubble.note && (
+                  <p className="text-xs text-base-content/70">{narratives.bubble.note}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {narratives.bye && (
+            <div className="card bg-base-200">
+              <div className="card-body p-4 space-y-2">
+                <div className="card-title text-sm">{narratives.bye.heading}</div>
+                <p className="text-sm leading-snug">{narratives.bye.summary}</p>
+                <ul className="list-disc list-inside text-sm leading-snug space-y-1 text-base-content/80">
+                  {narratives.bye.scenarios.map((line, idx) => (
+                    <li key={idx}>{line}</li>
+                  ))}
+                </ul>
+                {narratives.bye.note && (
+                  <p className="text-xs text-base-content/70">{narratives.bye.note}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {narratives.divisions.length > 0 && (
+            <div className="card bg-base-200">
+              <div className="card-body p-4 space-y-3">
+                <div className="card-title text-sm">Division Races</div>
+                <div className="space-y-3">
+                  {narratives.divisions.map((race, idx) => (
+                    <div key={race.id ?? idx} className="space-y-1">
+                      <div className="text-sm font-semibold leading-snug">{race.summary}</div>
+                      <ul className="list-disc list-inside text-xs sm:text-sm leading-snug space-y-1 text-base-content/80">
+                        {race.scenarios.map((line, idx) => (
+                          <li key={idx}>{line}</li>
+                        ))}
+                      </ul>
+                      {race.note && <p className="text-xs text-base-content/70">{race.note}</p>}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

@@ -6,6 +6,7 @@ import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTrans
 import type { Team } from '../models/fantasy';
 import { TeamAvatars } from '../components/common/TeamAvatars';
 import { computeStandingsInsights } from './standingsInsights';
+import { STANDINGS_GLOSSARY } from './narratives';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -194,6 +195,18 @@ export function StandingsPage() {
               </span>
             </div>
           )}
+          <div className="card bg-base-200 mb-4">
+            <div className="card-body p-4 space-y-1">
+              <h3 className="card-title text-sm">Standings Glossary</h3>
+              <ul className="text-sm leading-snug space-y-1">
+                {STANDINGS_GLOSSARY.map((entry) => (
+                  <li key={entry.code}>
+                    <span className="font-semibold">{entry.code}</span> – {entry.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="table table-zebra w-full">
               <thead>

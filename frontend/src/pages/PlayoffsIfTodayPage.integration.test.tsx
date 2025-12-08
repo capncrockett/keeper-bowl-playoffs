@@ -12,7 +12,7 @@ describe('PlayoffsIfTodayPage', () => {
     ).toBeInTheDocument();
     expect(await screen.findByText(/Bubble Watch/i)).toBeInTheDocument();
     expect(await screen.findByText(/Bye Chase/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Tight Divisions/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Division Races/i)).toBeInTheDocument();
 
     const scoreButton = screen.getByRole('button', { name: /score mode/i });
     const rewardButton = screen.getByRole('button', { name: /reward mode/i });
