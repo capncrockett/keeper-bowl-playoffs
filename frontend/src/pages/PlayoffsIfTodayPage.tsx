@@ -8,7 +8,7 @@ import { BRACKET_TEMPLATE } from '../bracket/template';
 import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 import { Bracket } from '../components/bracket/Bracket';
 import { TeamAvatars } from '../components/common/TeamAvatars';
-import { buildPlayoffNarratives } from './narratives';
+import { buildPlayoffNarratives } from './narratives.tsx';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';

@@ -1,6 +1,6 @@
 import { createElement, Fragment } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { buildPlayoffNarratives, STANDINGS_GLOSSARY } from './narratives';
+import { buildPlayoffNarratives, STANDINGS_GLOSSARY } from './narratives.tsx';
 import { computeSeeds, mergeRostersAndUsersToTeams } from '../utils/sleeperTransforms';
 import { mockSleeperLeague, mockSleeperRosters, mockSleeperUsers } from '../test/fixtures/sleeper';
 

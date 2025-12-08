@@ -6,7 +6,7 @@ import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTrans
 import type { Team } from '../models/fantasy';
 import { TeamAvatars } from '../components/common/TeamAvatars';
 import { computeStandingsInsights } from './standingsInsights';
-import { STANDINGS_GLOSSARY } from './narratives';
+import { STANDINGS_GLOSSARY } from './narratives.tsx';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
