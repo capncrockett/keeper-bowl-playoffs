@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 const THEMES = [
   { value: 'light', label: 'Light' },
   { value: 'cupcake', label: 'Mellow Light' },
-  { value: 'synthwave', label: 'Brighter Dark' },
-  { value: 'dark', label: 'Dark' },
+  { value: 'dim', label: 'Dim' },
+  { value: 'dracula', label: 'Dracula' },
 ] as const;
 
 type ThemeValue = (typeof THEMES)[number]['value'];
@@ -14,7 +14,7 @@ const STORAGE_KEY = 'keeper-bowl-theme';
 const getStoredTheme = (): ThemeValue => {
   const stored = localStorage.getItem(STORAGE_KEY);
   const isStoredTheme = THEMES.some(({ value }) => value === stored);
-  return isStoredTheme ? (stored as ThemeValue) : 'dark';
+  return isStoredTheme ? (stored as ThemeValue) : 'dracula';
 };
 
 export function ThemeSelector() {
