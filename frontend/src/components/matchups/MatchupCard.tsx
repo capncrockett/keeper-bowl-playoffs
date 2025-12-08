@@ -64,7 +64,7 @@ export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
 
           {/* Team B */}
           <div className="flex flex-col gap-1 items-end text-right">
-            <div className="flex items-center gap-2 flex-row-reverse">
+            <div className="flex items-center gap-2 flex-row-reverse w-full">
               {teamB && (
                 <TeamAvatars
                   teamName={teamB.teamName}
