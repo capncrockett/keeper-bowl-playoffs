@@ -5,7 +5,9 @@ import { computeSeeds, mergeRostersAndUsersToTeams } from '../utils/sleeperTrans
 import { mockSleeperLeague, mockSleeperRosters, mockSleeperUsers } from '../test/fixtures/sleeper';
 
 const buildTeams = () =>
-  computeSeeds(mergeRostersAndUsersToTeams(mockSleeperRosters, mockSleeperUsers, mockSleeperLeague));
+  computeSeeds(
+    mergeRostersAndUsersToTeams(mockSleeperRosters, mockSleeperUsers, mockSleeperLeague),
+  );
 
 const toText = (node: React.ReactNode | undefined) =>
   node == null ? '' : renderToStaticMarkup(createElement(Fragment, null, node));
@@ -32,8 +34,10 @@ describe('buildPlayoffNarratives', () => {
   });
 
   it('exposes glossary entries for standings UI', () => {
-    const clutch = STANDINGS_GLOSSARY.find((entry) => entry.code === 'c6');
-    expect(clutch?.description).toMatch(/clutch rule/i);
-    expect(STANDINGS_GLOSSARY.find((entry) => entry.code === 'bw')?.description).toMatch(/Best\/Worst/i);
+    const sixSeed = STANDINGS_GLOSSARY.find((entry) => entry.code === '6');
+    expect(sixSeed?.description).toMatch(/sixSeed rule/i);
+    expect(STANDINGS_GLOSSARY.find((entry) => entry.code === 'bw')?.description).toMatch(
+      /Best\/Worst/i,
+    );
   });
 });

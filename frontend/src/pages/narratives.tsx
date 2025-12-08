@@ -29,13 +29,8 @@ export const STANDINGS_GLOSSARY: GlossaryEntry[] = [
   { code: '*', description: 'Clinched No. 1 Overall Seed' },
   { code: 'e', description: 'Eliminated From Playoff Contention' },
   {
-    code: 'c6',
-    description:
-      'Currently holds the "Clutch Rule" 6th seed (highest PF among non-division-winners)',
-  },
-  {
-    code: 'm',
-    description: 'Mathematically in play: can still move up or down based on Best/Worst Seed range',
+    code: '6',
+    description: 'Currently holds the 6th seed (highest PF among non-division-winners)',
   },
   {
     code: 'bw',
@@ -113,7 +108,7 @@ const findBubbleThirdTeam = (
   const recordThreat = bubbleNeighbors.find((team) => Math.abs(gamesBack(challenger, team)) <= 1);
   if (recordThreat) return recordThreat;
 
-  // PF-based threat to the clutch seed
+  // PF-based threat to the 6 seed
   const pfLeader = bubbleNeighbors.reduce<Team | null>((best, team) => {
     if (!best) return team;
     return team.pointsFor > best.pointsFor ? team : best;
@@ -166,8 +161,8 @@ const buildBubbleNarrative = (teams: Team[]): NarrativeSection | null => {
           {pfEdgePlus}.
         </>,
         <>
-          If both lose, the flip still happens if {boldName(challenger)} outscores {boldName(cutoff)}{' '}
-          by {pfEdgePlus}.
+          If both lose, the flip still happens if {boldName(challenger)} outscores{' '}
+          {boldName(cutoff)} by {pfEdgePlus}.
         </>,
       ]
     : recordGap.leader?.sleeperRosterId === cutoff.sleeperRosterId
@@ -177,37 +172,32 @@ const buildBubbleNarrative = (teams: Team[]): NarrativeSection | null => {
             outright.
           </>,
           <>
-            {boldName(challenger)} needs a result swing plus {pfEdgePlain} to steal the
-            clutch rule spot.
+            {boldName(challenger)} needs a result swing plus {pfEdgePlain} to steal the 6 seed spot.
           </>,
-          <>
-            If records stay apart, {boldName(cutoff)} keeps No. 6 even if PF tightens.
-          </>,
+          <>If records stay apart, {boldName(cutoff)} keeps No. 6 even if PF tightens.</>,
         ]
       : [
           <>
-            {boldName(cutoff)} still owns the clutch rule spot until {boldName(challenger)} erases
+            {boldName(cutoff)} still owns the 6 seed spot until {boldName(challenger)} erases
             {pfEdgePlus}.
           </>,
           <>
             {boldName(challenger)} can take it by outscoring {boldName(cutoff)} by {pfEdgePlus}{' '}
             while keeping their record edge.
           </>,
-          <>
-            {boldName(cutoff)} keeps No. 6 if the PF lead holds, even if the records stay split.
-          </>,
+          <>{boldName(cutoff)} keeps No. 6 if the PF lead holds, even if the records stay split.</>,
         ];
 
-  const note = thirdTeam
-    ? (
-      <>
-        A third team ({seedToken(thirdTeam)}) can still enter the mix. If they win and post a high
-        PF week while both current bubble teams stumble, Seed 6 may shift again. In that scenario,
-        either {seedToken(cutoff)} or {seedToken(challenger)} could fall to Seed 7 or out of the
-        playoffs entirely based on the clutch rule.
-      </>
-    )
-    : 'No other teams are in range to take Seeds 6 or 7 this week based on current record and PF math.';
+  const note = thirdTeam ? (
+    <>
+      A third team ({seedToken(thirdTeam)}) can still enter the mix. If they win and post a high PF
+      week while both current bubble teams stumble, Seed 6 may shift again. In that scenario, either{' '}
+      {seedToken(cutoff)} or {seedToken(challenger)} could fall to Seed 7 or out of the playoffs
+      entirely based on the 6 seed rule.
+    </>
+  ) : (
+    'No other teams are in range to take Seeds 6 or 7 this week based on current record and PF math.'
+  );
 
   return {
     heading: 'Bubble Watch',
@@ -278,18 +268,18 @@ const buildByeNarrative = (teams: Team[]): NarrativeSection | null => {
   );
 
   const scenarios = tiedOnRecord
-      ? [
-          <>
-            {boldName(challenger)} claims the bye with a win that erases the {pfEdgePlain} PF gap.
-          </>,
-          <>
-            {boldName(challenger)} also gets the bye if they win while {boldName(holder)} loses (no PF
-            math needed).
-          </>,
-          <>
-            If both win or both lose, the bye stays with {boldName(holder)} unless the PF gap closes.
-          </>,
-        ]
+    ? [
+        <>
+          {boldName(challenger)} claims the bye with a win that erases the {pfEdgePlain} PF gap.
+        </>,
+        <>
+          {boldName(challenger)} also gets the bye if they win while {boldName(holder)} loses (no PF
+          math needed).
+        </>,
+        <>
+          If both win or both lose, the bye stays with {boldName(holder)} unless the PF gap closes.
+        </>,
+      ]
     : recordGap.leader?.sleeperRosterId === holder.sleeperRosterId
       ? [
           <>
