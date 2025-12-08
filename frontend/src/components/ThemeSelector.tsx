@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 const THEMES = [
-  { value: 'light', label: 'Light' },
-  { value: 'cupcake', label: 'Mellow Light' },
+  { value: 'cupcake', label: 'Cupcake' },
+  { value: 'retro', label: 'Retro' },
   { value: 'dim', label: 'Dim' },
   { value: 'dracula', label: 'Dracula' },
 ] as const;
