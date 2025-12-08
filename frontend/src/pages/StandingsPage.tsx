@@ -173,17 +173,17 @@ export function StandingsPage() {
                             '—'
                           )}
                         </td>
-                        <td>{div.divisionName}</td>
-                        <td>{div.members.length}</td>
-                        <td>{div.avgPfPerGame.toFixed(1)}</td>
-                        <td>{div.avgPaPerGame.toFixed(1)}</td>
-                        <td>
-                          #{div.topSeed.standingRank} {div.topSeed.teamName}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      <td>{div.divisionName}</td>
+                      <td>{div.members.length}</td>
+                      <td>{div.avgPfPerGame.toFixed(1)}</td>
+                      <td>{div.avgPaPerGame.toFixed(1)}</td>
+                      <td>
+                          ({div.topSeed.standingRank}) {div.topSeed.teamName}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               </div>
             </>
           ) : (
@@ -228,7 +228,9 @@ export function StandingsPage() {
                             showUserAvatar={false}
                             size="md"
                           />
-                          <span>{team.teamName}</span>
+                          <span>
+                            ({team.seed ?? team.rank}) {team.teamName}
+                          </span>
                         </div>
                       </td>
                       <td>
