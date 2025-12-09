@@ -35,6 +35,9 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 
 ## Future Enhancements (Nice-to-Have)
 
+- Persist a lightweight “matchup history” data store (SQLite or static JSON) with weekly PF highs/lows and margins to power best/worst ranges, stat-correction checks, and narratives without re-hitting Sleeper for past weeks.
+- Add a scheduled background job (e.g., hourly cron) to fetch Sleeper matchup results between MNF end and Wednesday stat corrections, updating the local matchup history/DB so B/W and `sc` signals stay current during the correction window.
+
 ### Enhanced Matchup Projections
 
 **Goal:** Display accurate projected scores and win probabilities on the Matchups page.
