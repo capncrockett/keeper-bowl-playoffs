@@ -5,9 +5,13 @@ import {
   type SleeperMatchup,
   type SleeperRoster,
   type SleeperUser,
-} from '../src/api/sleeper';
-import { getMatchupStore } from '../src/data/matchupHistoryStore.node';
-import type { StoredMatchup } from '../src/data/matchupHistoryTypes';
+} from '../../frontend/src/api/sleeper';
+import {
+  getMatchupStore,
+  type MatchupHistoryStore,
+  type StoreConfig,
+} from '../matchupHistoryStore';
+import type { StoredMatchup } from '../../frontend/src/data/matchupHistoryTypes';
 
 const DEFAULT_LEAGUE_ID = '1251950356187840512';
 
@@ -142,11 +146,11 @@ function buildMatchups(
   return entries;
 }
 
-async function main() {
+async function main(storeConfig: StoreConfig = {}) {
   const options = parseArgs();
   console.log(`Fetching Sleeper matchups for week(s): ${options.weeks.join(', ')}...`);
 
-  const store = await getMatchupStore();
+  const store: MatchupHistoryStore = await getMatchupStore(storeConfig);
   console.log(`Using matchup store: ${store.describe()}`);
 
   const [users, rosters] = await Promise.all([
@@ -185,10 +189,7 @@ async function main() {
 }
 
 main().catch((err: unknown) => {
-  if (err instanceof Error) {
-    console.error(err.message);
-  } else {
-    console.error(err);
-  }
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(message);
   process.exit(1);
 });

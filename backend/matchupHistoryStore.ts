@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import type { MatchupHistory, StoredMatchup } from './matchupHistoryTypes';
-import { normalizeTeamName } from './matchupHistory';
+import type { MatchupHistory, StoredMatchup } from '../frontend/src/data/matchupHistoryTypes';
+import { normalizeTeamName } from '../frontend/src/data/matchupHistory';
 
 export type MatchupHistoryStore = {
   kind: 'json' | 'sqlite';
@@ -17,9 +17,11 @@ export type StoreConfig = {
   sqlitePath?: string;
 };
 
-const STORE_FILE_URL = new URL('./matchupHistoryStore.json', import.meta.url);
+const STORE_FILE_URL = new URL('../frontend/src/data/matchupHistoryStore.json', import.meta.url);
 export const MATCHUP_HISTORY_STORE_PATH = fileURLToPath(STORE_FILE_URL);
-const DEFAULT_SQLITE_PATH = fileURLToPath(new URL('./matchupHistory.sqlite', import.meta.url));
+const DEFAULT_SQLITE_PATH = fileURLToPath(
+  new URL('../frontend/src/data/matchupHistory.sqlite', import.meta.url),
+);
 
 const sortMatchups = (matchups: MatchupHistory): MatchupHistory =>
   [...matchups].sort((a, b) => {
