@@ -6,10 +6,7 @@ import {
   type SleeperRoster,
   type SleeperUser,
 } from '../src/api/sleeper';
-import {
-  appendWeekMatchups,
-  MATCHUP_HISTORY_STORE_PATH,
-} from '../src/data/matchupHistoryStore.node';
+import { getMatchupStore } from '../src/data/matchupHistoryStore.node';
 import type { StoredMatchup } from '../src/data/matchupHistoryTypes';
 
 const DEFAULT_LEAGUE_ID = '1251950356187840512';
@@ -149,6 +146,9 @@ async function main() {
   const options = parseArgs();
   console.log(`Fetching Sleeper matchups for week(s): ${options.weeks.join(', ')}...`);
 
+  const store = await getMatchupStore();
+  console.log(`Using matchup store: ${store.describe()}`);
+
   const [users, rosters] = await Promise.all([
     getLeagueUsers(options.leagueId),
     getLeagueRosters(options.leagueId),
@@ -167,12 +167,12 @@ async function main() {
       continue;
     }
 
-    const updated = await appendWeekMatchups(week, entries);
+    const updated = await store.appendWeek(week, entries);
     touchedWeeks.add(week);
     totalWritten += entries.length;
     const weeks = Array.from(new Set(updated.map((m) => m.week))).sort((a, b) => a - b);
     console.log(
-      `Wrote ${entries.length.toString()} rows for week ${week.toString()} to ${MATCHUP_HISTORY_STORE_PATH}`,
+      `Wrote ${entries.length.toString()} rows for week ${week.toString()} to ${store.describe()}`,
     );
     console.log(`Store now covers weeks: ${weeks.join(', ')}`);
   }
