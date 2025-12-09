@@ -1,0 +1,8 @@
+{
+  "name": "keeper-bowl-playoffs",
+  "private": true,
+  "workspaces": ["frontend", "backend"],
+  "scripts": {
+    "lint": "npm run lint -w frontend && npm run lint -w backend"
+  }
+}
