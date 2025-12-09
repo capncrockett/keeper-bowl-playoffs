@@ -1,12 +1,13 @@
 // src/pages/StandingsPage.tsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getLeague, getLeagueRosters, getLeagueUsers } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
 import type { Team } from '../models/fantasy';
 import { TeamAvatars } from '../components/common/TeamAvatars';
 import { computeStandingsInsights } from './standingsInsights';
 import { STANDINGS_GLOSSARY } from './narratives.tsx';
+import { getMatchupMarginsForWeek, MATCHUP_HISTORY } from '../data/matchupHistory';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -32,12 +33,85 @@ export function StandingsPage() {
     return sorted.map((entry) => entry.id);
   };
 
+  const normalizeName = (name: string): string => name.replace(/’/g, "'").toLowerCase();
+
+  const findMatchup = (teamName: string, week?: number) => {
+    const normalized = normalizeName(teamName);
+    const byWeek = MATCHUP_HISTORY.find(
+      (m) =>
+        (week === undefined || m.week === week) &&
+        (normalizeName(m.team) === normalized || normalizeName(m.opponent) === normalized),
+    );
+    if (byWeek) return byWeek;
+    return MATCHUP_HISTORY.find(
+      (m) => normalizeName(m.team) === normalized || normalizeName(m.opponent) === normalized,
+    );
+  };
+
+  const computeSeedAfterFlip = (
+    team: Team,
+    allTeams: Team[],
+    matchupMargin: number,
+    opponentName: string | null,
+  ): number | null => {
+    if (!opponentName) return null;
+    const opponent = allTeams.find((t) => normalizeName(t.teamName) === normalizeName(opponentName));
+    if (!opponent) return null;
+
+    const adjusted = allTeams.map((t) => ({ ...t, record: { ...t.record } }));
+    const target = adjusted.find((t) => t.sleeperRosterId === team.sleeperRosterId);
+    const targetOpp = adjusted.find((t) => t.sleeperRosterId === opponent.sleeperRosterId);
+    if (!target || !targetOpp) return null;
+
+    if (matchupMargin > 0) {
+      target.record.wins = Math.max(0, target.record.wins - 1);
+      target.record.losses += 1;
+      targetOpp.record.wins += 1;
+      targetOpp.record.losses = Math.max(0, targetOpp.record.losses - 1);
+    } else if (matchupMargin < 0) {
+      target.record.wins += 1;
+      target.record.losses = Math.max(0, target.record.losses - 1);
+      targetOpp.record.wins = Math.max(0, targetOpp.record.wins - 1);
+      targetOpp.record.losses += 1;
+    } else {
+      // tie margin unlikely; treat as no-op
+      return null;
+    }
+
+    const reseeded = computeSeeds(adjusted);
+    return reseeded.find((t) => t.sleeperRosterId === team.sleeperRosterId)?.seed ?? null;
+  };
+
   const bestWorstRange = (
     team: Team,
     allTeams: Team[],
-  ): { best: number; worst: number; label: string } => {
+    marginByTeam: Map<string, number>,
+    latestWeek: number | null,
+  ): { best: number; worst: number; label: string; statCorrectionRisk: boolean } => {
     const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
     const remaining = Math.max(regularSeasonWeeks - gamesPlayed, 0);
+    const currentSeed = team.seed ?? team.rank;
+    const normalizedName = team.teamName.replace(/’/g, "'").toLowerCase();
+    const margin = marginByTeam.get(team.teamName) ?? marginByTeam.get(normalizedName);
+
+    const withinCorrectionThreshold = margin != null && Math.abs(margin) <= 8;
+    const matchup = latestWeek !== null ? findMatchup(team.teamName, latestWeek) : null;
+    let flippedSeed: number | null = null;
+    if (withinCorrectionThreshold && matchup) {
+      flippedSeed = computeSeedAfterFlip(team, allTeams, margin, matchup.opponent);
+    }
+    const statCorrectionRisk =
+      withinCorrectionThreshold && flippedSeed != null && flippedSeed !== currentSeed;
+
+    if (remaining === 0) {
+      return {
+        best: currentSeed,
+        worst: currentSeed,
+        label: `${currentSeed.toString()}-${currentSeed.toString()}`,
+        statCorrectionRisk,
+      };
+    }
+
     const minWinPoints = winPoints(team);
     const maxWinPoints = minWinPoints + remaining;
 
@@ -64,10 +138,18 @@ export function StandingsPage() {
     const bestRank = rankTeams(optimisticEntries).indexOf(team.sleeperRosterId) + 1;
     const worstRank = rankTeams(pessimisticEntries).indexOf(team.sleeperRosterId) + 1;
 
-    return { best: bestRank, worst: worstRank, label: `${bestRank.toString()}-${worstRank.toString()}` };
+    return {
+      best: bestRank,
+      worst: worstRank,
+      label: `${bestRank.toString()}-${worstRank.toString()}`,
+      statCorrectionRisk,
+    };
   };
 
-  const teamBadges = (team: Team, bw: { best: number; worst: number }): string[] => {
+  const teamBadges = (
+    team: Team,
+    bw: { best: number; worst: number; statCorrectionRisk: boolean },
+  ): string[] => {
     const badges = new Set<string>();
     const seed = team.seed ?? team.rank;
     if (bw.worst <= 1) {
@@ -114,6 +196,16 @@ export function StandingsPage() {
 
     void load();
   }, []);
+
+  const latestRecordedWeek = useMemo(() => {
+    if (MATCHUP_HISTORY.length === 0) return null;
+    return MATCHUP_HISTORY.reduce((max, m) => Math.max(max, m.week), 0);
+  }, []);
+
+  const marginByTeam = useMemo(() => {
+    if (latestRecordedWeek === null) return new Map<string, number>();
+    return getMatchupMarginsForWeek(latestRecordedWeek);
+  }, [latestRecordedWeek]);
 
   const insights = computeStandingsInsights(teams);
 
@@ -282,7 +374,7 @@ export function StandingsPage() {
                   const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
                   const avgPoints = gamesPlayed > 0 ? team.pointsFor / gamesPlayed : 0;
                   const paPfRatio = team.pointsFor > 0 ? team.pointsAgainst / team.pointsFor : null;
-                  const bw = bestWorstRange(team, teams);
+                  const bw = bestWorstRange(team, teams, marginByTeam, latestRecordedWeek);
 
                   return (
                     <tr key={team.sleeperRosterId}>
@@ -315,7 +407,12 @@ export function StandingsPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="text-sm text-base-content/80">{bw.label}</td>
+                      <td className="text-sm text-base-content/80">
+                        {bw.label}
+                        {bw.statCorrectionRisk && (
+                          <span className="ml-1 text-[0.65rem] text-base-content/60">sc</span>
+                        )}
+                      </td>
                       <td>
                         <div className="flex items-center gap-2">
                           {team.userAvatarUrl && (
@@ -328,7 +425,12 @@ export function StandingsPage() {
                           <span>{team.ownerDisplayName}</span>
                         </div>
                       </td>
-                      <td>{formatRecord(team.record)}</td>
+                      <td>
+                        {formatRecord(team.record)}
+                        {bw.statCorrectionRisk && (
+                          <span className="ml-1 text-[0.65rem] text-base-content/60">sc</span>
+                        )}
+                      </td>
                       <td>{team.pointsFor.toFixed(2)}</td>
                       <td>{team.pointsAgainst.toFixed(2)}</td>
                       <td>{avgPoints.toFixed(2)}</td>

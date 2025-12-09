@@ -37,6 +37,11 @@ export const STANDINGS_GLOSSARY: GlossaryEntry[] = [
     description:
       'Best/Worst range showing the highest and lowest possible seed (e.g., 3-8, 1-4, 1-1)',
   },
+  {
+    code: 'sc',
+    description:
+      'Locked barring a small stat correction (scores would need an unusual swing to change the result)',
+  },
 ];
 
 const seedToken = (team: Team): ReactNode => {
