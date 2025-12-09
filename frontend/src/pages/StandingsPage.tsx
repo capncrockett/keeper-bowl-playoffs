@@ -7,7 +7,13 @@ import type { Team } from '../models/fantasy';
 import { TeamAvatars } from '../components/common/TeamAvatars';
 import { computeStandingsInsights } from './standingsInsights';
 import { STANDINGS_GLOSSARY } from './narratives.tsx';
-import { getMatchupMarginsForWeek, MATCHUP_HISTORY } from '../data/matchupHistory';
+import {
+  findMatchupForTeam,
+  getLatestCompletedWeek,
+  getMatchupMarginsForWeek,
+  getStoredMatchups,
+  normalizeTeamName,
+} from '../data/matchupHistory';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -33,20 +39,10 @@ export function StandingsPage() {
     return sorted.map((entry) => entry.id);
   };
 
-  const normalizeName = (name: string): string => name.replace(/’/g, "'").toLowerCase();
+  const storedMatchups = useMemo(() => getStoredMatchups(), []);
 
-  const findMatchup = (teamName: string, week?: number) => {
-    const normalized = normalizeName(teamName);
-    const byWeek = MATCHUP_HISTORY.find(
-      (m) =>
-        (week === undefined || m.week === week) &&
-        (normalizeName(m.team) === normalized || normalizeName(m.opponent) === normalized),
-    );
-    if (byWeek) return byWeek;
-    return MATCHUP_HISTORY.find(
-      (m) => normalizeName(m.team) === normalized || normalizeName(m.opponent) === normalized,
-    );
-  };
+  const findMatchup = (teamName: string, week?: number) =>
+    findMatchupForTeam(teamName, { week, matchups: storedMatchups });
 
   const computeSeedAfterFlip = (
     team: Team,
@@ -55,7 +51,9 @@ export function StandingsPage() {
     opponentName: string | null,
   ): number | null => {
     if (!opponentName) return null;
-    const opponent = allTeams.find((t) => normalizeName(t.teamName) === normalizeName(opponentName));
+    const opponent = allTeams.find(
+      (t) => normalizeTeamName(t.teamName) === normalizeTeamName(opponentName),
+    );
     if (!opponent) return null;
 
     const adjusted = allTeams.map((t) => ({ ...t, record: { ...t.record } }));
@@ -91,7 +89,7 @@ export function StandingsPage() {
     const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
     const remaining = Math.max(regularSeasonWeeks - gamesPlayed, 0);
     const currentSeed = team.seed ?? team.rank;
-    const normalizedName = team.teamName.replace(/’/g, "'").toLowerCase();
+    const normalizedName = normalizeTeamName(team.teamName);
     const margin = marginByTeam.get(team.teamName) ?? marginByTeam.get(normalizedName);
 
     const withinCorrectionThreshold = margin != null && Math.abs(margin) <= 8;
@@ -197,15 +195,15 @@ export function StandingsPage() {
     void load();
   }, []);
 
-  const latestRecordedWeek = useMemo(() => {
-    if (MATCHUP_HISTORY.length === 0) return null;
-    return MATCHUP_HISTORY.reduce((max, m) => Math.max(max, m.week), 0);
-  }, []);
+  const latestCompletedWeek = useMemo(
+    () => getLatestCompletedWeek(storedMatchups),
+    [storedMatchups],
+  );
 
   const marginByTeam = useMemo(() => {
-    if (latestRecordedWeek === null) return new Map<string, number>();
-    return getMatchupMarginsForWeek(latestRecordedWeek);
-  }, [latestRecordedWeek]);
+    if (latestCompletedWeek === null) return new Map<string, number>();
+    return getMatchupMarginsForWeek(latestCompletedWeek, storedMatchups);
+  }, [latestCompletedWeek, storedMatchups]);
 
   const insights = computeStandingsInsights(teams);
 
@@ -374,7 +372,7 @@ export function StandingsPage() {
                   const gamesPlayed = team.record.wins + team.record.losses + team.record.ties;
                   const avgPoints = gamesPlayed > 0 ? team.pointsFor / gamesPlayed : 0;
                   const paPfRatio = team.pointsFor > 0 ? team.pointsAgainst / team.pointsFor : null;
-                  const bw = bestWorstRange(team, teams, marginByTeam, latestRecordedWeek);
+                  const bw = bestWorstRange(team, teams, marginByTeam, latestCompletedWeek);
 
                   return (
                     <tr key={team.sleeperRosterId}>

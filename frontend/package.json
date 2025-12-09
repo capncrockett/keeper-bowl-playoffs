@@ -12,9 +12,10 @@
     "test:ci": "jest --runInBand --ci",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src scripts --ext .ts,.tsx",
     "format": "prettier . --check",
-    "format:write": "prettier . --write"
+    "format:write": "prettier . --write",
+    "fetch:matchups": "ts-node --esm scripts/updateMatchupHistory.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",

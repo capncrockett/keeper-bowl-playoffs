@@ -1,134 +1,69 @@
-export type StoredMatchup = {
-  week: number;
-  team: string;
-  opponent: string;
-  pointsFor: number;
-  pointsAgainst: number;
-  margin: number;
-  finished: boolean;
-};
+import matchupHistoryData from './matchupHistoryStore.json';
+import type { MatchupHistory, StoredMatchup } from './matchupHistoryTypes';
 
-// Snapshot of Week 14 results (regular season finale), stored in a flat, table-like shape
-// to mirror what we would persist in a SQLite table. Positive margin means a win.
-export const MATCHUP_HISTORY: StoredMatchup[] = [
-  {
-    week: 14,
-    team: 'Glaurung & Foes',
-    opponent: 'Ravens Win Super Bowl LX!',
-    pointsFor: 111.24,
-    pointsAgainst: 95.04,
-    margin: 16.2,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'Ravens Win Super Bowl LX!',
-    opponent: 'Glaurung & Foes',
-    pointsFor: 95.04,
-    pointsAgainst: 111.24,
-    margin: -16.2,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'There Goes Nabers’ Hood 😭',
-    opponent: 'Bo Derek Henry V',
-    pointsFor: 112.0,
-    pointsAgainst: 142.66,
-    margin: -30.66,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'Bo Derek Henry V',
-    opponent: 'There Goes Nabers’ Hood 😭',
-    pointsFor: 142.66,
-    pointsAgainst: 112.0,
-    margin: 30.66,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'The Dudes From Cocoon',
-    opponent: 'Kitchen Chubbards',
-    pointsFor: 118.86,
-    pointsAgainst: 54.7,
-    margin: 64.16,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'Kitchen Chubbards',
-    opponent: 'The Dudes From Cocoon',
-    pointsFor: 54.7,
-    pointsAgainst: 118.86,
-    margin: -64.16,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: "Big Ol' TDs",
-    opponent: 'Seahawgs',
-    pointsFor: 112.86,
-    pointsAgainst: 131.44,
-    margin: -18.58,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'Seahawgs',
-    opponent: "Big Ol' TDs",
-    pointsFor: 131.44,
-    pointsAgainst: 112.86,
-    margin: 18.58,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: '5 Fingers 2 Ur Face',
-    opponent: 'Lux73lip',
-    pointsFor: 112.94,
-    pointsAgainst: 109.58,
-    margin: 3.36,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'Lux73lip',
-    opponent: '5 Fingers 2 Ur Face',
-    pointsFor: 109.58,
-    pointsAgainst: 112.94,
-    margin: -3.36,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: 'Inappropriate touchdowns',
-    opponent: "Skeletrex's Bone Brigade",
-    pointsFor: 125.94,
-    pointsAgainst: 84.24,
-    margin: 41.7,
-    finished: true,
-  },
-  {
-    week: 14,
-    team: "Skeletrex's Bone Brigade",
-    opponent: 'Inappropriate touchdowns',
-    pointsFor: 84.24,
-    pointsAgainst: 125.94,
-    margin: -41.7,
-    finished: true,
-  },
-];
+export const MATCHUP_HISTORY: MatchupHistory = matchupHistoryData;
 
-// Convenience helper: get margins keyed by team for a given week.
-export function getMatchupMarginsForWeek(week: number): Map<string, number> {
-  const margins = new Map<string, number>();
-  const normalize = (name: string) => name.replace(/’/g, "'").toLowerCase();
+export const normalizeTeamName = (name: string): string => name.replace(/’/g, "'").toLowerCase();
 
-  MATCHUP_HISTORY.filter((m) => m.week === week).forEach((m) => {
-    margins.set(m.team, m.margin);
-    margins.set(normalize(m.team), m.margin);
+export function getStoredMatchups(): MatchupHistory {
+  return MATCHUP_HISTORY;
+}
+
+export function getLatestRecordedWeek(matchups: MatchupHistory = MATCHUP_HISTORY): number | null {
+  if (matchups.length === 0) return null;
+  return matchups.reduce((max, m) => Math.max(max, m.week), 0);
+}
+
+export function getLatestCompletedWeek(matchups: MatchupHistory = MATCHUP_HISTORY): number | null {
+  if (matchups.length === 0) return null;
+
+  const groupedByWeek = new Map<number, StoredMatchup[]>();
+  matchups.forEach((m) => {
+    const existing = groupedByWeek.get(m.week) ?? [];
+    existing.push(m);
+    groupedByWeek.set(m.week, existing);
   });
+
+  const completedWeeks = Array.from(groupedByWeek.entries())
+    .filter(([, games]) => games.every((game) => game.finished))
+    .map(([week]) => week);
+
+  if (completedWeeks.length === 0) return null;
+
+  return completedWeeks.reduce((max, week) => Math.max(max, week), completedWeeks[0]);
+}
+
+export function getMatchupMarginsForWeek(
+  week: number,
+  matchups: MatchupHistory = MATCHUP_HISTORY,
+): Map<string, number> {
+  const margins = new Map<string, number>();
+
+  matchups
+    .filter((m) => m.week === week)
+    .forEach((m) => {
+      margins.set(m.team, m.margin);
+      margins.set(normalizeTeamName(m.team), m.margin);
+    });
   return margins;
+}
+
+export function findMatchupForTeam(
+  teamName: string,
+  options: { week?: number; matchups?: MatchupHistory } = {},
+): StoredMatchup | undefined {
+  const matchups = options.matchups ?? MATCHUP_HISTORY;
+  const normalized = normalizeTeamName(teamName);
+
+  const byWeek = matchups.find(
+    (m) =>
+      (options.week === undefined || m.week === options.week) &&
+      (normalizeTeamName(m.team) === normalized || normalizeTeamName(m.opponent) === normalized),
+  );
+  if (byWeek) return byWeek;
+
+  return matchups.find(
+    (m) =>
+      normalizeTeamName(m.team) === normalized || normalizeTeamName(m.opponent) === normalized,
+  );
 }
