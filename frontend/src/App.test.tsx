@@ -3,10 +3,6 @@ import App from './App';
 import { renderWithRouter } from './test/testUtils';
 
 // Mock pages to avoid real data fetching
-jest.mock('./pages/MatchupsPage', () => ({
-  MatchupsPage: () => <div>Matchups Page</div>,
-}));
-
 jest.mock('./pages/PlayoffsIfTodayPage', () => ({
   __esModule: true,
   default: () => <div>If Today Page</div>,
@@ -27,14 +23,14 @@ jest.mock('./components/ThemeSelector', () => ({
 }));
 
 describe('App routing + nav', () => {
-  it('redirects "/" to "/matchups" and highlights nav', async () => {
+  it('redirects "/" to "/playoffs/live" and highlights nav', async () => {
     renderWithRouter(<App />, { route: '/' });
 
-    expect(await screen.findByText('Matchups Page')).toBeInTheDocument();
+    expect(await screen.findByText('Live Playoffs Page')).toBeInTheDocument();
 
-    const matchupsLink = screen.getByRole('link', { name: /matchups/i });
+    const playoffsLink = screen.getByRole('link', { name: /playoffs/i });
     await waitFor(() => {
-      expect(matchupsLink).toHaveClass('btn-active');
+      expect(playoffsLink).toHaveClass('btn-active');
     });
   });
 

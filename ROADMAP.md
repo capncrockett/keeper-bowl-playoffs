@@ -35,6 +35,8 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 
 ## Future Enhancements (Nice-to-Have)
 
+- Backend data store work (cron + DB migration) is tracked in `backend/TODO.md`.
+
 ### Enhanced Matchup Projections
 
 **Goal:** Display accurate projected scores and win probabilities on the Matchups page.

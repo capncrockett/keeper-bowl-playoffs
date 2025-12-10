@@ -37,6 +37,11 @@ export const STANDINGS_GLOSSARY: GlossaryEntry[] = [
     description:
       'Best/Worst range showing the highest and lowest possible seed (e.g., 3-8, 1-4, 1-1)',
   },
+  {
+    code: 'sc',
+    description:
+      'Locked barring a small stat correction (scores would need an unusual swing to change the result)',
+  },
 ];
 
 const seedToken = (team: Team): ReactNode => {
@@ -102,6 +107,13 @@ const computeBestWorstRanges = (teams: Team[], regularSeasonWeeks = 14): Map<num
   return map;
 };
 
+const isSeasonComplete = (teams: Team[], regularSeasonWeeks = 14): boolean => {
+  const gamesPlayed = teams.map((team) => team.record.wins + team.record.losses + team.record.ties);
+  const maxGames = Math.max(...gamesPlayed);
+  const minGames = Math.min(...gamesPlayed);
+  return minGames === maxGames && maxGames >= regularSeasonWeeks;
+};
+
 const leagueAvgPfPerGame = (teams: Team[]): number => {
   const withGames = teams
     .map((team) => ({
@@ -128,11 +140,43 @@ const formatPfEdge = (gap: number, withPlus = false): string => {
   return withPlus ? `+${value}` : value;
 };
 
-const describePfSwing = (gap: number, avgPf: number): string => {
-  const base = formatPfEdge(gap, true);
-  if (gap === 0) return base;
-  const hugeSwing = gap > avgPf * 1.25;
-  return hugeSwing ? `${base} (rare; league median ~${avgPf.toFixed(1)})` : base;
+type PfContext = {
+  avgPerWeek: number;
+  estHigh: number;
+  estLow: number;
+};
+
+const computePfContexts = (teams: Team[]): { perTeam: Map<number, PfContext>; median: number } => {
+  const perTeam = new Map<number, PfContext>();
+  const avgs: number[] = [];
+
+  teams.forEach((team) => {
+    const games = team.record.wins + team.record.losses + team.record.ties;
+    const avgPerWeek = games > 0 ? team.pointsFor / games : 0;
+    const estHigh = avgPerWeek * 1.35; // heuristic ceiling
+    const estLow = avgPerWeek * 0.65; // heuristic floor
+    avgs.push(avgPerWeek);
+    perTeam.set(team.sleeperRosterId, { avgPerWeek, estHigh, estLow });
+  });
+
+  avgs.sort((a, b) => a - b);
+  const mid = Math.floor(avgs.length / 2);
+  const median = avgs.length
+    ? avgs.length % 2 === 0
+      ? (avgs[mid - 1] + avgs[mid]) / 2
+      : avgs[mid]
+    : 0;
+
+  return { perTeam, median };
+};
+
+const describePfSwing = (gap: number, leagueMedian: number, teamHigh: number): string => {
+  if (gap === 0) return 'any PF edge';
+  const abs = Math.abs(gap);
+  const base = `+${abs.toFixed(1)}`;
+  if (abs <= leagueMedian + 15) return base; // normal swing
+  if (abs <= teamHigh) return `${base} (hot week)`;
+  return `${base} (outlier vs season range)`;
 };
 
 type RecordGap = {
@@ -186,15 +230,25 @@ const buildBubbleNarrative = (teams: Team[], ranges: Map<number, BestWorst>): Na
   if (!race) return null;
 
   const { cutoff, challenger } = race;
+  const seasonComplete = isSeasonComplete(teams);
+
   const cutoffRange = ranges.get(cutoff.sleeperRosterId);
   const challengerRange = ranges.get(challenger.sleeperRosterId);
   if (!cutoffRange || !challengerRange) return null;
+  // If both teams are already locked into their seeds, skip the bubble narrative.
+  if (
+    seasonComplete ||
+    (cutoffRange.best === cutoffRange.worst && challengerRange.best === challengerRange.worst)
+  ) {
+    return null;
+  }
   if (challengerRange.best > 6) return null; // challenger cannot reach Seed 6
   const recordGap = recordLead(cutoff, challenger);
   const tiedOnRecord = recordGap.games === 0;
   const pfGap = pfSwingNeeded(cutoff, challenger);
   const avgPf = leagueAvgPfPerGame(teams);
-  const pfEdgePlus = describePfSwing(pfGap, avgPf);
+  const contexts = computePfContexts(teams);
+  const pfEdgePlus = describePfSwing(pfGap, contexts.median, contexts.perTeam.get(cutoff.sleeperRosterId)?.estHigh ?? avgPf * 1.35);
   const pfEdgePlain = formatPfEdge(pfGap, false);
   const thirdTeam = findBubbleThirdTeam(teams, cutoff, challenger, avgPf);
 
@@ -252,13 +306,14 @@ const buildBubbleNarrative = (teams: Team[], ranges: Map<number, BestWorst>): Na
         ];
 
   const thirdRange = thirdTeam ? ranges.get(thirdTeam.sleeperRosterId) : null;
+  const thirdCtx = thirdTeam ? contexts.perTeam.get(thirdTeam.sleeperRosterId) : null;
   const note =
-    thirdTeam && thirdRange && thirdRange.best <= 6 ? (
+    thirdTeam && thirdRange && thirdRange.best <= 6 && thirdCtx ? (
       <>
         A third team ({seedToken(thirdTeam)}) can still enter the mix. They would need a big PF week
-        to clear the {formatPfEdge(Math.abs(cutoff.pointsFor - thirdTeam.pointsFor), true)} gap;
-        league median weekly PF is {avgPf.toFixed(1)}, so it likely takes a monster outing while
-        both bubble teams stumble. Otherwise, Seeds 6/7 stay as-is.
+        to clear the {describePfSwing(Math.abs(cutoff.pointsFor - thirdTeam.pointsFor), contexts.median, thirdCtx.estHigh)} gap;
+        league median weekly PF is {contexts.median.toFixed(1)}, so it likely takes a monster outing
+        while both bubble teams stumble. Otherwise, Seeds 6/7 stay as-is.
       </>
     ) : (
       'No other teams are in range to take Seeds 6 or 7 this week based on current record and PF math.'
@@ -311,9 +366,14 @@ const buildByeNarrative = (teams: Team[], ranges: Map<number, BestWorst>): Narra
   const recordGap = recordLead(holder, challenger);
   const tiedOnRecord = recordGap.games === 0;
   const pfGap = pfSwingNeeded(holder, challenger);
-  const avgPf = leagueAvgPfPerGame(teams);
-  const pfEdgePlus = describePfSwing(pfGap, avgPf);
+  const contexts = computePfContexts(teams);
+  const pfEdgePlus = describePfSwing(
+    pfGap,
+    contexts.median,
+    contexts.perTeam.get(holder.sleeperRosterId)?.estHigh ?? contexts.median * 1.35,
+  );
   const pfEdgePlain = formatPfEdge(pfGap, false);
+  const avgPf = leagueAvgPfPerGame(teams);
   const thirdTeam = findByeThirdTeam(teams, holder, challenger, avgPf);
 
   const summary = (
@@ -390,6 +450,7 @@ const buildByeNarrative = (teams: Team[], ranges: Map<number, BestWorst>): Narra
 const buildDivisionNarratives = (teams: Team[], ranges: Map<number, BestWorst>): NarrativeSection[] => {
   const insights = computePlayoffRaceInsights(teams);
   if (!insights) return [];
+  if (isSeasonComplete(teams)) return [];
 
   const sections: NarrativeSection[] = [];
 
@@ -401,8 +462,11 @@ const buildDivisionNarratives = (teams: Team[], ranges: Map<number, BestWorst>):
     if (chaserRange.best >= leaderRange.worst) return;
 
     const pfGap = pfSwingNeeded(race.leader, race.chaser);
+    const contexts = computePfContexts(teams);
+    const leaderHigh =
+      contexts.perTeam.get(race.leader.sleeperRosterId)?.estHigh ?? contexts.median * 1.35;
     const pfEdgePlain = formatPfEdge(pfGap, false);
-    const pfEdgePlus = formatPfEdge(pfGap, true);
+    const pfEdgePlus = describePfSwing(pfGap, contexts.median, leaderHigh);
     const tiedOnRecord = race.gamesBack === 0;
     const divisionLabel = race.divisionName ?? 'Division';
 
