@@ -107,6 +107,13 @@ const computeBestWorstRanges = (teams: Team[], regularSeasonWeeks = 14): Map<num
   return map;
 };
 
+const isSeasonComplete = (teams: Team[], regularSeasonWeeks = 14): boolean => {
+  const gamesPlayed = teams.map((team) => team.record.wins + team.record.losses + team.record.ties);
+  const maxGames = Math.max(...gamesPlayed);
+  const minGames = Math.min(...gamesPlayed);
+  return minGames === maxGames && maxGames >= regularSeasonWeeks;
+};
+
 const leagueAvgPfPerGame = (teams: Team[]): number => {
   const withGames = teams
     .map((team) => ({
@@ -223,9 +230,18 @@ const buildBubbleNarrative = (teams: Team[], ranges: Map<number, BestWorst>): Na
   if (!race) return null;
 
   const { cutoff, challenger } = race;
+  const seasonComplete = isSeasonComplete(teams);
+
   const cutoffRange = ranges.get(cutoff.sleeperRosterId);
   const challengerRange = ranges.get(challenger.sleeperRosterId);
   if (!cutoffRange || !challengerRange) return null;
+  // If both teams are already locked into their seeds, skip the bubble narrative.
+  if (
+    seasonComplete ||
+    (cutoffRange.best === cutoffRange.worst && challengerRange.best === challengerRange.worst)
+  ) {
+    return null;
+  }
   if (challengerRange.best > 6) return null; // challenger cannot reach Seed 6
   const recordGap = recordLead(cutoff, challenger);
   const tiedOnRecord = recordGap.games === 0;
@@ -434,6 +450,7 @@ const buildByeNarrative = (teams: Team[], ranges: Map<number, BestWorst>): Narra
 const buildDivisionNarratives = (teams: Team[], ranges: Map<number, BestWorst>): NarrativeSection[] => {
   const insights = computePlayoffRaceInsights(teams);
   if (!insights) return [];
+  if (isSeasonComplete(teams)) return [];
 
   const sections: NarrativeSection[] = [];
 
