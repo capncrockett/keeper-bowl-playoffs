@@ -5,7 +5,7 @@ This plan drives Phase 7 (Release / Hosting / QA). Bias toward integration tests
 ## Quick how-to
 
 - Jest/RT: `npm run test -w frontend` (or `npm run test:ci -w frontend` in CI).
-- Playwright local: start the dev server (`npm run dev -w frontend`, default `http://localhost:5173`), then in another terminal run `npm run test:e2e:local -w frontend` (adds `E2E_BASE_URL=http://localhost:5173` and pins the local browser cache). Append `-- --headed` if you want the browser window.
+- Playwright local: start the dev server (`npm run dev -w frontend`, default `http://localhost:5173`), then in another terminal run `npm run test:e2e:local -w frontend` (adds `E2E_BASE_URL=http://localhost:5173` and pins the local browser cache). This runs all configured Playwright projects (desktop + mobile). Append `-- --headed` if you want the browser window.
 - Playwright staging: `npm run test:e2e -w frontend` (defaults to the staging base URL from `playwright.config.ts`), or override with `E2E_BASE_URL=... npm run test:e2e -w frontend`.
 - CI: Jest runs on every PR, and a Playwright smoke job runs on pushes to `release/**` or when manually dispatched, targeting staging.
 
