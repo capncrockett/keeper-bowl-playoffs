@@ -35,9 +35,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 
 ## Future Enhancements (Nice-to-Have)
 
-- [x] Persist a lightweight matchup-history store (JSON for now) to power best/worst ranges, PF swing context, and `sc` signals without re-hitting Sleeper for past weeks. Helper API lives in `frontend/src/data`, with a fetcher at `frontend/scripts/updateMatchupHistory.ts`.
-- [ ] Add an hourly cron between MNF end and Wednesday stat corrections to run the fetcher and refresh the store automatically.
-- [ ] If we migrate to SQLite/Turso later, add a schema + migration to backfill from the JSON store, and swap the helper API behind a storage adapter so the UI stays unchanged.
+- Backend data store work (cron + DB migration) is tracked in `backend/TODO.md`.
 
 ### Enhanced Matchup Projections
 
