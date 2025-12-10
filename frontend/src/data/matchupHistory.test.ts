@@ -33,6 +33,24 @@ describe('matchupHistory store', () => {
         margin: -9,
         finished: true,
       },
+      {
+        week: 1,
+        team: 'Beta',
+        opponent: 'Alpha',
+        pointsFor: 90,
+        pointsAgainst: 100,
+        margin: -10,
+        finished: true,
+      },
+      {
+        week: 2,
+        team: 'Beta',
+        opponent: 'Gamma',
+        pointsFor: 110,
+        pointsAgainst: 101,
+        margin: 9,
+        finished: true,
+      },
     ];
 
     expect(findMatchupForTeam('beta', { week: 1, matchups: sample })?.opponent).toBe('Alpha');
