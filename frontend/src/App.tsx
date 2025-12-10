@@ -112,7 +112,8 @@ export default function App() {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Navigate to="/matchups" replace />} />
+          <Route path="/" element={<Navigate to="/playoffs/live" replace />} />
+          <Route path="/playoffs" element={<Navigate to="/playoffs/live" replace />} />
           <Route path="/matchups" element={<MatchupsPage />} />
           <Route path="/playoffs/if-today" element={<PlayoffsIfTodayPage />} />
           <Route path="/playoffs/live" element={<PlayoffsLivePage />} />
