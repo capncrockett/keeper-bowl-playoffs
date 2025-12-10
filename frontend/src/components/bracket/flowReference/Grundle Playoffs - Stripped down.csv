@@ -5,13 +5,13 @@ CHAMP BOWL,,
 ,1,
 BYE,,
 ,,1/4/5
-4,,
-,4/5,
-5,,
+4,,v
+,4/5,v
+5,,v
 ,,W = 1st! | L = 2nd
-2,,
-,2,
-BYE,,
+2,,^
+,2,^
+BYE,,^
 ,,2/6/3
 6,,
 ,6/3,
@@ -22,17 +22,13 @@ BYE,,
 ,,
 KEEPER BOWL,,
 ,,
-,,
 ,CHB LOSER TOP: 4/5,
 ,,4/5/8/9
-,TB WINNER TOP: 8/9,
-,,
+,TB WINNER TOP: 8/9,vvv
 ,,W = 5th | L = 6th
-,,
-,CHB LOSER BTM: 3/6,
+,CHB LOSER BTM: 3/6,^^^
 ,,3/6/7/10
 ,TB TOILET BTM: 7/10,
-,,
 ,,
 ,,RD 2 LOSER TOP: 4/5/8/9
 ,,W = 7th | L = 8th
@@ -44,13 +40,13 @@ TOILET BOWL,,
 ,12,
 BYE,,
 ,,8/9/12
-9,,
-,RD 1 LOSER: 8/9,
-8,,
+9,,v
+,RD 1 LOSER: 8/9,v
+8,,v
 ,,W = 12th | L = 11th
-11,,
-,11,
-BYE,,
+11,,^
+,11,^
+BYE,,^
 ,,7/10/11
 7,,
 ,RD 1 LOSER: 7/10,

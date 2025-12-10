@@ -12,11 +12,14 @@ const tsProjects = [
   path.join(tsconfigRootDir, 'tsconfig.app.json'),
   path.join(tsconfigRootDir, 'tsconfig.node.json'),
 ];
+const backendTsconfig = path.resolve(tsconfigRootDir, '../backend/tsconfig.json');
+const frontendFiles = ['**/src/**/*.{ts,tsx}'];
+const backendFiles = ['**/backend/**/*.ts'];
 
 export default defineConfig([
   globalIgnores(['dist', 'node_modules']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: [frontendFiles],
     extends: [
       js.configs.recommended,
       tseslint.configs.strictTypeChecked,
@@ -32,6 +35,20 @@ export default defineConfig([
       globals: {
         ...globals.browser,
         ...globals.jest,
+      },
+    },
+  },
+  {
+    files: [backendFiles],
+    ignores: ['../backend/node_modules/**'],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2020,
+      parserOptions: {
+        tsconfigRootDir,
+      },
+      globals: {
+        ...globals.node,
       },
     },
   },

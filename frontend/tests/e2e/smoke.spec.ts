@@ -8,6 +8,11 @@ const routes = [
 ];
 
 test.describe('Happy path smoke', () => {
+  test.beforeAll(({}, workerInfo) => {
+    const baseURL = workerInfo.project.use?.baseURL ?? 'undefined';
+    console.log(`[e2e] Using baseURL: ${baseURL}`);
+  });
+
   test('renders header/footer on home', async ({ page }) => {
     await page.goto('/');
 
