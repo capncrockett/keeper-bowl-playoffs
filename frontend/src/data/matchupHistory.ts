@@ -55,15 +55,23 @@ export function findMatchupForTeam(
   const matchups = options.matchups ?? MATCHUP_HISTORY;
   const normalized = normalizeTeamName(teamName);
 
-  const byWeek = matchups.find(
+  const choose = (candidates: MatchupHistory): StoredMatchup | undefined => {
+    const direct = candidates.find((m) => normalizeTeamName(m.team) === normalized);
+    return direct ?? candidates[0];
+  };
+
+  const byWeek = matchups.filter(
     (m) =>
       (options.week === undefined || m.week === options.week) &&
       (normalizeTeamName(m.team) === normalized || normalizeTeamName(m.opponent) === normalized),
   );
-  if (byWeek) return byWeek;
+  if (byWeek.length > 0) return choose(byWeek);
 
-  return matchups.find(
+  const anyWeek = matchups.filter(
     (m) =>
       normalizeTeamName(m.team) === normalized || normalizeTeamName(m.opponent) === normalized,
   );
+  if (anyWeek.length > 0) return choose(anyWeek);
+
+  return undefined;
 }
