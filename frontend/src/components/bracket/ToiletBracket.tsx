@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
-import type { BracketLayoutColumn } from './BracketGrid';
+import type { BracketColumnDef } from './BracketGrid';
 import { BracketGrid } from './BracketGrid';
 
 interface ToiletBracketProps {
@@ -13,31 +13,46 @@ interface ToiletBracketProps {
   mode: 'score' | 'reward';
 }
 
-const TOILET_COLUMNS: BracketLayoutColumn[] = [
+const TOILET_COLUMNS: BracketColumnDef[] = [
   {
+    id: 'toilet_round1',
     title: 'Round 1',
     subtitle: 'Week 15',
     items: [
-      { id: 'toilet_bye1', slotId: 'toilet_r2_g1', topPct: 1, maskOppIndex: 1, titleOverride: 'BYE' },
-      { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1', topPct: 25 },
-      { id: 'toilet_bye2', slotId: 'toilet_r2_g2', topPct: 50, maskOppIndex: 1, titleOverride: 'BYE' },
-      { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2', topPct: 75 },
+      {
+        id: 'toilet_bye1',
+        slotId: 'toilet_r2_g1',
+        kind: 'bye',
+        titleOverride: 'BYE',
+        maskOppIndex: 1,
+      },
+      { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1', kind: 'match' },
+      {
+        id: 'toilet_bye2',
+        slotId: 'toilet_r2_g2',
+        kind: 'bye',
+        titleOverride: 'BYE',
+        maskOppIndex: 1,
+      },
+      { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2', kind: 'match' },
     ],
   },
   {
+    id: 'toilet_round2',
     title: 'Round 2',
     subtitle: 'Week 16',
     items: [
-      { id: 'toilet_r2_g1', slotId: 'toilet_r2_g1', topPct: 12.5 },
-      { id: 'toilet_r2_g2', slotId: 'toilet_r2_g2', topPct: 62.5 },
+      { id: 'toilet_r2_g1', slotId: 'toilet_r2_g1', kind: 'match' },
+      { id: 'toilet_r2_g2', slotId: 'toilet_r2_g2', kind: 'match' },
     ],
   },
   {
+    id: 'toilet_finals',
     title: 'Finals',
     subtitle: 'Week 17',
     items: [
-      { id: 'toilet_finals', slotId: 'toilet_finals', topPct: 37.5 },
-      { id: 'toilet_9th_10th', slotId: 'toilet_9th_10th', topPct: 87.5 },
+      { id: 'toilet_finals', slotId: 'toilet_finals', kind: 'match' },
+      { id: 'toilet_9th_10th', slotId: 'toilet_9th_10th', kind: 'match' },
     ],
   },
 ];
@@ -55,7 +70,7 @@ export const ToiletBracket: FC<ToiletBracketProps> = ({
       teamsById={teamsById}
       highlightTeamId={highlightTeamId}
       mode={mode}
-      columnHeightClass="min-h-[600px] md:min-h-[760px]"
+      columnHeightClass="min-h-[520px] md:min-h-[760px]"
     />
   );
 };

@@ -2,47 +2,39 @@
 
 import type { FC, ReactNode } from 'react';
 import { useMemo } from 'react';
-import type { BracketSlot } from '../../bracket/types';
+import type { BracketSlot, BracketSlotId } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
 import { BracketTile } from './BracketTile';
 
-interface LayoutItem {
+export type BracketItemKind = 'match' | 'bye';
+
+export interface BracketColumnItem {
   id: string;
-  slotId: BracketSlot['id'] | null;
-  /** Percent from top of the column container (0-100). */
-  topPct: number;
-  /** Center the card on the percent marker (translateY(-50%)). Defaults to false. */
-  centerOnPct?: boolean;
-  /** Optional: mask one position to show a BYE/TBD without altering the real slot data. */
-  maskOppIndex?: 0 | 1;
+  slotId: BracketSlotId;
+  kind: BracketItemKind;
   /** Optional override for the card title (e.g., BYE when masking a slot in Round 1). */
   titleOverride?: string;
+  /** Optional: mask one position to show a BYE/TBD without altering the real slot data. */
+  maskOppIndex?: 0 | 1;
 }
 
-export interface BracketLayoutColumn {
-  title?: string;
+export interface BracketColumnDef {
+  id: string;
+  title: string;
   subtitle?: string;
-  items: LayoutItem[];
+  items: BracketColumnItem[];
   /** Optional height override per column. */
   columnHeightClass?: string;
-  /** Optional scale factor to stretch topPct spacing (e.g., 1.2 makes 50% behave like 60%). */
-  heightScale?: number;
 }
 
 interface BracketGridProps {
-  columns: BracketLayoutColumn[];
+  columns: BracketColumnDef[];
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
-  /** Base column height if none is provided per column. */
-  defaultColumnHeightClass?: string;
   /** Optional override to apply the same height class to all columns (e.g., Keeper uses a shorter stack). */
   columnHeightClass?: string;
-  /** Default height scale applied when a column doesn't provide one. */
-  defaultHeightScale?: number;
-  /** Horizontal gap between columns. */
-  colGapClass?: string;
 }
 
 interface BracketMatchShellProps {
@@ -52,7 +44,11 @@ interface BracketMatchShellProps {
 
 const BracketMatchShell: FC<BracketMatchShellProps> = ({ itemId, children }) => {
   return (
-    <div className="relative flex flex-col items-stretch gap-1" data-cell-id={itemId} role="group">
+    <div
+      className="relative flex flex-col items-stretch gap-1 min-w-0"
+      data-cell-id={itemId}
+      role="group"
+    >
       <div className="h-2 w-full" data-anchor="top" />
       <div className="flex-1">{children}</div>
       <div className="h-2 w-full" data-anchor="bottom" />
@@ -66,89 +62,63 @@ export const BracketGrid: FC<BracketGridProps> = ({
   teamsById,
   highlightTeamId,
   mode,
-  defaultColumnHeightClass = 'min-h-[600px] md:min-h-[720px]',
   columnHeightClass,
-  defaultHeightScale = 1,
-  colGapClass = 'gap-3 md:gap-10',
-  }) => {
+}) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
-
-  const gridTemplateColumns = `repeat(${columns.length.toString()}, minmax(0, 1fr))`;
+  const resolvedColumnHeight = columnHeightClass ?? 'min-h-[360px] md:min-h-[640px]';
 
   return (
-    <div className="w-full">
-      {/* Column headers */}
-      <div
-        className={`grid ${colGapClass} mb-2 md:mb-4`}
-        style={{ gridTemplateColumns: gridTemplateColumns }}
-      >
-        {columns.map((col, idx) => (
-          <div key={idx} className="flex flex-col">
-            {col.title && (
-              <h2 className="text-[0.6rem] md:text-sm font-semibold tracking-wide uppercase text-base-content/70">
+    <div className="w-full grid grid-cols-3 gap-2 md:gap-4 lg:gap-6">
+      {columns.map((col) => {
+        const columnHeight = col.columnHeightClass ?? resolvedColumnHeight;
+        return (
+          <div key={col.id} className={`flex flex-col min-w-0 ${columnHeight}`}>
+            <div className="mb-1 text-center">
+              <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide text-base-content/80">
                 {col.title}
-              </h2>
-            )}
-            {col.subtitle && (
-              <span className="text-[0.55rem] md:text-xs font-medium text-base-content/60">
-                {col.subtitle}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Columns with absolute-positioned matchups */}
-      <div className={`grid ${colGapClass}`} style={{ gridTemplateColumns: gridTemplateColumns }}>
-        {columns.map((col, colIdx) => (
-          <div
-            key={colIdx}
-            className={`relative ${col.columnHeightClass ?? columnHeightClass ?? defaultColumnHeightClass}`}
-          >
-            {col.items.map((item) => {
-              if (!item.slotId) return null;
-              const slot = slotById.get(item.slotId);
-              if (!slot) return null;
-
-              const center = item.centerOnPct === true;
-              const scale = col.heightScale ?? defaultHeightScale;
-              const top = item.topPct * scale;
-              const displaySlot =
-                item.maskOppIndex == null
-                  ? slot
-                  : {
-                      ...slot,
-                      positions: slot.positions.map((pos, idx) =>
-                        idx === item.maskOppIndex
-                          ? { ...(pos ?? {}), teamId: undefined, isBye: true }
-                          : pos,
-                      ) as typeof slot.positions,
-                    };
-
-              return (
-                <div
-                  key={item.id}
-                  className="absolute left-0 right-0"
-                  style={{
-                    top: `${top.toString()}%`,
-                    transform: center ? 'translateY(-50%)' : undefined,
-                  }}
-                >
-                  <BracketMatchShell itemId={item.id}>
-                  <BracketTile
-                    slot={displaySlot}
-                    teamsById={teamsById}
-                    highlightTeamId={highlightTeamId}
-                    mode={mode}
-                    titleOverride={item.titleOverride}
-                  />
-                  </BracketMatchShell>
+              </div>
+              {col.subtitle && (
+                <div className="text-[9px] md:text-[11px] text-base-content/60 leading-tight">
+                  {col.subtitle}
                 </div>
-              );
-            })}
+              )}
+            </div>
+
+            <div className="flex-1 flex flex-col gap-2 md:gap-4">
+              {col.items.map((item) => {
+                const slot = slotById.get(item.slotId);
+                if (!slot) return null;
+
+                const displaySlot =
+                  item.maskOppIndex == null
+                    ? slot
+                    : {
+                        ...slot,
+                        positions: slot.positions.map((pos, idx) =>
+                          idx === item.maskOppIndex
+                            ? { ...(pos ?? {}), teamId: undefined, isBye: true }
+                            : pos,
+                        ) as typeof slot.positions,
+                      };
+
+                const titleOverride = item.titleOverride ?? (item.kind === 'bye' ? 'BYE' : undefined);
+
+                return (
+                  <BracketMatchShell key={item.id} itemId={item.id}>
+                    <BracketTile
+                      slot={displaySlot}
+                      teamsById={teamsById}
+                      highlightTeamId={highlightTeamId}
+                      mode={mode}
+                      titleOverride={titleOverride}
+                    />
+                  </BracketMatchShell>
+                );
+              })}
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 };
