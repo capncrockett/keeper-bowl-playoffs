@@ -27,6 +27,7 @@ export function MatchupsPage() {
   const [liveMatchups, setLiveMatchups] = useState<LiveMatchData[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   const [seasonLabel, setSeasonLabel] = useState<string>('');
+  const [season, setSeason] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [playersById, setPlayersById] = useState<Record<string, SleeperPlayer> | null>(null);
@@ -43,6 +44,7 @@ export function MatchupsPage() {
         const seasonState = mapNFLStateToSeasonState(nflState);
         setPlayersById(players);
         setSelectedWeek(seasonState.displayWeek);
+        setSeason(seasonState.season);
         setSeasonLabel(`${seasonState.season} • Week ${seasonState.displayWeek.toString()}`);
       } catch (err) {
         console.error(err);
@@ -87,10 +89,14 @@ export function MatchupsPage() {
       } finally {
         setIsLoading(false);
       }
+
+      if (season) {
+        setSeasonLabel(`${season} • Week ${week.toString()}`);
+      }
     }
 
     void loadWeekData(selectedWeek);
-  }, [selectedWeek, playersById]);
+  }, [selectedWeek, playersById, season]);
 
   const teamsByRosterId = useMemo(
     () => new Map<number, Team>(teams.map((t) => [t.sleeperRosterId, t])),
@@ -118,6 +124,7 @@ export function MatchupsPage() {
             onChange={(e) => {
               setSelectedWeek(Number(e.target.value));
             }}
+            aria-label="Week"
             disabled={selectedWeek == null}
           >
             <option disabled value="">
