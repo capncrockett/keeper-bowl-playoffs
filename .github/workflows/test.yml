@@ -2,6 +2,9 @@ name: Test
 
 on:
   pull_request:
+  push:
+    branches:
+      - 'release/**'
   workflow_dispatch:
 
 jobs:
@@ -23,3 +26,33 @@ jobs:
 
       - name: Run tests
         run: npm run test:ci -w frontend
+
+  e2e-smoke:
+    # Run on release branch pushes or when manually dispatched.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+        working-directory: frontend
+
+      - name: Run Playwright smoke against staging
+        env:
+          E2E_BASE_URL: https://keeper-bowl-playoffs-staging.vercel.app
+          CI: '1'
+        run: npm run test:e2e -w frontend

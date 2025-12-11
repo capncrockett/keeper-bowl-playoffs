@@ -28,7 +28,7 @@ export function ThemeSelector() {
 
   return (
     <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn btn-ghost btn-sm">
+      <label tabIndex={0} aria-label="Theme" className="btn btn-ghost btn-sm">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
