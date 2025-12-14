@@ -45,13 +45,16 @@ interface BracketMatchShellProps {
 const BracketMatchShell: FC<BracketMatchShellProps> = ({ itemId, children }) => {
   return (
     <div
-      className="relative flex flex-col items-stretch gap-1 min-w-0"
+      className="relative flex flex-col items-stretch gap-1 min-w-0 w-full"
       data-cell-id={itemId}
       role="group"
     >
-      <div className="h-2 w-full" data-anchor="top" />
-      <div className="flex-1">{children}</div>
-      <div className="h-2 w-full" data-anchor="bottom" />
+      <div className="absolute inset-x-0 top-0 h-0 w-full pointer-events-none" data-anchor="top" />
+      <div className="flex-1 min-w-0 w-full">{children}</div>
+      <div
+        className="absolute inset-x-0 bottom-0 h-0 w-full pointer-events-none"
+        data-anchor="bottom"
+      />
     </div>
   );
 };
@@ -72,7 +75,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
       {columns.map((col) => {
         const columnHeight = col.columnHeightClass ?? resolvedColumnHeight;
         return (
-          <div key={col.id} className={`flex flex-col min-w-0 ${columnHeight}`}>
+          <div key={col.id} className={`flex flex-col min-w-0 w-full ${columnHeight}`}>
             <div className="mb-1 text-center">
               <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide text-base-content/80">
                 {col.title}

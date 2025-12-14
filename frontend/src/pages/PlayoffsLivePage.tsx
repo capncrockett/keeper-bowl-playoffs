@@ -212,7 +212,16 @@ export default function PlayoffsLivePage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-[0.7rem] italic text-base-content/60">Opponent TBD</div>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div
+                    className="rounded-full invisible md:scale-125 shrink-0"
+                    style={{ width: 32, height: 32 }}
+                    aria-hidden
+                  />
+                  <div className="text-right text-[0.7rem] italic text-base-content/60 whitespace-nowrap">
+                    Opponent TBD
+                  </div>
+                </div>
               )}
             </div>
 

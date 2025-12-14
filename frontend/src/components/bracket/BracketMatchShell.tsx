@@ -16,13 +16,16 @@ export function BracketMatchShell({ slotId, children }: BracketMatchShellProps) 
   return (
     <div className="relative flex flex-col items-stretch gap-1" data-slot-id={slotId} role="group">
       {/* Top anchor: future incoming connector target */}
-      <div className="h-2 w-full" data-anchor="top" />
+      <div className="absolute inset-x-0 top-0 h-0 w-full pointer-events-none" data-anchor="top" />
 
       {/* Existing card content goes here */}
       <div className="flex-1">{children}</div>
 
       {/* Bottom anchor: future outgoing / fork connector target */}
-      <div className="h-2 w-full" data-anchor="bottom" />
+      <div
+        className="absolute inset-x-0 bottom-0 h-0 w-full pointer-events-none"
+        data-anchor="bottom"
+      />
     </div>
   );
 }
