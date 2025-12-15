@@ -1,6 +1,6 @@
 // src/components/bracket/BracketTile.tsx
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { BracketRoutingRule } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
@@ -59,34 +59,49 @@ const ROUTE_BY_FROM_ID = ROUTING_RULES.reduce(
 
 const cleanLabel = (label: string): string => label.replace(/\s*\(.*?\)\s*$/, '');
 
-const SLOT_TITLES: Partial<Record<BracketSlot['id'], string>> = {
+const SLOT_TITLES: Partial<Record<BracketSlot['id'], ReactNode>> = {
   // Champ round 1 games
   champ_r1_g1: 'Game 1',
   champ_r1_g2: 'Game 2',
   // Keeper semis
-  keeper_splashback1: 'Keeper Semis',
-  keeper_splashback2: 'Keeper Semis',
+  keeper_splashback1: (
+    <span>
+      <span className="md:hidden">Semis</span>
+      <span className="hidden md:inline">Keeper Semis</span>
+    </span>
+  ),
+  keeper_splashback2: (
+    <span>
+      <span className="md:hidden">Semis</span>
+      <span className="hidden md:inline">Keeper Semis</span>
+    </span>
+  ),
   // Toilet round 1 games
   toilet_r1_g1: 'Game 1',
   toilet_r1_g2: 'Game 2',
 };
 
-const ROUND_TITLES: Partial<Record<BracketSlot['round'], string>> = {
+const ROUND_TITLES_DESKTOP: Partial<Record<BracketSlot['round'], string>> = {
   champ_round_1: 'Champ Round 1',
-  champ_round_2: 'Semis',
+  champ_round_2: 'Champ Semis',
   champ_finals: 'Championship',
   // Let 3rd place games use their labels (e.g., "3rd Place Game")
   keeper_main: 'Keeper Bowl',
   // Let keeper placement games use their labels (5th/6th, 7th/8th)
   toilet_round_1: 'Toilet Round 1',
-  toilet_round_2: 'Semis',
+  toilet_round_2: 'Toilet Semis',
   toilet_finals: 'Toilet Final',
   // Show losers from Toilet R2 flowing to Poop Final (9th/10th)
   toilet_misc: 'Poop Final',
 };
 
-const TEAM_NAME_CLASS =
-  'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
+const ROUND_TITLES_MOBILE: Partial<Record<BracketSlot['round'], string>> = {
+  ...ROUND_TITLES_DESKTOP,
+  champ_round_2: 'Semis',
+  toilet_round_2: 'Semis',
+};
+
+const TEAM_NAME_CLASS = 'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
 const SCORE_CLASS = 'bracket-score text-[0.7rem] md:text-base font-semibold text-base-content/80';
 const CARD_BODY_HEIGHT_CLASS = 'min-h-[130px] md:min-h-[150px]';
 
@@ -96,7 +111,9 @@ function describeDestination(
   if (!dest) return null;
   const targetSlot = SLOT_BY_ID.get(dest.slotId);
   const label =
-    (targetSlot ? (ROUND_TITLES[targetSlot.round] ?? cleanLabel(targetSlot.label)) : null) ??
+    (targetSlot
+      ? (ROUND_TITLES_DESKTOP[targetSlot.round] ?? cleanLabel(targetSlot.label))
+      : null) ??
     cleanLabel(SLOT_LABEL_BY_ID.get(dest.slotId) ?? dest.slotId);
   return label;
 }
@@ -104,7 +121,7 @@ function describeDestination(
 const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round, hasBye }) => {
   const seed = pos?.seed ?? team?.seed;
   const showSeedBadge =
-    seed != null && ((round === 'champ_round_1' || round === 'toilet_round_1') || hasBye);
+    seed != null && (round === 'champ_round_1' || round === 'toilet_round_1' || hasBye);
   const seedBadge = showSeedBadge ? (
     <span className="shrink-0 px-1 py-0.5 rounded bg-base-200 text-[0.55rem] md:text-[0.65rem] font-semibold text-base-content/70 leading-none whitespace-nowrap">
       <span className="md:hidden">{seed}</span>
@@ -247,9 +264,7 @@ export const BracketTile: FC<BracketTileProps> = ({
 
   const renderFront = (showReward: boolean) => (
     <div className={cardClassName}>
-      <div
-        className={`card-body gap-1.5 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}
-      >
+      <div className={`card-body gap-1.5 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}>
         <div className="divide-y divide-base-300 flex-1">
           {slot.positions.map((pos, idx) => {
             const team = pos?.teamId != null ? teamsById.get(pos.teamId) : undefined;
@@ -279,15 +294,24 @@ export const BracketTile: FC<BracketTileProps> = ({
   const route = ROUTE_BY_FROM_ID.get(slot.id);
   const winnerDest = describeDestination(route?.winnerGoesTo);
   const loserDest = describeDestination(route?.loserGoesTo);
-  const baseRoundLabel = ROUND_TITLES[slot.round] ?? cleanLabel(slot.label);
-  const roundLabel =
-    titleOverride ?? SLOT_TITLES[slot.id] ?? ROUND_TITLES[slot.round] ?? cleanLabel(slot.label);
+  const baseRoundLabel = ROUND_TITLES_DESKTOP[slot.round] ?? cleanLabel(slot.label);
+  const roundLabel: ReactNode =
+    titleOverride ??
+    SLOT_TITLES[slot.id] ??
+    (() => {
+      const mobileLabel = ROUND_TITLES_MOBILE[slot.round] ?? cleanLabel(slot.label);
+      const desktopLabel = ROUND_TITLES_DESKTOP[slot.round] ?? cleanLabel(slot.label);
+      return (
+        <span>
+          <span className="md:hidden">{mobileLabel}</span>
+          <span className="hidden md:inline">{desktopLabel}</span>
+        </span>
+      );
+    })();
 
   const renderBack = () => (
     <div className={cardClassName}>
-      <div
-        className={`card-body gap-2 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}
-      >
+      <div className={`card-body gap-2 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}>
         <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? roundLabel}</div>
         <div className="flex-1 flex flex-col justify-between">
           {hasBye ? (
