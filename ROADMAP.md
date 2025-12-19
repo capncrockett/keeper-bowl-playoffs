@@ -19,6 +19,7 @@ Completed phases 0–6 removed for brevity; reopen if you need historical notes.
 
 - [ ] Smoke test all routes.
 - [ ] Verify Sleeper API errors are surfaced cleanly.
+- [ ] Add stable `data-testid` hooks for e2e selectors (theme toggle, matchups list, etc.).
 - [x] Confirm works on mobile widths.
 - [ ] Add minimal README usage notes.
 - [ ] Deploy to chosen host (Render/Azure/AWS).

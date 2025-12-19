@@ -12,7 +12,7 @@ test.describe('Theme selection', () => {
   test('switches theme and persists after reload', async ({ page }) => {
     await page.goto('/');
 
-    const themeToggle = page.getByLabel('Theme');
+    const themeToggle = page.locator('header .dropdown > label').first();
 
     await themeToggle.click();
     await page.getByRole('button', { name: 'Retro' }).click();
