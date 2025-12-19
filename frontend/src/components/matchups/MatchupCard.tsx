@@ -15,9 +15,8 @@ const formatRecord = (record: Team['record']): string => {
 };
 
 export function MatchupCard({ live, teamA, teamB }: MatchupCardProps) {
-
   return (
-    <div className="card bg-base-200 shadow-md mb-4">
+    <div className="card bg-base-200 shadow-md mb-4" data-testid="matchup-card">
       <div className="card-body p-4 gap-3">
         {/* Header: week / matchup label */}
         <div className="flex justify-between items-center text-xs text-base-content/60">

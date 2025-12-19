@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const routes = [
-  { path: '/', heading: /matchups/i },
+  { path: '/', heading: /live playoffs/i },
   { path: '/playoffs/if-today', heading: /if the season ended today/i },
   { path: '/playoffs/live', heading: /live playoffs/i },
   { path: '/standings', heading: /standings/i },
@@ -16,7 +16,9 @@ test.describe('Happy path smoke', () => {
   test('renders header/footer on home', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /matchups/i })).toBeVisible();
+    // Home redirects to the live playoffs page.
+    await expect(page).toHaveURL(/\/playoffs\/live/);
+    await expect(page.getByRole('heading', { name: /live playoffs/i })).toBeVisible();
     await expect(page.getByRole('banner')).toBeVisible();
     await expect(page.getByRole('contentinfo')).toContainText(/keeper bowl playoffs/i);
   });
