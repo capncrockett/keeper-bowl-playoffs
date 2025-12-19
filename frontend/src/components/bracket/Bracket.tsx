@@ -12,9 +12,16 @@ interface BracketProps {
   teams: Team[];
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
+  byeWeekPointsByTeamId?: Map<number, number> | null;
 }
 
-export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode }) => {
+export const Bracket: FC<BracketProps> = ({
+  slots,
+  teams,
+  highlightTeamId,
+  mode,
+  byeWeekPointsByTeamId,
+}) => {
   const teamsById = new Map<number, Team>();
   teams.forEach((t) => teamsById.set(t.sleeperRosterId, t));
 
@@ -30,6 +37,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
         <ChampBracket
           slots={champSlots}
           teamsById={teamsById}
+          byeWeekPointsByTeamId={byeWeekPointsByTeamId ?? undefined}
           highlightTeamId={highlightTeamId}
           mode={mode}
         />
@@ -41,6 +49,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
         <KeeperBracket
           slots={keeperSlots}
           teamsById={teamsById}
+          byeWeekPointsByTeamId={byeWeekPointsByTeamId ?? undefined}
           highlightTeamId={highlightTeamId}
           mode={mode}
         />
@@ -52,6 +61,7 @@ export const Bracket: FC<BracketProps> = ({ slots, teams, highlightTeamId, mode 
         <ToiletBracket
           slots={toiletSlots}
           teamsById={teamsById}
+          byeWeekPointsByTeamId={byeWeekPointsByTeamId ?? undefined}
           highlightTeamId={highlightTeamId}
           mode={mode}
         />

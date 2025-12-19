@@ -49,6 +49,9 @@ const formatRecord = (record: Team['record']): string => {
 export default function PlayoffsLivePage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [slots, setSlots] = useState<BracketSlot[]>(BRACKET_TEMPLATE);
+  const [byeWeekPointsByTeamId, setByeWeekPointsByTeamId] = useState<Map<number, number> | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
@@ -59,6 +62,7 @@ export default function PlayoffsLivePage() {
       try {
         setIsLoading(true);
         setError(null);
+        setByeWeekPointsByTeamId(null);
 
         // Fetch all required data in parallel
         const [
@@ -83,6 +87,12 @@ export default function PlayoffsLivePage() {
         const merged = mergeRostersAndUsersToTeams(rosters, users);
         const withSeeds = computeSeeds(merged);
         setTeams(withSeeds);
+
+        const byeWeekPoints = new Map<number, number>();
+        round1Matchups.forEach((matchup) => {
+          byeWeekPoints.set(matchup.roster_id, matchup.points);
+        });
+        setByeWeekPointsByTeamId(byeWeekPoints);
 
         // Start with template and apply seed assignments
         let bracketSlots = assignSeedsToBracketSlots(withSeeds);
@@ -275,7 +285,13 @@ export default function PlayoffsLivePage() {
       )}
 
       {!isLoading && !error && teams.length > 0 && (
-        <Bracket slots={slots} teams={teams} highlightTeamId={selectedTeamId} mode={mode} />
+        <Bracket
+          slots={slots}
+          teams={teams}
+          highlightTeamId={selectedTeamId}
+          mode={mode}
+          byeWeekPointsByTeamId={byeWeekPointsByTeamId}
+        />
       )}
     </div>
   );
