@@ -28,10 +28,11 @@ jobs:
         run: npm run test:ci -w frontend
 
   e2e-smoke:
-    # Run on release branch pushes or when manually dispatched.
+    # Run on release branch pushes, PRs targeting main, or when manually dispatched.
     if: >
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')) ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
