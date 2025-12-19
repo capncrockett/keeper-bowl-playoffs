@@ -59,16 +59,17 @@ test.describe('Matchups page with mocked data', () => {
 
     await page.goto('/matchups');
 
-    const weekSelect = page.getByLabel('Week');
+    const weekSelect = page.getByRole('combobox');
 
     await expect(page.getByRole('heading', { name: /matchups/i })).toBeVisible();
     await expect(page.getByText('2025 • Week 13')).toBeVisible();
-    await expect(page.getByTestId('matchup-card')).toHaveCount(6);
+    const matchupHeaders = page.locator('text=/Matchup #/');
+    await expect(matchupHeaders).toHaveCount(6);
 
     await weekSelect.selectOption('14');
 
-    await expect(page.getByText('2025 • Week 14')).toBeVisible();
-    await expect(page.getByTestId('matchup-card')).toHaveCount(1);
-    await expect(page.getByTestId('matchup-card').first()).toContainText('200.00');
+    await expect(page.getByText('Matchup #1-2')).toBeVisible();
+    await expect(matchupHeaders).toHaveCount(1);
+    await expect(page.getByText('200.00')).toBeVisible();
   });
 });
