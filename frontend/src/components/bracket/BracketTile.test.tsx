@@ -81,7 +81,7 @@ describe('BracketTile', () => {
     );
 
     const scores = Array.from(container.querySelectorAll('.bracket-score')).map((node) =>
-      node.textContent?.trim(),
+      node.textContent.trim(),
     );
     expect(scores).toEqual(['-', '-']);
     expect(screen.queryByText('222.22')).not.toBeInTheDocument();
