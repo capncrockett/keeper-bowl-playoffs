@@ -19,6 +19,25 @@ import { TeamAvatars } from '../components/common/TeamAvatars';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
+const PLAYOFF_WEEKS = {
+  round1: 15,
+  round2: 16,
+  finals: 17,
+} as const;
+
+const ROUND_1_ROUNDS: BracketSlot['round'][] = ['champ_round_1', 'toilet_round_1'];
+const ROUND_2_ROUNDS: BracketSlot['round'][] = [
+  'champ_round_2',
+  'toilet_round_2',
+  'keeper_main',
+];
+const FINALS_ROUNDS: BracketSlot['round'][] = [
+  'champ_finals',
+  'champ_misc',
+  'toilet_finals',
+  'toilet_misc',
+  'keeper_misc',
+];
 
 type BracketMode = 'score' | 'reward';
 
@@ -30,6 +49,9 @@ const formatRecord = (record: Team['record']): string => {
 export default function PlayoffsLivePage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [slots, setSlots] = useState<BracketSlot[]>(BRACKET_TEMPLATE);
+  const [byeWeekPointsByTeamId, setByeWeekPointsByTeamId] = useState<Map<number, number> | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
@@ -40,22 +62,37 @@ export default function PlayoffsLivePage() {
       try {
         setIsLoading(true);
         setError(null);
+        setByeWeekPointsByTeamId(null);
 
         // Fetch all required data in parallel
-        const [users, rosters, winnersBracket, losersBracket, week15Matchups] = await Promise.all(
-          [
-            getLeagueUsers(LEAGUE_ID),
-            getLeagueRosters(LEAGUE_ID),
-            getWinnersBracket(LEAGUE_ID),
-            getLosersBracket(LEAGUE_ID),
-            getLeagueMatchupsForWeek(LEAGUE_ID, 15), // Week 15 is first week of playoffs
-          ],
-        );
+        const [
+          users,
+          rosters,
+          winnersBracket,
+          losersBracket,
+          round1Matchups,
+          round2Matchups,
+          finalsMatchups,
+        ] = await Promise.all([
+          getLeagueUsers(LEAGUE_ID),
+          getLeagueRosters(LEAGUE_ID),
+          getWinnersBracket(LEAGUE_ID),
+          getLosersBracket(LEAGUE_ID),
+          getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round1),
+          getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round2),
+          getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.finals),
+        ]);
 
         // Build team data with seeds
         const merged = mergeRostersAndUsersToTeams(rosters, users);
         const withSeeds = computeSeeds(merged);
         setTeams(withSeeds);
+
+        const byeWeekPoints = new Map<number, number>();
+        round1Matchups.forEach((matchup) => {
+          byeWeekPoints.set(matchup.roster_id, matchup.points);
+        });
+        setByeWeekPointsByTeamId(byeWeekPoints);
 
         // Start with template and apply seed assignments
         let bracketSlots = assignSeedsToBracketSlots(withSeeds);
@@ -68,8 +105,16 @@ export default function PlayoffsLivePage() {
           bracketSlots = applyGameOutcomesToBracket(bracketSlots, outcomes);
         }
 
-        // Apply Week 15 matchup scores
-        bracketSlots = applyMatchupScoresToBracket(bracketSlots, week15Matchups);
+        // Apply matchup scores by playoff week
+        bracketSlots = applyMatchupScoresToBracket(bracketSlots, round1Matchups, {
+          rounds: ROUND_1_ROUNDS,
+        });
+        bracketSlots = applyMatchupScoresToBracket(bracketSlots, round2Matchups, {
+          rounds: ROUND_2_ROUNDS,
+        });
+        bracketSlots = applyMatchupScoresToBracket(bracketSlots, finalsMatchups, {
+          rounds: FINALS_ROUNDS,
+        });
 
         setSlots(bracketSlots);
       } catch (err) {
@@ -240,7 +285,13 @@ export default function PlayoffsLivePage() {
       )}
 
       {!isLoading && !error && teams.length > 0 && (
-        <Bracket slots={slots} teams={teams} highlightTeamId={selectedTeamId} mode={mode} />
+        <Bracket
+          slots={slots}
+          teams={teams}
+          highlightTeamId={selectedTeamId}
+          mode={mode}
+          byeWeekPointsByTeamId={byeWeekPointsByTeamId}
+        />
       )}
     </div>
   );

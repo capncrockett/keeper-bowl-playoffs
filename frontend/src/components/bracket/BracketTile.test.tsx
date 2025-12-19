@@ -56,4 +56,35 @@ describe('BracketTile', () => {
     expect(screen.getByText(finalsTemplate.rewardTitle)).toBeInTheDocument();
     expect(screen.getByText(finalsTemplate.rewardText)).toBeInTheDocument();
   });
+
+  it('does not fall back to season points when currentPoints is missing', () => {
+    const slotTemplate = BRACKET_TEMPLATE.find((s) => s.id === 'champ_r1_g1');
+    if (!slotTemplate) throw new Error('Missing slot template for champ_r1_g1');
+
+    const teamA = buildTeam({ sleeperRosterId: 1, teamName: 'Alpha', pointsFor: 222.22 });
+    const teamB = buildTeam({ sleeperRosterId: 2, teamName: 'Bravo', pointsFor: 198.76 });
+    const teamsById = new Map([
+      [teamA.sleeperRosterId, teamA],
+      [teamB.sleeperRosterId, teamB],
+    ]);
+
+    const slot = {
+      ...slotTemplate,
+      positions: [
+        { seed: 4, teamId: teamA.sleeperRosterId },
+        { seed: 5, teamId: teamB.sleeperRosterId },
+      ] as typeof slotTemplate.positions,
+    };
+
+    const { container } = render(
+      <BracketTile slot={slot} teamsById={teamsById} highlightTeamId={null} mode="score" />,
+    );
+
+    const scores = Array.from(container.querySelectorAll('.bracket-score')).map((node) =>
+      node.textContent.trim(),
+    );
+    expect(scores).toEqual(['-', '-']);
+    expect(screen.queryByText('222.22')).not.toBeInTheDocument();
+    expect(screen.queryByText('198.76')).not.toBeInTheDocument();
+  });
 });

@@ -13,6 +13,8 @@ describe('PlayoffsLivePage', () => {
 
     const [teamLabel] = await screen.findAllByText(/Big Ol' TDs/i);
     expect(teamLabel).toBeInTheDocument();
+    expect(await screen.findByText('123.45')).toBeInTheDocument();
+    expect(await screen.findByText('150.01')).toBeInTheDocument();
 
     const rewardButton = screen.getByRole('button', { name: /reward mode/i });
     fireEvent.click(rewardButton);
