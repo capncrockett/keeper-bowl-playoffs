@@ -11,12 +11,15 @@ import type { BracketSlot } from '../bracket/types';
  *
  * @param slots - Array of bracket slots
  * @param matchups - Array of Sleeper matchup data for the week
+ * @param options - Optional filters (e.g., limit to specific rounds)
  * @returns New array of bracket slots with score data applied
  */
 export function applyMatchupScoresToBracket(
   slots: BracketSlot[],
   matchups: SleeperMatchup[],
+  options: { rounds?: BracketSlot['round'][] } = {},
 ): BracketSlot[] {
+  const eligibleRounds = options.rounds ? new Set(options.rounds) : null;
   // Build a map of roster_id -> matchup data
   const matchupByRosterId = new Map<number, SleeperMatchup>();
   matchups.forEach((m) => {
@@ -24,6 +27,9 @@ export function applyMatchupScoresToBracket(
   });
 
   return slots.map((slot) => {
+    if (eligibleRounds && !eligibleRounds.has(slot.round)) {
+      return slot;
+    }
     const [top, bottom] = slot.positions;
 
     const updatePosition = (pos: BracketSlot['positions'][number]) => {
