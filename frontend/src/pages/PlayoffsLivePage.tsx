@@ -2,15 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   getLeagueRosters,
   getLeagueUsers,
-  getWinnersBracket,
-  getLosersBracket,
   getLeagueMatchupsForWeek,
 } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
-import { toBracketGameOutcomes } from '../utils/sleeperPlayoffTransforms';
 import { applyMatchupScoresToBracket } from '../utils/applyMatchupScores';
 import type { Team } from '../models/fantasy';
-import type { BracketSlot } from '../bracket/types';
+import type { BracketSlot, BracketSlotId } from '../bracket/types';
 import { BRACKET_TEMPLATE } from '../bracket/template';
 import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 import { applyGameOutcomesToBracket } from '../bracket/state';
@@ -39,11 +36,62 @@ const FINALS_ROUNDS: BracketSlot['round'][] = [
   'keeper_misc',
 ];
 
+const ROUND_1_SLOT_IDS: BracketSlotId[] = [
+  'champ_r1_g1',
+  'champ_r1_g2',
+  'toilet_r1_g1',
+  'toilet_r1_g2',
+];
+
+const ROUND_2_SLOT_IDS: BracketSlotId[] = [
+  'champ_r2_g1',
+  'champ_r2_g2',
+  'toilet_r2_g1',
+  'toilet_r2_g2',
+  'keeper_splashback1',
+  'keeper_splashback2',
+];
+
 type BracketMode = 'score' | 'reward';
 
 const formatRecord = (record: Team['record']): string => {
   const base = `${record.wins.toString()}-${record.losses.toString()}`;
   return record.ties ? `${base}-${record.ties.toString()}` : base;
+};
+
+const resolveRoundOutcomes = (
+  slots: BracketSlot[],
+  slotIds: BracketSlotId[],
+  teamsById: Map<number, Team>,
+): BracketSlot[] => {
+  const slotById = new Map<BracketSlotId, BracketSlot>();
+  slots.forEach((slot) => slotById.set(slot.id, slot));
+
+  const outcomes = slotIds.flatMap((slotId) => {
+    const slot = slotById.get(slotId);
+    if (!slot) return [];
+
+    const [posA, posB] = slot.positions;
+    if (!posA?.teamId || !posB?.teamId) return [];
+    if (posA.currentPoints == null || posB.currentPoints == null) return [];
+
+    if (posA.currentPoints > posB.currentPoints) {
+      return [{ slotId, winnerIndex: 0 as const }];
+    }
+    if (posB.currentPoints > posA.currentPoints) {
+      return [{ slotId, winnerIndex: 1 as const }];
+    }
+
+    const seedA = posA.seed ?? teamsById.get(posA.teamId)?.seed;
+    const seedB = posB.seed ?? teamsById.get(posB.teamId)?.seed;
+    if (seedA != null && seedB != null && seedA !== seedB) {
+      return [{ slotId, winnerIndex: seedA < seedB ? (0 as const) : (1 as const) }];
+    }
+
+    return [{ slotId, winnerIndex: 0 as const }];
+  });
+
+  return outcomes.length > 0 ? applyGameOutcomesToBracket(slots, outcomes) : slots;
 };
 
 export default function PlayoffsLivePage() {
@@ -65,19 +113,9 @@ export default function PlayoffsLivePage() {
         setByeWeekPointsByTeamId(null);
 
         // Fetch all required data in parallel
-        const [
-          users,
-          rosters,
-          winnersBracket,
-          losersBracket,
-          round1Matchups,
-          round2Matchups,
-          finalsMatchups,
-        ] = await Promise.all([
+        const [users, rosters, round1Matchups, round2Matchups, finalsMatchups] = await Promise.all([
           getLeagueUsers(LEAGUE_ID),
           getLeagueRosters(LEAGUE_ID),
-          getWinnersBracket(LEAGUE_ID),
-          getLosersBracket(LEAGUE_ID),
           getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round1),
           getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round2),
           getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.finals),
@@ -87,6 +125,10 @@ export default function PlayoffsLivePage() {
         const merged = mergeRostersAndUsersToTeams(rosters, users);
         const withSeeds = computeSeeds(merged);
         setTeams(withSeeds);
+        const teamsById = new Map<number, Team>();
+        withSeeds.forEach((team) => {
+          teamsById.set(team.sleeperRosterId, team);
+        });
 
         const byeWeekPoints = new Map<number, number>();
         round1Matchups.forEach((matchup) => {
@@ -97,21 +139,15 @@ export default function PlayoffsLivePage() {
         // Start with template and apply seed assignments
         let bracketSlots = assignSeedsToBracketSlots(withSeeds);
 
-        // Convert Sleeper playoff matchups to game outcomes
-        const outcomes = toBracketGameOutcomes(winnersBracket, losersBracket);
-
-        // Apply outcomes to bracket using routing engine
-        if (outcomes.length > 0) {
-          bracketSlots = applyGameOutcomesToBracket(bracketSlots, outcomes);
-        }
-
         // Apply matchup scores by playoff week
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, round1Matchups, {
           rounds: ROUND_1_ROUNDS,
         });
+        bracketSlots = resolveRoundOutcomes(bracketSlots, ROUND_1_SLOT_IDS, teamsById);
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, round2Matchups, {
           rounds: ROUND_2_ROUNDS,
         });
+        bracketSlots = resolveRoundOutcomes(bracketSlots, ROUND_2_SLOT_IDS, teamsById);
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, finalsMatchups, {
           rounds: FINALS_ROUNDS,
         });
