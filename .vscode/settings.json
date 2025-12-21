@@ -10,5 +10,12 @@
     "splashback",
     "Splashbacks",
     "VERCEL"
-  ]
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.tsx": "typescriptreact"
+  },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  }
 }
