@@ -201,7 +201,7 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round, hasBye }) => {
   }
 
   const isBye = !!pos.isBye;
-  const currentPoints = mode === 'score' ? (pos.currentPoints ?? team.pointsFor) : undefined;
+  const currentPoints = mode === 'score' ? pos.currentPoints : undefined;
 
   return (
     <div className="py-1.5 md:py-2 max-w-full overflow-hidden min-w-0">

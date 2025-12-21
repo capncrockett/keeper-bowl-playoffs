@@ -6,6 +6,8 @@ import {
   mockSleeperRosters,
   mockSleeperMatchupsWeek13,
   mockSleeperMatchupsWeek15,
+  mockSleeperMatchupsWeek16,
+  mockSleeperMatchupsWeek17,
   mockNFLState,
   mockPlayoffWinnersBracket,
   mockPlayoffLosersBracket,
@@ -41,6 +43,12 @@ export const handlers = [
     }
     if (week === '15') {
       return HttpResponse.json(mockSleeperMatchupsWeek15);
+    }
+    if (week === '16') {
+      return HttpResponse.json(mockSleeperMatchupsWeek16);
+    }
+    if (week === '17') {
+      return HttpResponse.json(mockSleeperMatchupsWeek17);
     }
     return HttpResponse.json([]);
   }),

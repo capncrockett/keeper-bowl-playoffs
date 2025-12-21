@@ -9,6 +9,7 @@ import { BracketGrid } from './BracketGrid';
 interface KeeperBracketProps {
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
+  byeWeekPointsByTeamId?: Map<number, number>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
 }
@@ -44,6 +45,7 @@ const KEEPER_COLUMNS: BracketColumnDef[] = [
 export const KeeperBracket: FC<KeeperBracketProps> = ({
   slots,
   teamsById,
+  byeWeekPointsByTeamId,
   highlightTeamId,
   mode,
 }) => {
@@ -52,6 +54,7 @@ export const KeeperBracket: FC<KeeperBracketProps> = ({
       columns={KEEPER_COLUMNS}
       slots={slots}
       teamsById={teamsById}
+      scoreOverridesByTeamId={byeWeekPointsByTeamId}
       highlightTeamId={highlightTeamId}
       mode={mode}
       columnHeightClass="min-h-[260px] md:min-h-[340px]"

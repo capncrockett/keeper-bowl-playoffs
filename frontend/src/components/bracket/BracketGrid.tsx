@@ -31,6 +31,7 @@ interface BracketGridProps {
   columns: BracketColumnDef[];
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
+  scoreOverridesByTeamId?: Map<number, number>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
   /** Optional override to apply the same height class to all columns (e.g., Keeper uses a shorter stack). */
@@ -63,9 +64,12 @@ export const BracketGrid: FC<BracketGridProps> = ({
   columns,
   slots,
   teamsById,
+  scoreOverridesByTeamId,
   highlightTeamId,
   mode,
   columnHeightClass,
+  defaultHeightScale = 1,
+  colGapClass = 'gap-3 md:gap-10',
 }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
   const resolvedColumnHeight = columnHeightClass ?? 'min-h-[360px] md:min-h-[640px]';
@@ -83,6 +87,67 @@ export const BracketGrid: FC<BracketGridProps> = ({
               {col.subtitle && (
                 <div className="text-[9px] md:text-[11px] text-base-content/60 leading-tight">
                   {col.subtitle}
+              </h2>
+            )}
+            {col.subtitle && (
+              <span className="text-[0.55rem] md:text-xs font-medium text-base-content/60">
+                {col.subtitle}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Columns with absolute-positioned matchups */}
+      <div className={`grid ${colGapClass}`} style={{ gridTemplateColumns: gridTemplateColumns }}>
+        {columns.map((col, colIdx) => (
+          <div
+            key={colIdx}
+            className={`relative ${col.columnHeightClass ?? columnHeightClass ?? defaultColumnHeightClass}`}
+          >
+            {col.items.map((item) => {
+              if (!item.slotId) return null;
+              const slot = slotById.get(item.slotId);
+              if (!slot) return null;
+
+              const center = item.centerOnPct === true;
+              const scale = col.heightScale ?? defaultHeightScale;
+              const top = item.topPct * scale;
+              const displaySlot =
+                item.maskOppIndex == null
+                  ? slot
+                  : {
+                      ...slot,
+                      positions: slot.positions.map((pos, idx) =>
+                        idx === item.maskOppIndex
+                          ? { ...(pos ?? {}), teamId: undefined, isBye: true }
+                          : pos && scoreOverridesByTeamId
+                            ? {
+                                ...pos,
+                                currentPoints: scoreOverridesByTeamId.get(pos.teamId ?? -1),
+                              }
+                            : pos,
+                      ) as typeof slot.positions,
+                    };
+
+              return (
+                <div
+                  key={item.id}
+                  className="absolute left-0 right-0"
+                  style={{
+                    top: `${top.toString()}%`,
+                    transform: center ? 'translateY(-50%)' : undefined,
+                  }}
+                >
+                  <BracketMatchShell itemId={item.id}>
+                  <BracketTile
+                    slot={displaySlot}
+                    teamsById={teamsById}
+                    highlightTeamId={highlightTeamId}
+                    mode={mode}
+                    titleOverride={item.titleOverride}
+                  />
+                  </BracketMatchShell>
                 </div>
               )}
             </div>
