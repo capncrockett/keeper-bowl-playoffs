@@ -33,6 +33,7 @@ interface BracketGridProps {
   columns: BracketLayoutColumn[];
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
+  scoreOverridesByTeamId?: Map<number, number>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
   /** Base column height if none is provided per column. */
@@ -64,13 +65,14 @@ export const BracketGrid: FC<BracketGridProps> = ({
   columns,
   slots,
   teamsById,
+  scoreOverridesByTeamId,
   highlightTeamId,
   mode,
   defaultColumnHeightClass = 'min-h-[600px] md:min-h-[720px]',
   columnHeightClass,
   defaultHeightScale = 1,
   colGapClass = 'gap-3 md:gap-10',
-  }) => {
+}) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
 
   const gridTemplateColumns = `repeat(${columns.length.toString()}, minmax(0, 1fr))`;
@@ -121,7 +123,12 @@ export const BracketGrid: FC<BracketGridProps> = ({
                       positions: slot.positions.map((pos, idx) =>
                         idx === item.maskOppIndex
                           ? { ...(pos ?? {}), teamId: undefined, isBye: true }
-                          : pos,
+                          : pos && scoreOverridesByTeamId
+                            ? {
+                                ...pos,
+                                currentPoints: scoreOverridesByTeamId.get(pos.teamId ?? -1),
+                              }
+                            : pos,
                       ) as typeof slot.positions,
                     };
 
