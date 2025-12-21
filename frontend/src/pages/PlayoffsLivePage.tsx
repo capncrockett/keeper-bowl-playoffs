@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   getLeagueRosters,
   getLeagueUsers,
+  getNFLState,
   getLeagueMatchupsForWeek,
 } from '../api/sleeper';
 import { mergeRostersAndUsersToTeams, computeSeeds } from '../utils/sleeperTransforms';
@@ -48,6 +49,9 @@ const ROUND_2_SLOT_IDS: BracketSlotId[] = [
   'champ_r2_g2',
   'toilet_r2_g1',
   'toilet_r2_g2',
+];
+
+const KEEPER_ROUND_2_SLOT_IDS: BracketSlotId[] = [
   'keeper_splashback1',
   'keeper_splashback2',
 ];
@@ -113,13 +117,15 @@ export default function PlayoffsLivePage() {
         setByeWeekPointsByTeamId(null);
 
         // Fetch all required data in parallel
-        const [users, rosters, round1Matchups, round2Matchups, finalsMatchups] = await Promise.all([
-          getLeagueUsers(LEAGUE_ID),
-          getLeagueRosters(LEAGUE_ID),
-          getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round1),
-          getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round2),
-          getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.finals),
-        ]);
+        const [users, rosters, nflState, round1Matchups, round2Matchups, finalsMatchups] =
+          await Promise.all([
+            getLeagueUsers(LEAGUE_ID),
+            getLeagueRosters(LEAGUE_ID),
+            getNFLState(),
+            getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round1),
+            getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.round2),
+            getLeagueMatchupsForWeek(LEAGUE_ID, PLAYOFF_WEEKS.finals),
+          ]);
 
         // Build team data with seeds
         const merged = mergeRostersAndUsersToTeams(rosters, users);
@@ -140,14 +146,23 @@ export default function PlayoffsLivePage() {
         let bracketSlots = assignSeedsToBracketSlots(withSeeds);
 
         // Apply matchup scores by playoff week
+        const currentWeek = nflState.display_week;
+
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, round1Matchups, {
           rounds: ROUND_1_ROUNDS,
         });
-        bracketSlots = resolveRoundOutcomes(bracketSlots, ROUND_1_SLOT_IDS, teamsById);
+        if (currentWeek >= PLAYOFF_WEEKS.round1) {
+          bracketSlots = resolveRoundOutcomes(bracketSlots, ROUND_1_SLOT_IDS, teamsById);
+        }
+
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, round2Matchups, {
           rounds: ROUND_2_ROUNDS,
         });
-        bracketSlots = resolveRoundOutcomes(bracketSlots, ROUND_2_SLOT_IDS, teamsById);
+        if (currentWeek >= PLAYOFF_WEEKS.finals) {
+          bracketSlots = resolveRoundOutcomes(bracketSlots, KEEPER_ROUND_2_SLOT_IDS, teamsById);
+          bracketSlots = resolveRoundOutcomes(bracketSlots, ROUND_2_SLOT_IDS, teamsById);
+        }
+
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, finalsMatchups, {
           rounds: FINALS_ROUNDS,
         });
