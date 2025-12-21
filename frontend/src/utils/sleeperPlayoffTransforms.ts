@@ -2,7 +2,7 @@
 
 import type { SleeperPlayoffMatchup } from '../api/sleeper';
 import type { BracketGameOutcome } from '../bracket/state';
-import type { BracketSlotId } from '../bracket/types';
+import type { BracketSlot, BracketSlotId } from '../bracket/types';
 
 /**
  * Maps Sleeper's playoff bracket structure to our custom bracket slot IDs.
@@ -18,8 +18,8 @@ import type { BracketSlotId } from '../bracket/types';
  */
 const SLEEPER_TO_BRACKET_MAP: Partial<Record<string, BracketSlotId>> = {
   // Winners Bracket (Champ Bowl)
-  'winners_r1_m1': 'champ_r1_g1', // 4 vs 2 -> actually should be 4 vs 5
-  'winners_r1_m2': 'champ_r1_g2', // 7 vs 3 -> actually should be 3 vs 6
+  'winners_r1_m1': 'champ_r1_g2', // 3 vs 6
+  'winners_r1_m2': 'champ_r1_g1', // 4 vs 5
   'winners_r2_m3': 'champ_r2_g1', // 9 vs winner of m1 -> seed 1 vs winner of R1G1
   'winners_r2_m4': 'champ_r2_g2', // 12 vs winner of m2 -> seed 2 vs winner of R1G2
   'winners_r2_m5': 'champ_3rd', // loser of m1 vs loser of m2 -> 3rd place game
@@ -27,8 +27,8 @@ const SLEEPER_TO_BRACKET_MAP: Partial<Record<string, BracketSlotId>> = {
   'winners_r3_m7': 'champ_3rd', // This appears to be duplicate? Need to verify
 
   // Losers Bracket (Toilet Bowl)
-  'losers_r1_m1': 'toilet_r1_g1', // 11 vs 8 -> actually should be 8 vs 9
-  'losers_r1_m2': 'toilet_r1_g2', // 6 vs 1 -> actually should be 7 vs 10
+  'losers_r1_m1': 'toilet_r1_g1', // 8 vs 9
+  'losers_r1_m2': 'toilet_r1_g2', // 7 vs 10
   'losers_r2_m3': 'toilet_r2_g1', // 10 vs winner of m1 -> seed 12 vs winner
   'losers_r2_m4': 'toilet_r2_g2', // 5 vs winner of m2 -> seed 11 vs winner
   'losers_r2_m5': 'toilet_9th_10th', // loser of m1 vs loser of m2
@@ -50,6 +50,7 @@ function makeMatchupKey(bracket: 'winners' | 'losers', round: number, matchup: n
 export function toBracketGameOutcomes(
   winnersBracket: SleeperPlayoffMatchup[],
   losersBracket: SleeperPlayoffMatchup[],
+  slots?: BracketSlot[],
 ): BracketGameOutcome[] {
   const outcomes: BracketGameOutcome[] = [];
 
@@ -69,7 +70,15 @@ export function toBracketGameOutcomes(
 
     // Determine which position (0 or 1) won
     // t1 is position 0 (top/left), t2 is position 1 (bottom/right)
-    const winnerIndex: 0 | 1 = matchup.w === matchup.t1 ? 0 : 1;
+    let winnerIndex: 0 | 1 = matchup.w === matchup.t1 ? 0 : 1;
+
+    if (slots) {
+      const slot = slots.find((candidate) => candidate.id === slotId);
+      const matchingIndex = slot?.positions.findIndex((pos) => pos?.teamId === matchup.w);
+      if (matchingIndex === 0 || matchingIndex === 1) {
+        winnerIndex = matchingIndex;
+      }
+    }
 
     outcomes.push({
       slotId,

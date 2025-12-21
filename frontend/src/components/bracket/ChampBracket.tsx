@@ -9,6 +9,7 @@ import { BracketGrid } from './BracketGrid';
 interface ChampBracketProps {
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
+  byeWeekPointsByTeamId?: Map<number, number>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
 }
@@ -45,6 +46,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
 export const ChampBracket: FC<ChampBracketProps> = ({
   slots,
   teamsById,
+  byeWeekPointsByTeamId,
   highlightTeamId,
   mode,
 }) => {
@@ -53,6 +55,7 @@ export const ChampBracket: FC<ChampBracketProps> = ({
       columns={CHAMP_COLUMNS}
       slots={slots}
       teamsById={teamsById}
+      scoreOverridesByTeamId={byeWeekPointsByTeamId}
       highlightTeamId={highlightTeamId}
       mode={mode}
       columnHeightClass="min-h-[600px] md:min-h-[760px]"

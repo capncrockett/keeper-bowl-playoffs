@@ -9,6 +9,7 @@ import { BracketGrid } from './BracketGrid';
 interface ToiletBracketProps {
   slots: BracketSlot[];
   teamsById: Map<number, Team>;
+  byeWeekPointsByTeamId?: Map<number, number>;
   highlightTeamId?: number | null;
   mode: 'score' | 'reward';
 }
@@ -45,6 +46,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
 export const ToiletBracket: FC<ToiletBracketProps> = ({
   slots,
   teamsById,
+  byeWeekPointsByTeamId,
   highlightTeamId,
   mode,
 }) => {
@@ -53,6 +55,7 @@ export const ToiletBracket: FC<ToiletBracketProps> = ({
       columns={TOILET_COLUMNS}
       slots={slots}
       teamsById={teamsById}
+      scoreOverridesByTeamId={byeWeekPointsByTeamId}
       highlightTeamId={highlightTeamId}
       mode={mode}
       columnHeightClass="min-h-[600px] md:min-h-[760px]"
