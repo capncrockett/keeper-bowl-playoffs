@@ -24,11 +24,7 @@ const PLAYOFF_WEEKS = {
 } as const;
 
 const ROUND_1_ROUNDS: BracketSlot['round'][] = ['champ_round_1', 'toilet_round_1'];
-const ROUND_2_ROUNDS: BracketSlot['round'][] = [
-  'champ_round_2',
-  'toilet_round_2',
-  'keeper_main',
-];
+const ROUND_2_ROUNDS: BracketSlot['round'][] = ['champ_round_2', 'toilet_round_2', 'keeper_main'];
 const FINALS_ROUNDS: BracketSlot['round'][] = [
   'champ_finals',
   'champ_misc',
@@ -51,10 +47,7 @@ const ROUND_2_SLOT_IDS: BracketSlotId[] = [
   'toilet_r2_g2',
 ];
 
-const KEEPER_ROUND_2_SLOT_IDS: BracketSlotId[] = [
-  'keeper_splashback1',
-  'keeper_splashback2',
-];
+const KEEPER_ROUND_2_SLOT_IDS: BracketSlotId[] = ['keeper_splashback1', 'keeper_splashback2'];
 
 type BracketMode = 'score' | 'reward';
 
@@ -104,6 +97,7 @@ export default function PlayoffsLivePage() {
   const [byeWeekPointsByTeamId, setByeWeekPointsByTeamId] = useState<Map<number, number> | null>(
     null,
   );
+  const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
@@ -147,6 +141,7 @@ export default function PlayoffsLivePage() {
 
         // Apply matchup scores by playoff week
         const currentWeek = nflState.display_week;
+        setCurrentWeek(currentWeek);
 
         bracketSlots = applyMatchupScoresToBracket(bracketSlots, round1Matchups, {
           rounds: ROUND_1_ROUNDS,
@@ -191,7 +186,18 @@ export default function PlayoffsLivePage() {
     const selected = teamsById.get(selectedTeamId);
     if (!selected) return null;
 
-    const slot = slots.find((s) => s.positions.some((p) => p?.teamId === selectedTeamId));
+    const roundFilter =
+      currentWeek && currentWeek >= PLAYOFF_WEEKS.finals
+        ? FINALS_ROUNDS
+        : currentWeek && currentWeek >= PLAYOFF_WEEKS.round2
+          ? ROUND_2_ROUNDS
+          : ROUND_1_ROUNDS;
+
+    const slot =
+      slots.find(
+        (s) =>
+          roundFilter.includes(s.round) && s.positions.some((p) => p?.teamId === selectedTeamId),
+      ) ?? slots.find((s) => s.positions.some((p) => p?.teamId === selectedTeamId));
     if (!slot) {
       return { selected, opponent: null, slot: null };
     }
@@ -201,7 +207,7 @@ export default function PlayoffsLivePage() {
       otherPos && otherPos.teamId != null ? (teamsById.get(otherPos.teamId) ?? null) : null;
 
     return { selected, opponent, slot };
-  }, [selectedTeamId, teamsById, slots]);
+  }, [selectedTeamId, teamsById, slots, currentWeek]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-4">
@@ -261,7 +267,7 @@ export default function PlayoffsLivePage() {
       </div>
 
       {pvpInfo && (
-        <div className="card bg-base-200 shadow-md">
+        <div className="card bg-base-200 shadow-md sm:max-w-[50%] sm:mx-auto">
           <div className="card-body gap-3">
             <div className="text-xs font-semibold uppercase text-base-content/60">Head-to-head</div>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
@@ -311,10 +317,6 @@ export default function PlayoffsLivePage() {
                 <div className="text-[0.7rem] italic text-base-content/60">Opponent TBD</div>
               )}
             </div>
-
-            {pvpInfo.slot && (
-              <div className="text-[0.7rem] text-base-content/60">{pvpInfo.slot.label}</div>
-            )}
           </div>
         </div>
       )}
