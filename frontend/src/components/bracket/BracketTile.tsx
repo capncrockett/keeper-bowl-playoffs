@@ -113,8 +113,7 @@ function describeDestination(
   const label =
     (targetSlot
       ? (ROUND_TITLES_DESKTOP[targetSlot.round] ?? cleanLabel(targetSlot.label))
-      : null) ??
-    cleanLabel(SLOT_LABEL_BY_ID.get(dest.slotId) ?? dest.slotId);
+      : null) ?? cleanLabel(SLOT_LABEL_BY_ID.get(dest.slotId) ?? dest.slotId);
   return label;
 }
 
@@ -360,7 +359,7 @@ export const BracketTile: FC<BracketTileProps> = ({
   return (
     <div className="relative [perspective:1200px] w-full min-w-0">
       <div
-        className="grid will-change-transform w-full"
+        className="grid will-change-transform w-full outline-1 outline-offset-0 outline-purple-500"
         style={{
           gridTemplateAreas: '"card"',
           transformStyle: 'preserve-3d',
