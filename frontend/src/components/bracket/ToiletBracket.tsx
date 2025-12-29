@@ -18,6 +18,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 1',
     subtitle: 'Week 15',
+    itemsContainerClassName: 'justify-between',
     items: [
       {
         id: 'toilet_bye1',
@@ -38,7 +39,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 2',
     subtitle: 'Week 16',
-    itemsContainerClassName: 'justify-between',
+    itemsContainerClassName: 'justify-around',
     items: [
       { id: 'toilet_r2_g1', slotId: 'toilet_r2_g1' },
       { id: 'toilet_r2_g2', slotId: 'toilet_r2_g2' },
@@ -47,8 +48,14 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Finals',
     subtitle: 'Week 17',
+    itemsContainerClassName: 'justify-between',
     items: [
-      { id: 'toilet_finals', slotId: 'toilet_finals', itemClassName: 'my-auto' },
+      {
+        id: 'toilet_finals_spacer',
+        slotId: null,
+        itemClassName: 'min-h-[130px] md:min-h-[150px] outline outline-2 outline-pink-500/70',
+      },
+      { id: 'toilet_finals', slotId: 'toilet_finals' },
       { id: 'toilet_9th_10th', slotId: 'toilet_9th_10th' },
     ],
   },
