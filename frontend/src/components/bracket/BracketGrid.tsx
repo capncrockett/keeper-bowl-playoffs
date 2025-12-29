@@ -15,6 +15,8 @@ interface BracketColumnItem {
   maskOppIndex?: 0 | 1;
   /** Optional class override for positioning within the column. */
   itemClassName?: string;
+  /** Optional override for ghost body height. */
+  ghostBodyClassName?: string;
 }
 
 export interface BracketLayoutColumn {
@@ -129,6 +131,8 @@ export const BracketGrid: FC<BracketGridProps> = ({
               >
                 {col.items.map((item) => {
                   if (!item.slotId) {
+                    const ghostBodyClassName =
+                      item.ghostBodyClassName ?? BRACKET_TILE_BODY_HEIGHT_CLASS;
                     return (
                       <BracketMatchShell
                         key={item.id}
@@ -139,9 +143,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
                           className="card card-compact bg-base-100 w-full max-w-full min-w-0 h-full border border-base-300"
                           aria-hidden="true"
                         >
-                          <div
-                            className={`card-body p-2 md:p-3 ${BRACKET_TILE_BODY_HEIGHT_CLASS}`}
-                          />
+                          <div className={`card-body p-2 md:p-3 ${ghostBodyClassName}`} />
                         </div>
                       </BracketMatchShell>
                     );
