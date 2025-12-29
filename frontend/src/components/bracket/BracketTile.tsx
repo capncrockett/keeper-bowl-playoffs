@@ -416,7 +416,7 @@ export const BracketTile: FC<BracketTileProps> = ({
   return (
     <div className="relative [perspective:1200px] w-full min-w-0">
       <div
-        className="grid will-change-transform w-full outline-1 outline-offset-0 outline-purple-500"
+        className="grid will-change-transform w-full"
         style={{
           gridTemplateAreas: '"card"',
           transformStyle: 'preserve-3d',

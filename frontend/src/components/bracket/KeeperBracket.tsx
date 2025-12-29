@@ -54,7 +54,6 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
       {
         id: 'keeper_round1_spacer',
         slotId: null,
-        itemClassName: 'outline outline-2 outline-pink-500/70',
       },
     ],
   },
@@ -68,7 +67,6 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
       {
         id: 'keeper_round2_spacer',
         slotId: null,
-        itemClassName: 'outline outline-2 outline-pink-500/70',
       },
     ],
   },
@@ -81,14 +79,12 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
         id: 'keeper_finals_spacer_top',
         slotId: null,
         ghostBodyClassName: 'h-[65px] md:h-[75px]',
-        itemClassName: 'outline outline-2 outline-pink-500/70',
       },
       { id: 'keeper_5th_6th', slotId: 'keeper_5th_6th' },
       {
         id: 'keeper_finals_spacer',
         slotId: null,
         ghostBodyClassName: 'h-[85px] md:h-[100px]',
-        itemClassName: 'outline outline-2 outline-pink-500/70',
       },
       { id: 'keeper_7th_8th', slotId: 'keeper_7th_8th' },
     ],

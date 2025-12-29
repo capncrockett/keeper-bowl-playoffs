@@ -1,9 +1,10 @@
 // Shared bracket grid + connectors
 
 import type { FC, ReactNode } from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
+import { ROUTING_RULES } from '../../bracket/routingRules';
 import { BracketTile, BRACKET_TILE_BODY_HEIGHT_CLASS } from './BracketTile';
 
 interface BracketColumnItem {
@@ -54,15 +55,22 @@ interface BracketMatchShellProps {
   itemId: string;
   children: ReactNode;
   className?: string;
+  slotId?: BracketSlot['id'];
 }
 
-const BracketMatchShell: FC<BracketMatchShellProps> = ({ itemId, children, className }) => {
+const BracketMatchShell: FC<BracketMatchShellProps> = ({
+  itemId,
+  children,
+  className,
+  slotId,
+}) => {
   return (
     <div
       className={['relative flex flex-col items-stretch gap-1 min-w-0 w-full', className]
         .filter(Boolean)
         .join(' ')}
       data-cell-id={itemId}
+      data-slot-id={slotId ?? undefined}
       role="group"
     >
       <div className="absolute inset-x-0 top-0 h-0 w-full pointer-events-none" data-anchor="top" />
@@ -87,9 +95,72 @@ export const BracketGrid: FC<BracketGridProps> = ({
   colGapClass = 'gap-3 md:gap-10',
 }) => {
   const slotById = useMemo(() => new Map(slots.map((s) => [s.id, s])), [slots]);
+  const columnsContainerRef = useRef<HTMLDivElement | null>(null);
+  const [connectorPaths, setConnectorPaths] = useState<string[]>([]);
 
   const gridTemplateColumns = `repeat(${columns.length.toString()}, minmax(0, 1fr))`;
   const resolvedColumnHeight = columnHeightClass ?? defaultColumnHeightClass;
+
+  useEffect(() => {
+    const container = columnsContainerRef.current;
+    if (!container) return;
+
+    let rafId: number | null = null;
+    const updatePaths = () => {
+      const containerRect = container.getBoundingClientRect();
+      const slotRects = new Map<string, DOMRect>();
+      container.querySelectorAll<HTMLElement>('[data-slot-id]').forEach((el) => {
+        const slotId = el.dataset.slotId;
+        if (!slotId) return;
+        slotRects.set(slotId, el.getBoundingClientRect());
+      });
+
+      const nextPaths: string[] = [];
+      ROUTING_RULES.forEach((rule) => {
+        if (!rule.winnerGoesTo) return;
+        const fromRect = slotRects.get(rule.fromSlotId);
+        const toRect = slotRects.get(rule.winnerGoesTo.slotId);
+        if (!fromRect || !toRect) return;
+
+        const startX = fromRect.right - containerRect.left;
+        const startY = fromRect.top + fromRect.height / 2 - containerRect.top;
+        const endX = toRect.left - containerRect.left;
+        const endY = toRect.top + toRect.height / 2 - containerRect.top;
+        const curveOffset = Math.max(24, Math.abs(endX - startX) * 0.5);
+        const c1x = startX + curveOffset;
+        const c2x = endX - curveOffset;
+
+        nextPaths.push(
+          `M ${startX} ${startY} C ${c1x} ${startY} ${c2x} ${endY} ${endX} ${endY}`,
+        );
+      });
+
+      setConnectorPaths(nextPaths);
+    };
+
+    const scheduleUpdate = () => {
+      if (typeof requestAnimationFrame !== 'function') {
+        updatePaths();
+        return;
+      }
+      if (rafId != null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updatePaths);
+    };
+
+    scheduleUpdate();
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(scheduleUpdate);
+    resizeObserver?.observe(container);
+    window.addEventListener('resize', scheduleUpdate);
+
+    return () => {
+      if (rafId != null && typeof cancelAnimationFrame === 'function') {
+        cancelAnimationFrame(rafId);
+      }
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', scheduleUpdate);
+    };
+  }, [columns, slots, colGapClass, mode]);
 
   return (
     <div className="w-full">
@@ -115,98 +186,123 @@ export const BracketGrid: FC<BracketGridProps> = ({
       </div>
 
       {/* Columns with flex-stacked matchups */}
-      <div className={`grid ${colGapClass}`} style={{ gridTemplateColumns: gridTemplateColumns }}>
-        {columns.map((col, colIdx) => {
-          const columnHeight = col.columnHeightClass ?? resolvedColumnHeight;
-          return (
-            <div
-              key={colIdx}
-              className={['flex flex-col min-w-0 w-full', columnHeight, col.columnClassName]
-                .filter(Boolean)
-                .join(' ')}
-            >
+      <div ref={columnsContainerRef} className="relative">
+        <svg
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          aria-hidden="true"
+          focusable="false"
+        >
+          {connectorPaths.map((path, idx) => (
+            <path
+              key={idx}
+              d={path}
+              fill="none"
+              stroke="currentColor"
+              className="text-base-content/40"
+              strokeWidth={2}
+              strokeLinecap="round"
+            />
+          ))}
+        </svg>
+        <div
+          className={`relative z-10 grid ${colGapClass}`}
+          style={{ gridTemplateColumns: gridTemplateColumns }}
+        >
+          {columns.map((col, colIdx) => {
+            const columnHeight = col.columnHeightClass ?? resolvedColumnHeight;
+            return (
               <div
-                className={[
-                  'flex-1 flex flex-col gap-2 outline-2 outline-offset-2 outline-pink-500 md:gap-4',
-                  col.itemsContainerClassName,
-                ]
+                key={colIdx}
+                className={['flex flex-col min-w-0 w-full', columnHeight, col.columnClassName]
                   .filter(Boolean)
                   .join(' ')}
               >
-                {col.items.map((item) => {
-                  if (!item.slotId) {
-                    const ghostBodyClassName =
-                      item.ghostBodyClassName ?? BRACKET_TILE_BODY_HEIGHT_CLASS;
-                    const ghostContentClassName =
-                      item.ghostContentClassName ??
-                      'flex h-full w-full flex-col items-center justify-center text-center text-[0.7rem] md:text-xs text-base-content/70';
+                <div
+                  className={[
+                    'flex-1 flex flex-col gap-2 md:gap-4',
+                    col.itemsContainerClassName,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  {col.items.map((item) => {
+                    if (!item.slotId) {
+                      const ghostBodyClassName =
+                        item.ghostBodyClassName ?? BRACKET_TILE_BODY_HEIGHT_CLASS;
+                      const ghostContentClassName =
+                        item.ghostContentClassName ??
+                        'flex h-full w-full flex-col items-center justify-center text-center text-[0.7rem] md:text-xs text-base-content/70';
+                      return (
+                        <BracketMatchShell
+                          key={item.id}
+                          itemId={item.id}
+                          className={item.itemClassName}
+                        >
+                          <div
+                            className="card card-compact bg-base-100 w-full max-w-full min-w-0 h-full border border-base-300"
+                            aria-hidden="true"
+                          >
+                            <div
+                              className={[
+                                'card-body p-2 md:p-3',
+                                ghostBodyClassName,
+                                item.ghostContent ? 'flex' : null,
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                            >
+                              {item.ghostContent ? (
+                                <div className={ghostContentClassName}>{item.ghostContent}</div>
+                              ) : null}
+                            </div>
+                          </div>
+                        </BracketMatchShell>
+                      );
+                    }
+                    const slot = slotById.get(item.slotId);
+                    if (!slot) return null;
+
+                    const displaySlot =
+                      item.maskOppIndex == null
+                        ? slot
+                        : {
+                            ...slot,
+                            positions: slot.positions.map((pos, idx) =>
+                              idx === item.maskOppIndex
+                                ? { ...(pos ?? {}), teamId: undefined, isBye: true }
+                                : pos && scoreOverridesByTeamId
+                                  ? {
+                                      ...pos,
+                                      currentPoints: scoreOverridesByTeamId.get(pos.teamId ?? -1),
+                                    }
+                                  : pos,
+                            ) as typeof slot.positions,
+                          };
+
+                    const connectSlotId = item.maskOppIndex == null ? item.slotId : undefined;
+
                     return (
                       <BracketMatchShell
                         key={item.id}
                         itemId={item.id}
                         className={item.itemClassName}
+                        slotId={connectSlotId ?? undefined}
                       >
-                        <div
-                          className="card card-compact bg-base-100 w-full max-w-full min-w-0 h-full border border-base-300"
-                          aria-hidden="true"
-                        >
-                          <div
-                            className={[
-                              'card-body p-2 md:p-3',
-                              ghostBodyClassName,
-                              item.ghostContent ? 'flex' : null,
-                            ]
-                              .filter(Boolean)
-                              .join(' ')}
-                          >
-                            {item.ghostContent ? (
-                              <div className={ghostContentClassName}>{item.ghostContent}</div>
-                            ) : null}
-                          </div>
-                        </div>
+                        <BracketTile
+                          slot={displaySlot}
+                          teamsById={teamsById}
+                          highlightTeamId={highlightTeamId}
+                          mode={mode}
+                          titleOverride={item.titleOverride}
+                        />
                       </BracketMatchShell>
                     );
-                  }
-                  const slot = slotById.get(item.slotId);
-                  if (!slot) return null;
-
-                  const displaySlot =
-                    item.maskOppIndex == null
-                      ? slot
-                      : {
-                          ...slot,
-                          positions: slot.positions.map((pos, idx) =>
-                            idx === item.maskOppIndex
-                              ? { ...(pos ?? {}), teamId: undefined, isBye: true }
-                              : pos && scoreOverridesByTeamId
-                                ? {
-                                    ...pos,
-                                    currentPoints: scoreOverridesByTeamId.get(pos.teamId ?? -1),
-                                  }
-                                : pos,
-                          ) as typeof slot.positions,
-                        };
-
-                  return (
-                    <BracketMatchShell
-                      key={item.id}
-                      itemId={item.id}
-                      className={item.itemClassName}
-                    >
-                      <BracketTile
-                        slot={displaySlot}
-                        teamsById={teamsById}
-                        highlightTeamId={highlightTeamId}
-                        mode={mode}
-                        titleOverride={item.titleOverride}
-                      />
-                    </BracketMatchShell>
-                  );
-                })}
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
