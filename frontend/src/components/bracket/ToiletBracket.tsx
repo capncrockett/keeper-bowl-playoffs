@@ -53,7 +53,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
       {
         id: 'toilet_finals_spacer',
         slotId: null,
-        itemClassName: 'min-h-[130px] md:min-h-[150px] outline outline-2 outline-pink-500/70',
+        itemClassName: 'outline outline-2 outline-pink-500/70',
       },
       { id: 'toilet_finals', slotId: 'toilet_finals' },
       { id: 'toilet_9th_10th', slotId: 'toilet_9th_10th' },

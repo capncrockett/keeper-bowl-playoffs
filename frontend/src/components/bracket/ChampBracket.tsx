@@ -53,7 +53,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
       {
         id: 'champ_finals_spacer',
         slotId: null,
-        itemClassName: 'min-h-[130px] md:min-h-[150px] outline outline-2 outline-pink-500/70',
+        itemClassName: 'outline outline-2 outline-pink-500/70',
       },
       { id: 'champ_finals', slotId: 'champ_finals' },
       { id: 'champ_3rd', slotId: 'champ_3rd' },

@@ -107,7 +107,7 @@ const REWARD_TITLE_MOBILE_OVERRIDES: Partial<Record<BracketSlot['id'], string>> 
 
 const TEAM_NAME_CLASS = 'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
 const SCORE_CLASS = 'bracket-score text-[0.7rem] md:text-base font-semibold text-base-content/80';
-const CARD_BODY_HEIGHT_CLASS = 'min-h-[130px] md:min-h-[150px]';
+export const BRACKET_TILE_BODY_HEIGHT_CLASS = 'h-[130px] md:h-[150px]';
 
 function describeDestination(
   dest: BracketRoutingRule['winnerGoesTo'] | BracketRoutingRule['loserGoesTo'],
@@ -281,8 +281,10 @@ export const BracketTile: FC<BracketTileProps> = ({
 
   const renderFront = (showReward: boolean) => (
     <div className={cardClassName}>
-      <div className={`card-body gap-1.5 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}>
-        <div className="divide-y divide-base-300 flex-1">
+      <div
+        className={`card-body gap-1.5 p-2 md:p-3 ${BRACKET_TILE_BODY_HEIGHT_CLASS} flex flex-col overflow-hidden`}
+      >
+        <div className="divide-y divide-base-300 flex-1 min-h-0">
           {slot.positions.map((pos, idx) => {
             const team = pos?.teamId != null ? teamsById.get(pos.teamId) : undefined;
             return (
@@ -328,7 +330,9 @@ export const BracketTile: FC<BracketTileProps> = ({
 
   const renderBack = () => (
     <div className={cardClassName}>
-      <div className={`card-body gap-2 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}>
+      <div
+        className={`card-body gap-2 p-2 md:p-3 ${BRACKET_TILE_BODY_HEIGHT_CLASS} flex flex-col overflow-hidden`}
+      >
         <div className="text-sm font-bold text-base-content">{rewardTitle ?? roundLabel}</div>
         <div className="flex-1 flex flex-col justify-between">
           {hasBye ? (

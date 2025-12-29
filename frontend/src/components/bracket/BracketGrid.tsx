@@ -4,7 +4,7 @@ import type { FC, ReactNode } from 'react';
 import { useMemo } from 'react';
 import type { BracketSlot } from '../../bracket/types';
 import type { Team } from '../../models/fantasy';
-import { BracketTile } from './BracketTile';
+import { BracketTile, BRACKET_TILE_BODY_HEIGHT_CLASS } from './BracketTile';
 
 interface BracketColumnItem {
   id: string;
@@ -130,13 +130,20 @@ export const BracketGrid: FC<BracketGridProps> = ({
                 {col.items.map((item) => {
                   if (!item.slotId) {
                     return (
-                      <div
+                      <BracketMatchShell
                         key={item.id}
-                        className={['min-w-0 w-full', item.itemClassName]
-                          .filter(Boolean)
-                          .join(' ')}
-                        aria-hidden="true"
-                      />
+                        itemId={item.id}
+                        className={item.itemClassName}
+                      >
+                        <div
+                          className="card card-compact bg-base-100 w-full max-w-full min-w-0 h-full border border-base-300"
+                          aria-hidden="true"
+                        >
+                          <div
+                            className={`card-body p-2 md:p-3 ${BRACKET_TILE_BODY_HEIGHT_CLASS}`}
+                          />
+                        </div>
+                      </BracketMatchShell>
                     );
                   }
                   const slot = slotById.get(item.slotId);

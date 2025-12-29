@@ -28,6 +28,11 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
     items: [
       { id: 'keeper_splashback1', slotId: 'keeper_splashback1' },
       { id: 'keeper_splashback2', slotId: 'keeper_splashback2' },
+      {
+        id: 'keeper_round2_spacer',
+        slotId: null,
+        itemClassName: 'outline outline-2 outline-pink-500/70',
+      },
     ],
   },
   {
@@ -36,6 +41,11 @@ const KEEPER_COLUMNS: BracketLayoutColumn[] = [
     itemsContainerClassName: 'justify-between',
     items: [
       { id: 'keeper_5th_6th', slotId: 'keeper_5th_6th' },
+      {
+        id: 'keeper_finals_spacer',
+        slotId: null,
+        itemClassName: 'outline outline-2 outline-pink-500/70',
+      },
       { id: 'keeper_7th_8th', slotId: 'keeper_7th_8th' },
     ],
   },
