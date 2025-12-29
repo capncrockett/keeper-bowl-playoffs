@@ -142,9 +142,7 @@ export const BracketGrid: FC<BracketGridProps> = ({
         const c1x = startX + curveOffset;
         const c2x = endX - curveOffset;
 
-        nextPaths.push(
-          `M ${startX} ${startY} C ${c1x} ${startY} ${c2x} ${endY} ${endX} ${endY}`,
-        );
+        nextPaths.push(['M', startX, startY, 'C', c1x, startY, c2x, endY, endX, endY].join(' '));
       };
       ROUTING_RULES.forEach((rule) => {
         if (!rule.winnerGoesTo) return;
