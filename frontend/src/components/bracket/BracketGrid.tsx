@@ -22,6 +22,8 @@ interface BracketColumnItem {
   ghostContent?: ReactNode;
   /** Optional class override for ghost content wrapper. */
   ghostContentClassName?: string;
+  /** Optional connector target for non-slot items (ex: BYE cards). */
+  connectorToSlotId?: BracketSlot['id'];
 }
 
 export interface BracketLayoutColumn {
@@ -105,23 +107,33 @@ export const BracketGrid: FC<BracketGridProps> = ({
     const container = columnsContainerRef.current;
     if (!container) return;
 
+    const manualConnectors = columns.flatMap((col) =>
+      col.items
+        .filter((item) => item.connectorToSlotId)
+        .map((item) => ({
+          fromItemId: item.id,
+          toSlotId: item.connectorToSlotId as BracketSlot['id'],
+        })),
+    );
+
     let rafId: number | null = null;
     const updatePaths = () => {
       const containerRect = container.getBoundingClientRect();
       const slotRects = new Map<string, DOMRect>();
+      const cellRects = new Map<string, DOMRect>();
       container.querySelectorAll<HTMLElement>('[data-slot-id]').forEach((el) => {
         const slotId = el.dataset.slotId;
         if (!slotId) return;
         slotRects.set(slotId, el.getBoundingClientRect());
       });
+      container.querySelectorAll<HTMLElement>('[data-cell-id]').forEach((el) => {
+        const cellId = el.dataset.cellId;
+        if (!cellId) return;
+        cellRects.set(cellId, el.getBoundingClientRect());
+      });
 
       const nextPaths: string[] = [];
-      ROUTING_RULES.forEach((rule) => {
-        if (!rule.winnerGoesTo) return;
-        const fromRect = slotRects.get(rule.fromSlotId);
-        const toRect = slotRects.get(rule.winnerGoesTo.slotId);
-        if (!fromRect || !toRect) return;
-
+      const pushCurve = (fromRect: DOMRect, toRect: DOMRect) => {
         const startX = fromRect.right - containerRect.left;
         const startY = fromRect.top + fromRect.height / 2 - containerRect.top;
         const endX = toRect.left - containerRect.left;
@@ -133,6 +145,19 @@ export const BracketGrid: FC<BracketGridProps> = ({
         nextPaths.push(
           `M ${startX} ${startY} C ${c1x} ${startY} ${c2x} ${endY} ${endX} ${endY}`,
         );
+      };
+      ROUTING_RULES.forEach((rule) => {
+        if (!rule.winnerGoesTo) return;
+        const fromRect = slotRects.get(rule.fromSlotId);
+        const toRect = slotRects.get(rule.winnerGoesTo.slotId);
+        if (!fromRect || !toRect) return;
+        pushCurve(fromRect, toRect);
+      });
+      manualConnectors.forEach((connector) => {
+        const fromRect = cellRects.get(connector.fromItemId);
+        const toRect = slotRects.get(connector.toSlotId);
+        if (!fromRect || !toRect) return;
+        pushCurve(fromRect, toRect);
       });
 
       setConnectorPaths(nextPaths);
@@ -239,7 +264,14 @@ export const BracketGrid: FC<BracketGridProps> = ({
                           className={item.itemClassName}
                         >
                           <div
-                            className="card card-compact bg-base-100 w-full max-w-full min-w-0 h-full border border-base-300"
+                            className={[
+                              'card card-compact w-full max-w-full min-w-0 h-full',
+                              item.ghostContent
+                                ? 'bg-base-100 border border-base-300'
+                                : 'bg-transparent border border-transparent shadow-none',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
                             aria-hidden="true"
                           >
                             <div

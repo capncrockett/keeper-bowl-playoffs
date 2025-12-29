@@ -25,6 +25,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
         slotId: 'champ_r2_g1',
         maskOppIndex: 1,
         titleOverride: 'BYE',
+        connectorToSlotId: 'champ_r2_g1',
       },
       { id: 'champ_r1_g1', slotId: 'champ_r1_g1' },
       {
@@ -32,6 +33,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
         slotId: 'champ_r2_g2',
         maskOppIndex: 1,
         titleOverride: 'BYE',
+        connectorToSlotId: 'champ_r2_g2',
       },
       { id: 'champ_r1_g2', slotId: 'champ_r1_g2' },
     ],

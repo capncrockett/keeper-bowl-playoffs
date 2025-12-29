@@ -25,6 +25,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
         slotId: 'toilet_r2_g1',
         maskOppIndex: 1,
         titleOverride: 'BYE',
+        connectorToSlotId: 'toilet_r2_g1',
       },
       { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1' },
       {
@@ -32,6 +33,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
         slotId: 'toilet_r2_g2',
         maskOppIndex: 1,
         titleOverride: 'BYE',
+        connectorToSlotId: 'toilet_r2_g2',
       },
       { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2' },
     ],
