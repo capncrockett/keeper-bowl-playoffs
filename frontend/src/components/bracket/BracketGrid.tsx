@@ -17,6 +17,10 @@ interface BracketColumnItem {
   itemClassName?: string;
   /** Optional override for ghost body height. */
   ghostBodyClassName?: string;
+  /** Optional content for ghost cards. */
+  ghostContent?: ReactNode;
+  /** Optional class override for ghost content wrapper. */
+  ghostContentClassName?: string;
 }
 
 export interface BracketLayoutColumn {
@@ -133,6 +137,9 @@ export const BracketGrid: FC<BracketGridProps> = ({
                   if (!item.slotId) {
                     const ghostBodyClassName =
                       item.ghostBodyClassName ?? BRACKET_TILE_BODY_HEIGHT_CLASS;
+                    const ghostContentClassName =
+                      item.ghostContentClassName ??
+                      'flex h-full w-full flex-col items-center justify-center text-center text-[0.7rem] md:text-xs text-base-content/70';
                     return (
                       <BracketMatchShell
                         key={item.id}
@@ -143,7 +150,19 @@ export const BracketGrid: FC<BracketGridProps> = ({
                           className="card card-compact bg-base-100 w-full max-w-full min-w-0 h-full border border-base-300"
                           aria-hidden="true"
                         >
-                          <div className={`card-body p-2 md:p-3 ${ghostBodyClassName}`} />
+                          <div
+                            className={[
+                              'card-body p-2 md:p-3',
+                              ghostBodyClassName,
+                              item.ghostContent ? 'flex' : null,
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
+                          >
+                            {item.ghostContent ? (
+                              <div className={ghostContentClassName}>{item.ghostContent}</div>
+                            ) : null}
+                          </div>
                         </div>
                       </BracketMatchShell>
                     );

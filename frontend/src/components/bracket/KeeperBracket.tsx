@@ -14,12 +14,49 @@ interface KeeperBracketProps {
   mode: 'score' | 'reward';
 }
 
+const renderKeeperInfoRow = (label: string) => (
+  <div className="flex-1 max-w-full overflow-hidden min-w-0 flex items-center justify-center">
+    <div className="text-[0.65rem] md:text-sm font-semibold text-base-content/90 leading-tight text-center">
+      {label}
+    </div>
+  </div>
+);
+
 const KEEPER_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 1',
     subtitle: 'Seeding',
-    // Intentionally empty to mirror Champ/Toilet having a Round 1 column footprint
-    items: [],
+    // Info cards explaining who drops into Keeper Round 2.
+    itemsContainerClassName: 'justify-between',
+    items: [
+      {
+        id: 'keeper_round1_matchup1',
+        slotId: null,
+        ghostContentClassName: 'flex h-full w-full flex-col divide-y divide-base-300',
+        ghostContent: (
+          <>
+            {renderKeeperInfoRow('Floater 1')}
+            {renderKeeperInfoRow('Splashback 1')}
+          </>
+        ),
+      },
+      {
+        id: 'keeper_round1_matchup2',
+        slotId: null,
+        ghostContentClassName: 'flex h-full w-full flex-col divide-y divide-base-300',
+        ghostContent: (
+          <>
+            {renderKeeperInfoRow('Floater 2')}
+            {renderKeeperInfoRow('Splashback 2')}
+          </>
+        ),
+      },
+      {
+        id: 'keeper_round1_spacer',
+        slotId: null,
+        itemClassName: 'outline outline-2 outline-pink-500/70',
+      },
+    ],
   },
   {
     title: 'Round 2',
