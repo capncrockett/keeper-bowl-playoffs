@@ -15,24 +15,13 @@ body {
 }
 
 @layer components {
-  /* Prevent long team names from stretching bracket cards on narrow screens */
+  /* Force long team names to ellipsis within available card width */
   .bracket-team-name {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
     max-width: 100%;
-  }
-
-  @media (min-width: 640px) {
-    .bracket-team-name {
-      display: block;
-      -webkit-line-clamp: unset;
-      overflow: visible;
-      text-overflow: clip;
-      white-space: normal;
-    }
   }
 
   /* Extra tightening for very small widths (e.g., 375px devices) */

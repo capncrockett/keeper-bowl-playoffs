@@ -26,7 +26,7 @@ describe('BracketGrid', () => {
       {
         title: 'Round 1',
         items: [
-          { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 0, maskOppIndex: 1, titleOverride: 'BYE' },
+          { id: 'champ_bye1', slotId: 'champ_r2_g1', maskOppIndex: 1, titleOverride: 'BYE' },
         ],
       },
     ];
