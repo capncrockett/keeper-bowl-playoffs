@@ -27,7 +27,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
         titleOverride: 'BYE',
         connectorToSlotId: 'toilet_r2_g1',
       },
-      { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1' },
+      { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1', connectorToSlotId: 'toilet_r2_g1' },
       {
         id: 'toilet_bye2',
         slotId: 'toilet_r2_g2',
@@ -35,7 +35,7 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
         titleOverride: 'BYE',
         connectorToSlotId: 'toilet_r2_g2',
       },
-      { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2' },
+      { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2', connectorToSlotId: 'toilet_r2_g2' },
     ],
   },
   {
