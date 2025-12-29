@@ -109,6 +109,11 @@ const TEAM_NAME_CLASS = 'bracket-team-name font-semibold text-[0.65rem] md:text-
 const SCORE_CLASS = 'bracket-score text-[0.7rem] md:text-base font-semibold text-base-content/80';
 export const BRACKET_TILE_BODY_HEIGHT_CLASS = 'h-[130px] md:h-[150px]';
 
+type RewardOutcomeLine = {
+  label: 'W' | 'L';
+  text: string;
+};
+
 function describeDestination(
   dest: BracketRoutingRule['winnerGoesTo'] | BracketRoutingRule['loserGoesTo'],
 ): string | null {
@@ -260,6 +265,20 @@ const renderRewardTitle = (slotId: BracketSlot['id'], rewardTitle: string): Reac
   );
 };
 
+const parseRewardOutcomeLines = (rewardText: string): RewardOutcomeLine[] => {
+  return rewardText
+    .split('|')
+    .map((segment) => segment.trim())
+    .map((segment) => {
+      const match = segment.match(/^([WL])\s*=\s*(.+)$/i);
+      if (!match) return null;
+      const label = match[1].toUpperCase() as RewardOutcomeLine['label'];
+      const rawText = match[2].trim();
+      return { label, text: rawText };
+    })
+    .filter((line): line is RewardOutcomeLine => line != null);
+};
+
 export const BracketTile: FC<BracketTileProps> = ({
   slot,
   teamsById,
@@ -313,6 +332,9 @@ export const BracketTile: FC<BracketTileProps> = ({
   const route = ROUTE_BY_FROM_ID.get(slot.id);
   const winnerDest = describeDestination(route?.winnerGoesTo);
   const loserDest = describeDestination(route?.loserGoesTo);
+  const rewardOutcomeLines = slot.rewardText ? parseRewardOutcomeLines(slot.rewardText) : [];
+  const shouldUseRewardOutcomeLines =
+    rewardOutcomeLines.length > 0 && winnerDest == null && loserDest == null;
   const baseRoundLabel = ROUND_TITLES_DESKTOP[slot.round] ?? cleanLabel(slot.label);
   const roundLabel: ReactNode =
     titleOverride ??
@@ -347,23 +369,36 @@ export const BracketTile: FC<BracketTileProps> = ({
             </div>
           ) : (
             <>
-              {slot.rewardText && (
-                <div className="text-[0.7rem] text-base-content/70 leading-snug">
-                  {slot.rewardText}
+              {shouldUseRewardOutcomeLines ? (
+                <div className="mt-1 space-y-1 text-[0.7rem] text-base-content/70">
+                  {rewardOutcomeLines.map((line) => (
+                    <div key={line.label}>
+                      <span className="font-semibold text-base-content">{line.label}</span> →{' '}
+                      {line.text}
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <>
+                  {slot.rewardText && (
+                    <div className="text-[0.7rem] text-base-content/70 leading-snug">
+                      {slot.rewardText}
+                    </div>
+                  )}
+                  <div className="mt-1 space-y-1 text-[0.7rem] text-base-content/70">
+                    {winnerDest && (
+                      <div>
+                        <span className="font-semibold text-base-content">W</span> → {winnerDest}
+                      </div>
+                    )}
+                    {loserDest && (
+                      <div>
+                        <span className="font-semibold text-base-content">L</span> → {loserDest}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
-              <div className="mt-1 space-y-1 text-[0.7rem] text-base-content/70">
-                {winnerDest && (
-                  <div>
-                    <span className="font-semibold text-base-content">W</span> → {winnerDest}
-                  </div>
-                )}
-                {loserDest && (
-                  <div>
-                    <span className="font-semibold text-base-content">L</span> → {loserDest}
-                  </div>
-                )}
-              </div>
             </>
           )}
         </div>
