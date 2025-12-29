@@ -18,6 +18,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 1',
     subtitle: 'Week 15',
+    itemsContainerClassName: 'justify-between',
     items: [
       {
         id: 'champ_bye1',
@@ -38,7 +39,7 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 2',
     subtitle: 'Week 16',
-    itemsContainerClassName: 'justify-between',
+    itemsContainerClassName: 'justify-around',
     items: [
       { id: 'champ_r2_g1', slotId: 'champ_r2_g1' },
       { id: 'champ_r2_g2', slotId: 'champ_r2_g2' },
@@ -47,8 +48,14 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Finals',
     subtitle: 'Week 17',
+    itemsContainerClassName: 'justify-between',
     items: [
-      { id: 'champ_finals', slotId: 'champ_finals', itemClassName: 'my-auto' },
+      {
+        id: 'champ_finals_spacer',
+        slotId: null,
+        itemClassName: 'min-h-[130px] md:min-h-[150px] outline outline-2 outline-pink-500/70',
+      },
+      { id: 'champ_finals', slotId: 'champ_finals' },
       { id: 'champ_3rd', slotId: 'champ_3rd' },
     ],
   },

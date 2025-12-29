@@ -128,7 +128,17 @@ export const BracketGrid: FC<BracketGridProps> = ({
                   .join(' ')}
               >
                 {col.items.map((item) => {
-                  if (!item.slotId) return null;
+                  if (!item.slotId) {
+                    return (
+                      <div
+                        key={item.id}
+                        className={['min-w-0 w-full', item.itemClassName]
+                          .filter(Boolean)
+                          .join(' ')}
+                        aria-hidden="true"
+                      />
+                    );
+                  }
                   const slot = slotById.get(item.slotId);
                   if (!slot) return null;
 
