@@ -18,27 +18,46 @@ const CHAMP_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 1',
     subtitle: 'Week 15',
+    itemsContainerClassName: 'justify-between',
     items: [
-      { id: 'champ_bye1', slotId: 'champ_r2_g1', topPct: 1, maskOppIndex: 1, titleOverride: 'BYE' },
-      { id: 'champ_r1_g1', slotId: 'champ_r1_g1', topPct: 25 },
-      { id: 'champ_bye2', slotId: 'champ_r2_g2', topPct: 50, maskOppIndex: 1, titleOverride: 'BYE' },
-      { id: 'champ_r1_g2', slotId: 'champ_r1_g2', topPct: 75 },
+      {
+        id: 'champ_bye1',
+        slotId: 'champ_r2_g1',
+        maskOppIndex: 1,
+        titleOverride: 'BYE',
+        connectorToSlotId: 'champ_r2_g1',
+      },
+      { id: 'champ_r1_g1', slotId: 'champ_r1_g1' },
+      {
+        id: 'champ_bye2',
+        slotId: 'champ_r2_g2',
+        maskOppIndex: 1,
+        titleOverride: 'BYE',
+        connectorToSlotId: 'champ_r2_g2',
+      },
+      { id: 'champ_r1_g2', slotId: 'champ_r1_g2' },
     ],
   },
   {
     title: 'Round 2',
     subtitle: 'Week 16',
+    itemsContainerClassName: 'justify-around',
     items: [
-      { id: 'champ_r2_g1', slotId: 'champ_r2_g1', topPct: 12.5 },
-      { id: 'champ_r2_g2', slotId: 'champ_r2_g2', topPct: 62.5 },
+      { id: 'champ_r2_g1', slotId: 'champ_r2_g1' },
+      { id: 'champ_r2_g2', slotId: 'champ_r2_g2' },
     ],
   },
   {
     title: 'Finals',
     subtitle: 'Week 17',
+    itemsContainerClassName: 'justify-between',
     items: [
-      { id: 'champ_finals', slotId: 'champ_finals', topPct: 37.5 },
-      { id: 'champ_3rd', slotId: 'champ_3rd', topPct: 83 },
+      {
+        id: 'champ_finals_spacer',
+        slotId: null,
+      },
+      { id: 'champ_finals', slotId: 'champ_finals' },
+      { id: 'champ_3rd', slotId: 'champ_3rd' },
     ],
   },
 ];

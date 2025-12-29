@@ -18,27 +18,46 @@ const TOILET_COLUMNS: BracketLayoutColumn[] = [
   {
     title: 'Round 1',
     subtitle: 'Week 15',
+    itemsContainerClassName: 'justify-between',
     items: [
-      { id: 'toilet_bye1', slotId: 'toilet_r2_g1', topPct: 1, maskOppIndex: 1, titleOverride: 'BYE' },
-      { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1', topPct: 25 },
-      { id: 'toilet_bye2', slotId: 'toilet_r2_g2', topPct: 50, maskOppIndex: 1, titleOverride: 'BYE' },
-      { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2', topPct: 75 },
+      {
+        id: 'toilet_bye1',
+        slotId: 'toilet_r2_g1',
+        maskOppIndex: 1,
+        titleOverride: 'BYE',
+        connectorToSlotId: 'toilet_r2_g1',
+      },
+      { id: 'toilet_r1_g1', slotId: 'toilet_r1_g1', connectorToSlotId: 'toilet_r2_g1' },
+      {
+        id: 'toilet_bye2',
+        slotId: 'toilet_r2_g2',
+        maskOppIndex: 1,
+        titleOverride: 'BYE',
+        connectorToSlotId: 'toilet_r2_g2',
+      },
+      { id: 'toilet_r1_g2', slotId: 'toilet_r1_g2', connectorToSlotId: 'toilet_r2_g2' },
     ],
   },
   {
     title: 'Round 2',
     subtitle: 'Week 16',
+    itemsContainerClassName: 'justify-around',
     items: [
-      { id: 'toilet_r2_g1', slotId: 'toilet_r2_g1', topPct: 12.5 },
-      { id: 'toilet_r2_g2', slotId: 'toilet_r2_g2', topPct: 62.5 },
+      { id: 'toilet_r2_g1', slotId: 'toilet_r2_g1' },
+      { id: 'toilet_r2_g2', slotId: 'toilet_r2_g2' },
     ],
   },
   {
     title: 'Finals',
     subtitle: 'Week 17',
+    itemsContainerClassName: 'justify-between',
     items: [
-      { id: 'toilet_finals', slotId: 'toilet_finals', topPct: 37.5 },
-      { id: 'toilet_9th_10th', slotId: 'toilet_9th_10th', topPct: 87.5 },
+      {
+        id: 'toilet_finals_spacer',
+        slotId: null,
+      },
+      { id: 'toilet_finals', slotId: 'toilet_finals' },
+      { id: 'toilet_9th_10th', slotId: 'toilet_9th_10th' },
     ],
   },
 ];
