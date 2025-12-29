@@ -101,6 +101,10 @@ const ROUND_TITLES_MOBILE: Partial<Record<BracketSlot['round'], string>> = {
   toilet_round_2: 'Semis',
 };
 
+const REWARD_TITLE_MOBILE_OVERRIDES: Partial<Record<BracketSlot['id'], string>> = {
+  keeper_5th_6th: 'KB Champ',
+};
+
 const TEAM_NAME_CLASS = 'bracket-team-name font-semibold text-[0.65rem] md:text-sm leading-tight';
 const SCORE_CLASS = 'bracket-score text-[0.7rem] md:text-base font-semibold text-base-content/80';
 const CARD_BODY_HEIGHT_CLASS = 'min-h-[130px] md:min-h-[150px]';
@@ -245,6 +249,17 @@ const TeamRow: FC<TeamRowProps> = ({ team, pos, mode, round, hasBye }) => {
   );
 };
 
+const renderRewardTitle = (slotId: BracketSlot['id'], rewardTitle: string): ReactNode => {
+  const mobileOverride = REWARD_TITLE_MOBILE_OVERRIDES[slotId];
+  if (!mobileOverride) return rewardTitle;
+  return (
+    <span>
+      <span className="md:hidden">{mobileOverride}</span>
+      <span className="hidden md:inline">{rewardTitle}</span>
+    </span>
+  );
+};
+
 export const BracketTile: FC<BracketTileProps> = ({
   slot,
   teamsById,
@@ -255,6 +270,9 @@ export const BracketTile: FC<BracketTileProps> = ({
   const involvesHighlight =
     highlightTeamId != null && slot.positions.some((pos) => pos?.teamId === highlightTeamId);
   const hasBye = slot.positions.some((pos) => pos?.isBye);
+  const rewardTitle = slot.rewardTitle
+    ? renderRewardTitle(slot.id, slot.rewardTitle)
+    : undefined;
 
   const cardClassName = [
     'card card-compact bg-base-100 w-full max-w-full min-w-0 h-full overflow-hidden border border-base-300',
@@ -280,9 +298,9 @@ export const BracketTile: FC<BracketTileProps> = ({
           })}
         </div>
 
-        {slot.rewardTitle && showReward && (
+        {rewardTitle && showReward && (
           <div className="mt-auto text-[0.7rem] hidden md:block border-t border-base-300 pt-2 max-w-full overflow-hidden">
-            <div className="font-semibold text-base-content/90">{slot.rewardTitle}</div>
+            <div className="font-semibold text-base-content/90">{rewardTitle}</div>
             <div className="text-base-content/70 text-[0.65rem]">{slot.rewardText}</div>
           </div>
         )}
@@ -311,7 +329,7 @@ export const BracketTile: FC<BracketTileProps> = ({
   const renderBack = () => (
     <div className={cardClassName}>
       <div className={`card-body gap-2 p-2 md:p-3 ${CARD_BODY_HEIGHT_CLASS} flex flex-col`}>
-        <div className="text-sm font-bold text-base-content">{slot.rewardTitle ?? roundLabel}</div>
+        <div className="text-sm font-bold text-base-content">{rewardTitle ?? roundLabel}</div>
         <div className="flex-1 flex flex-col justify-between">
           {hasBye ? (
             <div className="text-[0.7rem] text-base-content/70 leading-snug">
