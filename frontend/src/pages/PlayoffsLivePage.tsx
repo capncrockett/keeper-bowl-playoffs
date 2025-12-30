@@ -14,6 +14,8 @@ import { assignSeedsToBracketSlots } from '../bracket/seedAssignment';
 import { applyGameOutcomesToBracket } from '../bracket/state';
 import { Bracket } from '../components/bracket/Bracket';
 import { TeamAvatars } from '../components/common/TeamAvatars';
+import { BracketModeToggle } from '../components/common/BracketModeToggle';
+import { TeamSelector } from '../components/common/TeamSelector';
 
 // TODO: unify with other pages later (config/env)
 const LEAGUE_ID = '1251950356187840512';
@@ -222,47 +224,19 @@ export default function PlayoffsLivePage() {
         {/* controls */}
         <div className="flex flex-wrap items-center gap-3">
           {/* mode toggle */}
-          <div className="join">
-            <button
-              type="button"
-              className={`btn btn-xs sm:btn-sm join-item ${
-                mode === 'score' ? 'btn-primary' : 'btn-ghost'
-              }`}
-              onClick={() => {
-                setMode('score');
-              }}
-            >
-              Score mode
-            </button>
-            <button
-              type="button"
-              className={`btn btn-xs sm:btn-sm join-item ${
-                mode === 'reward' ? 'btn-primary' : 'btn-ghost'
-              }`}
-              onClick={() => {
-                setMode('reward');
-              }}
-            >
-              Reward mode
-            </button>
-          </div>
+          <BracketModeToggle
+            mode={mode}
+            onModeChange={(nextMode) => {
+              setMode(nextMode);
+            }}
+          />
 
           {/* team selector */}
-          <select
-            className="select select-xs sm:select-sm w-40"
-            value={selectedTeamId ?? ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSelectedTeamId(value ? Number(value) : null);
-            }}
-          >
-            <option value="">All teams</option>
-            {teams.map((team) => (
-              <option key={team.sleeperRosterId} value={team.sleeperRosterId}>
-                {team.seed}. {team.teamName}
-              </option>
-            ))}
-          </select>
+          <TeamSelector
+            teams={teams}
+            selectedTeamId={selectedTeamId}
+            onSelectedTeamChange={setSelectedTeamId}
+          />
         </div>
       </div>
 
