@@ -1,4 +1,12 @@
 // src/components/bracket/BracketTile.tsx
+//
+// Card layer for a single bracket matchup. Responsible for:
+// - Mobile vs desktop rendering
+// - Score vs reward modes (including flip effect for some rounds)
+// - Highlighting a specific team
+// - Presenting BYE/TBD placeholders
+// Layout structure and connectors live in BracketGrid; this component only
+// cares about how one matchup card looks.
 
 import type { FC, ReactNode } from 'react';
 import type { BracketSlot } from '../../bracket/types';
