@@ -10,10 +10,12 @@ Playoff bracket visualization UI for a Sleeper fantasy football keeper league. T
 
 ## Tech Stack
 
-- React 19.2 + Vite 7 + TypeScript 5.9
+- React 19.2 + Vite 7.2 + TypeScript 5.9
 - Tailwind CSS 4.1 + DaisyUI 5.5
 - react-router-dom 7.9 for routing
 - ESLint 9 + Prettier 3.6
+- Testing: Jest 29 + React Testing Library 16 + Playwright 1.49
+- Data: SQLite (better-sqlite3) for matchup history caching
 
 ## Development Commands
 
@@ -38,6 +40,21 @@ npm format
 
 # Format and write
 npm run format:write
+
+# Run Jest tests
+npm test
+
+# Run Jest in watch mode
+npm run test:watch
+
+# Run Playwright E2E tests (against deployed staging)
+npm run test:e2e
+
+# Run Playwright E2E tests locally
+npm run test:e2e:local
+
+# Fetch matchup history from Sleeper (backend script)
+npm run fetch:matchups
 ```
 
 ## Code Architecture
@@ -57,29 +74,43 @@ src/
 ├── components/
 │   ├── bracket/
 │   │   ├── Bracket.tsx               # Main container (3 sub-brackets)
-│   │   ├── BracketGrid.tsx           # Shared grid layout with absolute positioning
+│   │   ├── BracketGrid.tsx           # Shared grid layout with SVG connectors
 │   │   ├── BracketTile.tsx           # Responsive matchup card (mobile minimal/desktop rich)
 │   │   ├── ChampBracket.tsx          # Champ Bowl layout definition
 │   │   ├── KeeperBracket.tsx         # Keeper Bowl layout definition
 │   │   ├── ToiletBracket.tsx         # Toilet Bowl layout definition
-│   │   ├── BracketMatchShell.tsx     # Wrapper with anchors for connectors
-│   │   ├── BracketColumn.tsx         # Legacy column component
-│   │   ├── BracketRoundColumn.tsx    # Legacy round component
-│   │   └── layoutReference/          # Visual layout planning documents
+│   │   └── BracketMatchShell.tsx     # Wrapper with anchors for connectors (embedded in BracketGrid)
+│   ├── common/
+│   │   └── TeamAvatars.tsx           # Reusable team avatar component
 │   ├── matchups/
 │   │   └── MatchupCard.tsx           # Weekly matchup results card
 │   └── ThemeSelector.tsx             # DaisyUI theme switcher (light/dark/cupcake/synthwave)
+├── data/
+│   ├── matchupHistory.ts             # Read matchup history from JSON store
+│   ├── matchupHistoryTypes.ts        # Types for matchup history data
+│   └── matchupHistoryStore.json      # Cached matchup data (updated via backend script)
 ├── models/
 │   └── fantasy.ts                    # Team, PairedMatchup domain types
 ├── pages/
 │   ├── PlayoffsIfTodayPage.tsx       # Preview bracket (seeded from current standings)
 │   ├── PlayoffsLivePage.tsx          # Live playoff bracket (real game outcomes)
 │   ├── MatchupsPage.tsx              # Weekly matchup results
-│   └── StandingsPage.tsx             # Season standings table
+│   ├── StandingsPage.tsx             # Season standings table
+│   ├── narratives.tsx                # Narrative text generation for insights
+│   ├── playoffRaceInsights.ts        # Playoff race analysis logic
+│   └── standingsInsights.ts          # Standings insights and division analysis
+├── test/
+│   ├── fixtures/                     # Test data (Sleeper API mocks, teams, matchups)
+│   ├── mocks/                        # MSW handlers and API mocks
+│   ├── __mocks__/                    # Module mocks
+│   ├── setupTests.ts                 # Jest/RTL configuration
+│   ├── server.ts                     # MSW server setup
+│   └── testUtils.tsx                 # Test helpers (renderWithRouter, etc.)
 └── utils/
     ├── sleeperTransforms.ts          # Sleeper data -> Teams, seeds, standings
     ├── sleeperPlayoffTransforms.ts   # Sleeper playoff matchups -> BracketGameOutcomes
-    └── applyMatchupScores.ts         # Apply current/projected points to bracket slots
+    ├── applyMatchupScores.ts         # Apply current/projected points to bracket slots
+    └── playerGameStatus.ts           # Player status tracking (finished/yet to play)
 ```
 
 ### Bracket Engine (Most Critical System)
@@ -129,23 +160,42 @@ Sleeper API -> sleeperTransforms.ts -> Team models -> bracket/seedAssignment.ts 
 #### Bracket Components
 
 - `<Bracket />` - Main container that organizes 3 sub-brackets with mode toggle (score/reward)
-- `<BracketGrid />` - Shared layout engine using absolute positioning with `topPct` values and height scaling
-  - Handles responsive column heights, gaps, and spacing
+- `<BracketGrid />` - Shared layout engine with dynamic SVG connector paths
+  - Uses flexbox column layout with responsive gaps
+  - Embeds `<BracketMatchShell />` for connector anchors
+  - Computes connector paths via ResizeObserver + requestAnimationFrame
   - Maps layout definitions to rendered `<BracketTile />` components
+  - Supports manual connectors (via `connectorToSlotId`) and automatic routing-based connectors
 - `<BracketTile />` - Fully responsive matchup card with two modes:
   - **Mobile (<768px)**: Minimal Sleeper-style design (avatar + name + score only)
   - **Desktop (≥768px)**: Rich cards with seed, record, reward text, and detailed layout
-- `<ChampBracket />`, `<KeeperBracket />`, `<ToiletBracket />` - Define layout structures (columns, items, topPct positioning)
-- `<BracketMatchShell />` - Wrapper with top/bottom anchors for future connector lines
+  - Supports reward outcome parsing and conditional rendering
+- `<ChampBracket />`, `<KeeperBracket />`, `<ToiletBracket />` - Define layout structures (columns, items, ghost content)
+  - Support ghost cards for BYE/TBD placeholders
+  - Include mobile reward title overrides
+  - Use subtitle text for round context
+- `<BracketMatchShell />` - Embedded in BracketGrid, provides top/bottom anchors for connectors
 - `<MatchupCard />` - Used in matchups page for weekly results
 - `<ThemeSelector />` - DaisyUI theme picker with localStorage persistence
+- `<TeamAvatars />` - Reusable component for rendering team avatars with various sizes
 
 ### Pages
 
-- `/playoffs/if-today` - Preview bracket seeded from current standings (fully functional)
-- `/playoffs/live` - Real playoff bracket with live game outcomes from Sleeper (fully functional)
-- `/matchups` - Weekly matchup results
-- `/standings` - Season standings table
+- `/playoffs/if-today` - Preview bracket seeded from current standings
+  - Includes playoff race insights (clinch scenarios, magic numbers)
+  - Shows division standings and narratives
+  - Team selector and mode toggle (score/reward)
+- `/playoffs/live` - Real playoff bracket with live game outcomes from Sleeper
+  - Fetches NFL state to determine current playoff week
+  - Shows live scores with BYE week totals
+  - Conditionally resolves round outcomes based on current week
+- `/matchups` - Weekly matchup results with week selector
+  - Uses matchup history from cached JSON store
+  - Shows head-to-head matchups with scores
+- `/standings` - Season standings table with division insights
+  - Shows clinch status, elimination status, magic numbers
+  - Division-specific insights and narratives
+  - Handles leagues with/without divisions gracefully
 
 **Both playoff pages share:**
 
@@ -155,46 +205,104 @@ Sleeper API -> sleeperTransforms.ts -> Team models -> bracket/seedAssignment.ts 
 
 ## Current Development Phase
 
+**Phase 7 (IN PROGRESS):** Testing + Release
+
+- ✅ Jest + React Testing Library configured
+- ✅ Unit tests for utilities (transforms, bracket routing, insights)
+- ✅ Integration tests for all pages
+- ✅ Playwright E2E smoke tests (desktop + mobile)
+- ✅ MSW mocks for Sleeper API
+- ✅ Test fixtures and helpers
+- ✅ CI integration (Jest on every PR, Playwright on release branches)
+- [ ] Complete smoke testing of all routes
+- [ ] Verify error surfacing
+- [ ] Deploy to production
+
+**Phase 3.3 (COMPLETE):** Bracket Connectors
+
+- ✅ SVG connector paths using Bezier curves
+- ✅ Dynamic path computation with ResizeObserver
+- ✅ Champ Bowl connectors
+- ✅ Toilet Bowl Round 1 connectors
+- ✅ Manual connector support for ghost items
+
+**Phase 6 (COMPLETE):** Visual Overhaul
+
+- ✅ Reward outcome parsing in BracketTile
+- ✅ Ghost content support in BracketGrid
+- ✅ Mobile reward title overrides
+- ✅ Layout improvements and alignment fixes
+- ✅ Column subtitles and round labels
+
+**Phase 5 (COMPLETE):** Insights + Data Layer
+
+- ✅ Matchup history caching (SQLite via backend script)
+- ✅ Playoff race insights (clinch/elimination/magic numbers)
+- ✅ Division standings insights
+- ✅ Narrative text generation
+- ✅ Player game status tracking
+
 **Phase 4 (COMPLETE):** Live Playoffs Mode
 
 - ✅ Sleeper winners_bracket/losers_bracket endpoints integrated
 - ✅ `toBracketGameOutcomes()` transform implemented
 - ✅ Live bracket page with real game outcomes
 - ✅ Full responsive design (mobile + desktop)
-
-**Phase 3.2 (COMPLETE):** Bracket Geometry + Spacing
-
-- ✅ Fully responsive BracketTile component
-- ✅ Mobile-optimized minimal cards (<768px)
-- ✅ Desktop rich cards (≥768px) with seed, record, reward text
-- ✅ Responsive spacing normalized across all components
-- ⏸️ Connectors paused (Phase 3.3)
-
-**Current Status:** App is feature-complete with both preview and live bracket modes. Next work would be:
-
-- Phase 5: Keeper + Toilet visual refinements
-- Phase 3.3: Resume connector lines (currently paused)
-- Phase 6: Optional visual style pass (user-owned)
-- Phase 7: Release/hosting/QA
+- ✅ NFL state fetching for current week resolution
+- ✅ BYE week totals in live brackets
 
 ## Testing & Quality
 
-**No test framework is currently configured.** Before writing tests, check if one has been added to package.json.
+**Testing Stack:**
 
-Run linting before committing:
+- **Jest 29** with ts-jest for unit/integration tests
+- **React Testing Library 16** for component testing
+- **Playwright 1.49** for E2E smoke tests
+- **MSW 2.12** for API mocking
+
+**Running Tests:**
 
 ```bash
+# Run Jest tests
+npm test
+
+# Run Jest in watch mode
+npm run test:watch
+
+# Run Jest in CI mode
+npm run test:ci
+
+# Run Playwright E2E tests (against staging)
+npm run test:e2e
+
+# Run Playwright E2E tests locally
+npm run test:e2e:local
+
+# Run linting
 npm run lint
 ```
+
+**Test Coverage:**
+
+- Unit tests: Bracket routing, seed assignment, transforms, insights logic
+- Integration tests: All pages (Playoffs If Today, Live, Matchups, Standings)
+- Component tests: BracketTile, BracketGrid, MatchupCard
+- E2E tests: Navigation, route content, mobile viewports, theme toggle
+
+See `TESTING.md` in the root directory for detailed testing strategy.
 
 ## Important Notes
 
 - **League ID:** Hardcoded in pages (look for `LEAGUE_ID` constants). Consider moving to environment variables for multi-league support.
-- **Sleeper API Rate Limits:** No caching currently implemented. Be mindful when fetching during development.
-- **Routing Rules:** Changes to playoff bracket flow require updating `ROUTING_RULES` in `bracket/routingRules.ts`. These rules are separate from the template structure.
-- **BYE Handling:** Some slots have `isBye: true` in positions. UI components handle BYE display differently than normal matchups.
+- **Data Caching:** Matchup history is cached in `frontend/src/data/matchupHistoryStore.json` via the `backend/scripts/updateMatchupHistory.ts` script. Run `npm run fetch:matchups` to update.
+- **Sleeper API Rate Limits:** Matchup data is now cached. Live playoff data and current week data are fetched directly.
+- **Routing Rules:** Changes to playoff bracket flow require updating `ROUTING_RULES` in `bracket/routingRules.ts`. These rules drive the SVG connector paths.
+- **Connectors:** SVG paths are computed dynamically using ResizeObserver and requestAnimationFrame. Paths update on resize and mode toggle.
+- **BYE Handling:** Ghost cards and `maskOppIndex` allow for flexible BYE/TBD display without altering slot data.
 - **Responsive Design:** The app uses Tailwind breakpoint `md:` (768px) to switch between mobile and desktop layouts. All spacing, text sizes, and card layouts adapt at this breakpoint.
 - **Theme System:** Uses DaisyUI themes with localStorage persistence. Current themes: light, cupcake, synthwave, dark.
+- **Insights:** Playoff race insights use narrative generation and division-aware logic. Handles leagues without divisions gracefully.
+- **Testing:** All critical paths have test coverage. Use `data-testid` attributes for stable E2E selectors.
 
 ## Common Patterns
 
@@ -276,6 +384,18 @@ const columns: BracketLayoutColumn[] = [
 ];
 ```
 
+## Backend
+
+The `backend/` directory contains data management scripts:
+
+- `backend/scripts/updateMatchupHistory.ts` - Fetches all matchup data from Sleeper and writes to `frontend/src/data/matchupHistoryStore.json`
+- `backend/matchupHistoryStore.ts` - SQLite-based matchup history store (used by update script)
+- `backend/TODO.md` - Backend work tracking (cron jobs, DB migration, etc.)
+
+Run the update script via: `npm run fetch:matchups` (from frontend directory).
+
 ## Roadmap Context
 
-Refer to `/ROADMAP.md` (parent directory) for detailed phase breakdowns. Each phase is designed to be self-contained for agent handoffs.
+Refer to `/ROADMAP.md` (parent directory) for detailed phase breakdowns. Phases 0-6 are complete. Current focus is Phase 7 (Testing + Release).
+
+Refer to `/TESTING.md` for comprehensive testing strategy and tooling details.
