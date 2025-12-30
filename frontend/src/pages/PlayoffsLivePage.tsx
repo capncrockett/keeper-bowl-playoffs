@@ -16,14 +16,7 @@ import { Bracket } from '../components/bracket/Bracket';
 import { TeamAvatars } from '../components/common/TeamAvatars';
 import { BracketModeToggle } from '../components/common/BracketModeToggle';
 import { TeamSelector } from '../components/common/TeamSelector';
-
-// TODO: unify with other pages later (config/env)
-const LEAGUE_ID = '1251950356187840512';
-const PLAYOFF_WEEKS = {
-  round1: 15,
-  round2: 16,
-  finals: 17,
-} as const;
+import { LEAGUE_ID, PLAYOFF_WEEKS } from '../config/league';
 
 const ROUND_1_ROUNDS: BracketSlot['round'][] = ['champ_round_1', 'toilet_round_1'];
 const ROUND_2_ROUNDS: BracketSlot['round'][] = ['champ_round_2', 'toilet_round_2', 'keeper_main'];

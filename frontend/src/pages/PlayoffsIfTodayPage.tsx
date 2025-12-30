@@ -10,10 +10,8 @@ import { Bracket } from '../components/bracket/Bracket';
 import { TeamAvatars } from '../components/common/TeamAvatars';
 import { BracketModeToggle } from '../components/common/BracketModeToggle';
 import { TeamSelector } from '../components/common/TeamSelector';
+import { LEAGUE_ID } from '../config/league';
 import { buildPlayoffNarratives } from './narratives.tsx';
-
-// TODO: unify with other pages later (config/env)
-const LEAGUE_ID = '1251950356187840512';
 
 type BracketMode = 'score' | 'reward';
 
